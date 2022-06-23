@@ -1,7 +1,7 @@
 import {App, Plugin} from 'obsidian';
 import { MoveModal } from 'modal';
 
-export default class MyPlugin extends Plugin {
+export default class FileCookerPlugin extends Plugin {
 
 	async onload() {
 		// This creates an icon in the left ribbon.
