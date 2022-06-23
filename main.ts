@@ -1,23 +1,29 @@
-import {App, Plugin} from 'obsidian';
-import { MoveModal } from 'modal';
+import {Plugin, Editor, getLinkpath} from 'obsidian';
+import { MoveModal } from 'move-modal';
+import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'move-info';
 
 export default class FileCookerPlugin extends Plugin {
 
 	async onload() {
-		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('clipboard-list', 'Move files to ...', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new MoveModal(this.app).open();
+			new MoveModal(this.app, FROM_CLIPBOARD).open();
 		});
-		// Perform additional things with the ribbon
+
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
-		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
 			id: 'move-files-to',
 			name: 'Move files to ...',
 			callback: () => {
-				new MoveModal(this.app).open();
+				new MoveModal(this.app, FROM_CLIPBOARD).open();
+			}
+		});
+
+		this.addCommand({
+			id: "move-links-to",
+			name: "Move links in current file to ...",
+			callback: () => {
+				new MoveModal(this.app, FROM_CURRENT_FILE).open();
 			}
 		});
 	}

@@ -1,13 +1,17 @@
 # Obsidian Files Cooker
 
-This is an obsidian plugin for moving search result to target folder。
+This is an obsidian plugin for search result。
 
 # Userage
 
+## Move search result to target folder
 - Query files from Search Plugin
 - Copy Search Result
 - Run Command 「Move files to ...」
 - Select target folder
-- Comfirm
+- Confirm
 
-
+## Move all links in current file to target folder
+- Run Command 「Move links in current file to ...」
+- Select target folder
+- Confirm
