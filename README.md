@@ -1,4 +1,4 @@
-# Obsidian File Mover
+# Obsidian Files Cooker
 
 This is an obsidian plugin for moving search result to target folder。
 
