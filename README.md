@@ -1,6 +1,6 @@
 # Obsidian Files Cooker
 
-This is an obsidian plugin for search result。
+This is an obsidian plugin deal with batch files。
 
 # Userage
 
