@@ -1,5 +1,5 @@
 import { App, Modal, Notice, Setting } from 'obsidian';
-import { MoveInfo } from 'move-info';
+import { MoveInfo } from 'src/move/move-info';
 
 /**
  *  弹窗确认要移动的文件

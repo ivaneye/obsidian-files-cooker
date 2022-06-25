@@ -1,7 +1,7 @@
 import { App, Notice, SuggestModal, TAbstractFile, TFolder } from 'obsidian';
-import { ClipboardMover } from 'clipboard-mover';
-import { CurrentFileMover } from 'current-file-mover';
-import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'move-info';
+import { ClipboardMover } from 'src/move/clipboard-mover';
+import { CurrentFileMover } from 'src/move/current-file-mover';
+import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'src/move/move-info';
 
 /**
  * 选择目录弹窗
