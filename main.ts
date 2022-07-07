@@ -1,7 +1,11 @@
-import {Plugin, Editor, getLinkpath} from 'obsidian';
-import { MoveModal } from 'src/move/move-modal';
-import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'src/move/move-info';
-import { DeleteModal } from 'src/remove/delete-modal';
+import { Plugin, Editor, getLinkpath, Notice, MarkdownView } from 'obsidian';
+import { MoveModal } from 'src/modal/move-modal';
+import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'src/modal/move-info';
+import { ClipboardReader } from 'src/reader/clipboard-reader';
+import { DeleteAction } from 'src/action/delete-action';
+import { CurrentFileReader } from 'src/reader/current-file-reader';
+import { DataviewReader } from 'src/reader/dataview-reader';
+
 
 export default class FileCookerPlugin extends Plugin {
 
@@ -16,7 +20,7 @@ export default class FileCookerPlugin extends Plugin {
 			id: 'move-files-to',
 			name: 'Move files to ...',
 			callback: () => {
-				new MoveModal(this.app, FROM_CLIPBOARD).open();
+				new MoveModal(this.app, new ClipboardReader(this.app)).open();
 			}
 		});
 
@@ -24,26 +28,63 @@ export default class FileCookerPlugin extends Plugin {
 			id: "move-links-to",
 			name: "Move links in current file to ...",
 			callback: () => {
-				new MoveModal(this.app, FROM_CURRENT_FILE).open();
+				new MoveModal(this.app, new CurrentFileReader(this.app)).open();
+			}
+		});
+
+		this.addCommand({
+			id: 'move-dataview-results-to',
+			name: 'Move dataview query results to ...',
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				new MoveModal(this.app, new DataviewReader(this.app, editor.getSelection())).open();
 			}
 		});
 
 		// Delete Files
 		this.addCommand({
 			id: 'delete-files-in-clipboard',
-			name: 'Delete files in clipboard ...',
+			name: 'Delete files in clipboard!',
 			callback: () => {
-				new DeleteModal(this.app, FROM_CLIPBOARD).open();
+				new ClipboardReader(this.app).read(new DeleteAction(this.app));
 			}
 		});
 
 		this.addCommand({
 			id: "delete-links-in-current-file",
-			name: "Delete link-files in current file ...",
+			name: "Delete link-files in current file!",
 			callback: () => {
-				new DeleteModal(this.app, FROM_CURRENT_FILE).open();
+				new CurrentFileReader(this.app).read(new DeleteAction(this.app));
 			}
 		});
+
+		this.addCommand({
+			id: 'delete-dataview-results',
+			name: 'Delete dataview query results!',
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				new DataviewReader(this.app, editor.getSelection()).read(new DeleteAction(this.app));
+			}
+		});
+
+		// Edit yaml prop 
+		// https://github.com/lijyze/obsidian-state-switcher/blob/d0a80081b0fcc1b899eed2e3d7e834c2d5703875/src/util.ts#L42
+		// let metaedit = this.app.plugins.plugins["metaedit"];
+
+		// this.addCommand({
+		// 	id: "add-prop-to-files",
+		// 	name: "Add prop to files in clipboard ...",
+		// 	callback: () => {
+		// 		if (metaedit == null) {
+		// 			new Notice("Please install metaEdit first!");
+		// 		}
+		// 	}
+		// });
+
+		// todo merge multi file
+		// todo deal tags
+		// todo deal yaml
+		// console.log(this.app.plugins.plugins["metaedit"].api);
+
+		// 
 
 	}
 

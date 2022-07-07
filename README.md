@@ -19,6 +19,13 @@ This is an obsidian plugin deal with batch files。
 - Select target folder
 - Confirm
 
+### Move dataview results to target folder
+`from v1.3.0`
+- select dataview query string
+- Run Command 「Move dataview query results to ...」
+- Select target folder
+- Confirm
+
 ## Delete Multi-Files
 ### Delete search results
 `from v1.2.0`
@@ -30,4 +37,10 @@ This is an obsidian plugin deal with batch files。
 ### Delete all links in current file
 `from v1.2.0`
 - Run Command 「Delete link-files in current file ...」
+- Confirm
+
+### Delete dataview results
+`from v1.3.0`
+- select dataview query string
+- Run Command 「Delete dataview query results!」
 - Confirm

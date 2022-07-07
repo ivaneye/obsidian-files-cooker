@@ -1,7 +1,9 @@
 import { App, Notice, SuggestModal, TAbstractFile, TFolder } from 'obsidian';
-import { ClipboardMover } from 'src/move/clipboard-mover';
-import { CurrentFileMover } from 'src/move/current-file-mover';
-import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'src/move/move-info';
+import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'src/modal/move-info';
+import { ClipboardReader } from 'src/reader/clipboard-reader';
+import { MoveAction } from 'src/action/move-action';
+import { CurrentFileReader } from 'src/reader/current-file-reader';
+import { Readable } from 'src/reader/readable';
 
 /**
  * 选择目录弹窗
@@ -9,10 +11,11 @@ import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'src/move/move-info';
 export class MoveModal extends SuggestModal<TAbstractFile> {
 
 	type: string;
+	readable: Readable;
 
-	constructor(app: App, type: string) {
+	constructor(app: App, readable: Readable) {
 		super(app);
-		this.type = type;
+		this.readable = readable;
 	}
 
 	// Returns all available suggestions.
@@ -36,10 +39,7 @@ export class MoveModal extends SuggestModal<TAbstractFile> {
 
 	// Perform action on the selected suggestion.
 	onChooseSuggestion(folder: TAbstractFile, evt: MouseEvent | KeyboardEvent) {
-		if (this.type == FROM_CLIPBOARD) {
-			new ClipboardMover(this.app).move(folder);
-		} else if (this.type == FROM_CURRENT_FILE) {
-			new CurrentFileMover(this.app).move(folder);
-		}
+		let action = new MoveAction(this.app, folder.path);
+		this.readable.read(action);
 	}
 }
