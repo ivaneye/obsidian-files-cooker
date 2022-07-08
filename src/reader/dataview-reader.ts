@@ -1,7 +1,7 @@
 import { App, Notice, TAbstractFile } from "obsidian";
 import { Action } from "src/action/action";
 import { Readable } from "./readable";
-import { getAPI } from "obsidian-dataview";
+import { getAPI, Link } from "obsidian-dataview";
 
 export class DataviewReader implements Readable {
 
@@ -18,12 +18,37 @@ export class DataviewReader implements Readable {
 
         let api = getAPI();
 
+        let qStr = this.queryStr.toUpperCase();
+
         if (api) {
-            api.query(this.queryStr).then(res => {
+            api.query(qStr).then(res => {
+                console.log(res);
                 if (res.successful) {
-                    let files = res.value.values;
-                    files.forEach(it => {
-                        let ff = this.app.vault.getAbstractFileByPath(it.path);
+                    let filePaths = [];
+                    if (res.value.type == "list") {
+                        // LIST
+                        res.value.values.forEach(it => {
+                            filePaths.push(it.path);
+                        });
+                    } else if (res.value.type == "table") {
+                        // TABLE
+                        filePaths = res.value.values;
+                        res.value.values.forEach(it => {
+                            it.forEach(innerIt => {
+                                if (innerIt && innerIt.path) {
+                                    filePaths.push(innerIt.path);
+                                    return;
+                                }
+                            })
+                        });
+                    } else {
+                        // TASK
+                        res.value.values.forEach(it => {
+                            filePaths.push(it.link.path);
+                        });
+                    }
+                    filePaths.forEach(filePath => {
+                        let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
                         if (ff != null) {
                             resultArr.push(ff);
                         }
