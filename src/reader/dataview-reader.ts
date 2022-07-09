@@ -18,13 +18,12 @@ export class DataviewReader implements Readable {
 
         let api = getAPI();
 
-        let qStr = this.queryStr.toUpperCase();
+        let qStr = formatStr(this.queryStr);
 
         if (api) {
             api.query(qStr).then(res => {
-                console.log(res);
                 if (res.successful) {
-                    let filePaths = [];
+                    let filePaths: any = [];
                     if (res.value.type == "list") {
                         // LIST
                         res.value.values.forEach(it => {
@@ -47,7 +46,7 @@ export class DataviewReader implements Readable {
                             filePaths.push(it.link.path);
                         });
                     }
-                    filePaths.forEach(filePath => {
+                    filePaths.forEach((filePath: { toString: () => string; }) => {
                         let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
                         if (ff != null) {
                             resultArr.push(ff);
@@ -55,11 +54,34 @@ export class DataviewReader implements Readable {
                     })
                     action.act(resultArr);
                 } else {
-                    new Notice("Query error![" + this.queryStr + "]");
+                    new Notice("Query string error![" + this.queryStr + "]");
                 }
             })
         } else {
             new Notice("Please install Dataview plugin first!");
         }
     }
+}
+
+/**
+ * 大写命令
+ */
+function formatStr(queryStr: string): string {
+    let str = queryStr.trimStart();
+
+    let commandStr = str.substring(0, 4);
+
+    if (commandStr.toUpperCase() == "LIST") {
+        return "LIST" + str.substring(4, str.length);
+    }
+
+    if (commandStr.toUpperCase() == "TABL") {
+        return "TABLE" + str.substring(5, str.length);
+    }
+
+    if (commandStr.toUpperCase() == "TASK") {
+        return "TASK" + str.substring(4, str.length);
+    }
+
+    return queryStr;
 }
