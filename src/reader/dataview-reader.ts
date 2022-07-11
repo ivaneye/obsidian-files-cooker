@@ -2,6 +2,7 @@ import { App, Notice, TAbstractFile } from "obsidian";
 import { Action } from "src/action/action";
 import { Readable } from "./readable";
 import { getAPI, Link } from "obsidian-dataview";
+import { ReadInfo } from "./read-info";
 
 export class DataviewReader implements Readable {
 
@@ -14,7 +15,7 @@ export class DataviewReader implements Readable {
     }
 
     read(action: Action): void {
-        let resultArr: TAbstractFile[] = [];
+        let readInfo = new ReadInfo();
 
         let api = getAPI();
 
@@ -46,13 +47,17 @@ export class DataviewReader implements Readable {
                             filePaths.push(it.link.path);
                         });
                     }
-                    filePaths.forEach((filePath: { toString: () => string; }) => {
-                        let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
-                        if (ff != null) {
-                            resultArr.push(ff);
-                        }
-                    })
-                    action.act(resultArr);
+                    try {
+                        filePaths.forEach((filePath: { toString: () => string; }) => {
+                            let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
+                            if (ff != null) {
+                                readInfo.add(ff);
+                            }
+                        })
+                        action.act(readInfo.getFiles());
+                    } catch (e) {
+                        new Notice(e.message);
+                    }
                 } else {
                     new Notice("Query string error![" + this.queryStr + "]");
                 }

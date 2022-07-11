@@ -1,5 +1,6 @@
 import { App, Notice, TAbstractFile } from "obsidian";
 import { Action } from "src/action/action";
+import { ReadInfo } from "./read-info";
 import { Readable } from "./readable";
 
 
@@ -12,7 +13,7 @@ export class CurrentFileReader implements Readable {
     }
 
     read(action: Action): void {
-        let resultArr: TAbstractFile[] = [];
+        let readInfo = new ReadInfo();
 
         let currentFile = this.app.workspace.getActiveFile();
 
@@ -25,14 +26,16 @@ export class CurrentFileReader implements Readable {
 
         let linkObj = this.app.metadataCache.resolvedLinks[currentFilePath];
 
-        for (let key in linkObj) {
-            let ff = this.app.vault.getAbstractFileByPath(key);
-            if (ff != null) {
-                resultArr.push(ff);
+        try {
+            for (let key in linkObj) {
+                let ff = this.app.vault.getAbstractFileByPath(key);
+                if (ff != null) {
+                    readInfo.add(ff);
+                }
             }
+            action.act(readInfo.getFiles());
+        } catch (e) {
+            new Notice(e.message);
         }
-
-        action.act(resultArr);
     }
-
 }
