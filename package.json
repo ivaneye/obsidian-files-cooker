@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
-	"version": "1.0.1",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"name": "obsidian-file-cooker",
+	"version": "1.3.2",
+	"description": "Deal batch notes from Search results、current file、Dataview query string...",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
