@@ -1,7 +1,7 @@
 import { App, Notice, TAbstractFile } from "obsidian";
 import { Action } from "src/action/action";
 import { Readable } from "./readable";
-import { getAPI, Link } from "obsidian-dataview";
+import { getAPI } from "obsidian-dataview";
 import { ReadInfo } from "./read-info";
 
 export class DataviewReader implements Readable {
@@ -21,50 +21,46 @@ export class DataviewReader implements Readable {
 
         let qStr = formatStr(this.queryStr);
 
-        if (api) {
-            api.query(qStr).then(res => {
-                if (res.successful) {
-                    let filePaths: any = [];
-                    if (res.value.type == "list") {
-                        // LIST
-                        res.value.values.forEach(it => {
-                            filePaths.push(it.path);
-                        });
-                    } else if (res.value.type == "table") {
-                        // TABLE
-                        filePaths = res.value.values;
-                        res.value.values.forEach(it => {
-                            it.forEach(innerIt => {
-                                if (innerIt && innerIt.path) {
-                                    filePaths.push(innerIt.path);
-                                    return;
-                                }
-                            })
-                        });
-                    } else {
-                        // TASK
-                        res.value.values.forEach(it => {
-                            filePaths.push(it.link.path);
-                        });
-                    }
-                    try {
-                        filePaths.forEach((filePath: { toString: () => string; }) => {
-                            let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
-                            if (ff != null) {
-                                readInfo.add(ff);
+        api.query(qStr).then(res => {
+            if (res.successful) {
+                let filePaths: any = [];
+                if (res.value.type == "list") {
+                    // LIST
+                    res.value.values.forEach(it => {
+                        filePaths.push(it.path);
+                    });
+                } else if (res.value.type == "table") {
+                    // TABLE
+                    filePaths = res.value.values;
+                    res.value.values.forEach(it => {
+                        it.forEach(innerIt => {
+                            if (innerIt && innerIt.path) {
+                                filePaths.push(innerIt.path);
+                                return;
                             }
                         })
-                        action.act(readInfo.getFiles());
-                    } catch (e) {
-                        new Notice(e.message);
-                    }
+                    });
                 } else {
-                    new Notice("Query string error![" + this.queryStr + "]");
+                    // TASK
+                    res.value.values.forEach(it => {
+                        filePaths.push(it.link.path);
+                    });
                 }
-            })
-        } else {
-            new Notice("Please install Dataview plugin first!");
-        }
+                try {
+                    filePaths.forEach((filePath: { toString: () => string; }) => {
+                        let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
+                        if (ff != null) {
+                            readInfo.add(ff);
+                        }
+                    })
+                    action.act(readInfo.getFiles());
+                } catch (e) {
+                    new Notice(e.message);
+                }
+            } else {
+                new Notice("Query string error![" + this.queryStr + "]");
+            }
+        })
     }
 }
 

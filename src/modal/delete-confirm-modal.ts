@@ -55,8 +55,8 @@ export class DeleteConfirmModal extends Modal {
         }
     }
 
-    onClose() {
-        let { contentEl } = this;
-        contentEl.empty();
-    }
+    // onClose() {
+    //     let { contentEl } = this;
+    //     contentEl.empty();
+    // }
 }

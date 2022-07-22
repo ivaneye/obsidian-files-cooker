@@ -1,10 +1,11 @@
-import { Plugin, Editor, getLinkpath, Notice, MarkdownView } from 'obsidian';
+import { Plugin, Editor, MarkdownView } from 'obsidian';
 import { MoveModal } from 'src/modal/move-modal';
-import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'src/modal/move-info';
 import { ClipboardReader } from 'src/reader/clipboard-reader';
 import { DeleteAction } from 'src/action/delete-action';
 import { CurrentFileReader } from 'src/reader/current-file-reader';
 import { DataviewReader } from 'src/reader/dataview-reader';
+import { CopyAction } from 'src/action/copy-action';
+import { getAPI } from "obsidian-dataview";
 
 
 export default class FileCookerPlugin extends Plugin {
@@ -14,6 +15,8 @@ export default class FileCookerPlugin extends Plugin {
 		// 	new MoveModal(this.app, FROM_CLIPBOARD).open();
 		// });
 		// ribbonIconEl.addClass('my-plugin-ribbon-class');
+
+		let dataviewApi = getAPI();
 
 		// Move Files
 		this.addCommand({
@@ -35,8 +38,12 @@ export default class FileCookerPlugin extends Plugin {
 		this.addCommand({
 			id: 'move-dataview-results-to',
 			name: 'Move dataview query results to ...',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				new MoveModal(this.app, new DataviewReader(this.app, editor.getSelection())).open();
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				console.log("checking = " + checking);
+				if (!checking) {
+					new MoveModal(this.app, new DataviewReader(this.app, editor.getSelection())).open();
+				}
+				return dataviewApi != null;
 			}
 		});
 
@@ -60,10 +67,30 @@ export default class FileCookerPlugin extends Plugin {
 		this.addCommand({
 			id: 'delete-dataview-results',
 			name: 'Delete dataview query results!',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				new DataviewReader(this.app, editor.getSelection()).read(new DeleteAction(this.app));
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (!checking) {
+					new DataviewReader(this.app, editor.getSelection()).read(new DeleteAction(this.app));
+				}
+				return dataviewApi != null;
 			}
 		});
+
+		// copy file links
+		this.addCommand({
+			id: 'copy-dataview-result-links',
+			name: 'Copy dataview result links!',
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (!checking) {
+					new DataviewReader(this.app, editor.getSelection()).read(new CopyAction(this.app));
+				}
+				return dataviewApi != null;
+			}
+		});
+
+
+		// let result = prepareFuzzySearch("test");
+
+		// console.log(result("test"));
 
 		// Edit yaml prop 
 		// https://github.com/lijyze/obsidian-state-switcher/blob/d0a80081b0fcc1b899eed2e3d7e834c2d5703875/src/util.ts#L42

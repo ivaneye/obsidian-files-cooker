@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Setting } from 'obsidian';
+import { App, FileManager, Modal, Notice, Setting } from 'obsidian';
 import { MoveInfo } from 'src/modal/move-info';
 
 /**
@@ -23,14 +23,14 @@ export class ConfirmModal extends Modal {
 
         new Setting(contentEl)
             .addButton((btn) =>
-                btn
-                    .setButtonText("Confirm")
+                btn.setButtonText("Confirm")
                     .setCta()
-                    .onClick(() => {
+                    .onClick(async () => {
                         this.close();
-                        this.moveInfos.forEach(info => {
-                            this.app.vault.rename(info.sourceFile, info.targetDir + "/" + info.sourceFile.name);
-                        })
+                        for (const key in this.moveInfos) {
+                            let info = this.moveInfos[key];
+                            await this.app.fileManager.renameFile(info.sourceFile, info.targetDir + "/" + info.sourceFile.name);
+                        }
                         new Notice("Move Success!");
                     }))
             .addButton((btn) =>
@@ -43,8 +43,8 @@ export class ConfirmModal extends Modal {
                     }));
     }
 
-    onClose() {
-        let { contentEl } = this;
-        contentEl.empty();
-    }
+    // onClose() {
+    //     let { contentEl } = this;
+    //     contentEl.empty();
+    // }
 }
