@@ -60,7 +60,18 @@ This plugin for Obsidian deals batch notes from search results、current file、
 - Run Command 「Delete dataview query results!」
 - Confirm
 
-## Manual installation
+## How to install
+
+### From within Obsidian
+You can activate this plugin within Obsidian by doing the following:
+- Open Settings > Third-party plugin
+- Make sure Safe mode is off
+- Click Browse community plugins
+- Search for "File Cooker"
+- Click Install
+- Once installed, close the community plugins window and activate the newly installed plugin
+
+### Manual installation
 
 - Download the [latest release](https://github.com/ivaneye/obsidian-files-cooker/releases/latest)
 - Extract the obsidian-file-cooker folder from the zip to your vault's plugins folder: `<vault>/.obsidian/plugins/`  
