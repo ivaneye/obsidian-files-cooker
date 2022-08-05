@@ -1,3 +1,5 @@
+> 欢迎加微讨论：SuppleThinking
+
 # obsidian-file-cooker
 
 This plugin for Obsidian deals batch notes from search results、current file、Dataview query string...
