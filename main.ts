@@ -39,7 +39,6 @@ export default class FileCookerPlugin extends Plugin {
 			id: 'move-dataview-results-to',
 			name: 'Move dataview query results to ...',
 			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
-				console.log("checking = " + checking);
 				if (!checking) {
 					new MoveModal(this.app, new DataviewReader(this.app, editor.getSelection())).open();
 				}
