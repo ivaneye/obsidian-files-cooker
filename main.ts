@@ -6,6 +6,7 @@ import { CurrentFileReader } from 'src/reader/current-file-reader';
 import { DataviewReader } from 'src/reader/dataview-reader';
 import { CopyAction } from 'src/action/copy-action';
 import { getAPI } from "obsidian-dataview";
+import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
 
 
 export default class FileCookerPlugin extends Plugin {
@@ -86,32 +87,41 @@ export default class FileCookerPlugin extends Plugin {
 			}
 		});
 
-
-		// let result = prepareFuzzySearch("test");
-
-		// console.log(result("test"));
-
-		// Edit yaml prop 
+		// Edit Front Matter 
 		// https://github.com/lijyze/obsidian-state-switcher/blob/d0a80081b0fcc1b899eed2e3d7e834c2d5703875/src/util.ts#L42
-		// let metaedit = this.app.plugins.plugins["metaedit"];
+		let metaedit = this.app.plugins.plugins["metaedit"];
 
-		// this.addCommand({
-		// 	id: "add-prop-to-files",
-		// 	name: "Add prop to files in clipboard ...",
-		// 	callback: () => {
-		// 		if (metaedit == null) {
-		// 			new Notice("Please install metaEdit first!");
-		// 		}
-		// 	}
-		// });
+		this.addCommand({
+			id: 'edit-front-matter-in-clipboard-files',
+			name: 'Edit Front Matter in clipboard files ...',
+			callback: () => {
+				new ClipboardReader(this.app).read(new EditFrontMatterAction(this.app));
+			}
+		});
+
+		this.addCommand({
+			id: "edit-front-matter-in-current-file-links",
+			name: "Edit Front Matter in current file links ... ...",
+			callback: () => {
+				new CurrentFileReader(this.app).read(new EditFrontMatterAction(this.app));
+			}
+		});
+
+		this.addCommand({
+			id: "edit-front-matter-in-dataview-results",
+			name: "Edit Front Matter in dataview results ...",
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (!checking) {
+					new DataviewReader(this.app, editor.getSelection()).read(new EditFrontMatterAction(this.app));
+				}
+				return dataviewApi != null && metaedit != null;
+			}
+		});
 
 		// todo merge multi file
 		// todo deal tags
 		// todo deal yaml
 		// console.log(this.app.plugins.plugins["metaedit"].api);
-
-		// 
-
 	}
 
 	onunload() {
