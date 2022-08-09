@@ -42,6 +42,9 @@ This plugin for Obsidian deals batch notes from search results、current file、
 - Confirm
 
 ### Edit Multi-File's Props
+
+> Need to install MetaEdit first!
+
 `from v1.4.0`
 #### Files from clipboard
 - Query files from Search Plugin
