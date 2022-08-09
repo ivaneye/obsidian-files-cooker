@@ -94,16 +94,22 @@ export default class FileCookerPlugin extends Plugin {
 		this.addCommand({
 			id: 'edit-front-matter-in-clipboard-files',
 			name: 'Edit Front Matter in clipboard files ...',
-			callback: () => {
-				new ClipboardReader(this.app).read(new EditFrontMatterAction(this.app));
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (!checking) {
+					new ClipboardReader(this.app).read(new EditFrontMatterAction(this.app));
+				}
+				return dataviewApi != null && metaedit != null;
 			}
 		});
 
 		this.addCommand({
 			id: "edit-front-matter-in-current-file-links",
 			name: "Edit Front Matter in current file links ... ...",
-			callback: () => {
-				new CurrentFileReader(this.app).read(new EditFrontMatterAction(this.app));
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (!checking) {
+					new CurrentFileReader(this.app).read(new EditFrontMatterAction(this.app));
+				}
+				return dataviewApi != null && metaedit != null;
 			}
 		});
 
