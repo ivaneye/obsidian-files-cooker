@@ -94,7 +94,7 @@ export default class FileCookerPlugin extends Plugin {
 		this.addCommand({
 			id: 'edit-front-matter-in-clipboard-files',
 			name: 'Edit Front Matter in clipboard files ...',
-			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+			checkCallback: (checking: boolean) => {
 				if (!checking) {
 					new ClipboardReader(this.app).read(new EditFrontMatterAction(this.app));
 				}
@@ -105,7 +105,7 @@ export default class FileCookerPlugin extends Plugin {
 		this.addCommand({
 			id: "edit-front-matter-in-current-file-links",
 			name: "Edit Front Matter in current file links ...",
-			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+			checkCallback: (checking: boolean) => {
 				if (!checking) {
 					new CurrentFileReader(this.app).read(new EditFrontMatterAction(this.app));
 				}
