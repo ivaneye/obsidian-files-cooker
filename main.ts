@@ -104,7 +104,7 @@ export default class FileCookerPlugin extends Plugin {
 
 		this.addCommand({
 			id: "edit-front-matter-in-current-file-links",
-			name: "Edit Front Matter in current file links ... ...",
+			name: "Edit Front Matter in current file links ...",
 			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
 				if (!checking) {
 					new CurrentFileReader(this.app).read(new EditFrontMatterAction(this.app));

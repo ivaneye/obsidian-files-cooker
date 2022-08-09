@@ -6,14 +6,14 @@ This plugin for Obsidian deals batch notes from search results、current file、
     
 ## Features
 
-- Move Multi-Files
-    - Move search results to target folder
-    - Move all links in current file to target folder
-    - Move dataview results to target folder
-- Delete Multi-Files
-    - Delete search results
-    - Delete all links in current file
-    - Delete dataview results
+- Move Multi-File to target folder
+- Add or Change Multi-File's Props
+- Delete Multi-File
+- Copy Dataview result links to clipboard
+
+> - files from clipboard
+> - file links in current file
+> - files from dataview query
 
 ![obsidian-file-cooker Demo Image](demo.png)
 
@@ -39,6 +39,26 @@ This plugin for Obsidian deals batch notes from search results、current file、
 - select dataview query string
 - Run Command 「Move dataview query results to ...」
 - Select target folder
+- Confirm
+
+### Edit Multi-File's Props
+`from v1.4.0`
+#### Files from clipboard
+- Query files from Search Plugin
+- Copy Search Result
+- Run Command 「Edit Front Matter in clipboard files ...」
+- Write Key and Value
+- Confirm
+
+#### File links in current file
+- Run Command 「Edit Front Matter in current file links ...」
+- Write Key and Value
+- Confirm
+
+#### Files from dataview query
+- select dataview query string
+- Run Command 「Edit Front Matter in dataview results ...」
+- Write Key and Value
 - Confirm
 
 ### Delete Multi-Files

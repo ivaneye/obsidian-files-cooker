@@ -18,9 +18,20 @@ export class ClipboardReader implements Readable {
         let promiseStr = navigator.clipboard.readText();
 
         promiseStr.then(str => {
-            let sp = str.split("\n");
+            let lines = str.split("\n");
             try {
-                sp.forEach(f => {
+                lines.forEach(line => {
+                    let f = line;
+                    if (f.startsWith("[[")) {
+                        f = f.substring(2, f.length);
+                    }
+                    if (f.endsWith("]]")) {
+                        f = f.substring(0, f.length - 2);
+                    }
+                    if (!f.endsWith(".md") && !f.endsWith(".MD") && !f.endsWith(".Md") && !f.endsWith(".mD")) {
+                        f = f + ".md";
+                    }
+                    console.log("f = " + f);
                     let ff = this.app.vault.getAbstractFileByPath(f);
                     if (ff != null) {
                         readInfo.add(ff);
