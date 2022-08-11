@@ -6,7 +6,7 @@ This plugin for Obsidian deals batch notes from search results、current file、
     
 ## Features
 
-- Move Multi-File to target folder
+- Move/Copy Multi-File to target folder
 - Add or Change Multi-File's Props
 - Delete Multi-File
 - Copy Dataview result links to clipboard
@@ -19,26 +19,32 @@ This plugin for Obsidian deals batch notes from search results、current file、
 
 ## Usage
 
-### Move Multi-Files
-#### Move search results to target folder
+### Move/Copy Multi-Files
+#### Move/Copy search results to target folder
 `from v1.0.0`
 - Query files from Search Plugin
 - Copy Search Result
 - Run Command 「Move files to ...」
 - Select target folder
 - Confirm
+- Toggle to move or copy
+- Confirm
 
-#### Move all links in current file to target folder
+#### Move/Copy all links in current file to target folder
 `from v1.1.0`
 - Run Command 「Move links in current file to ...」
 - Select target folder
 - Confirm
+- Toggle to move or copy
+- Confirm
 
-#### Move dataview results to target folder
+#### Move/Copy dataview results to target folder
 `from v1.3.0`
 - select dataview query string
 - Run Command 「Move dataview query results to ...」
 - Select target folder
+- Confirm
+- Toggle to move or copy
 - Confirm
 
 ### Edit Multi-File's Props
