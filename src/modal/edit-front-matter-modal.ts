@@ -1,4 +1,5 @@
 import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
+import { text } from 'stream/consumers';
 
 /**
  *  弹窗编辑Front Matter属性
@@ -7,10 +8,15 @@ export class EditFrontMatterModal extends Modal {
     resultArr: TAbstractFile[];
     key: String;
     val: String;
+    overrideFlag: boolean;
 
     constructor(app: App, resultArr: TAbstractFile[]) {
         super(app);
         this.resultArr = resultArr;
+        let tmpFlag = localStorage.getItem("overrideFlag");
+        if (tmpFlag && "true" == tmpFlag) {
+            this.overrideFlag = true;
+        }
     }
 
     onOpen() {
@@ -45,23 +51,47 @@ export class EditFrontMatterModal extends Modal {
                         .onChange((val) => {
                             this.val = val;
                         })
-                )
+                ).addToggle((toggle) => {
+                    toggle.setValue(this.overrideFlag);
+                    toggle.setTooltip("Override if exists!");
+                    toggle.onChange((val) => {
+                        localStorage.setItem("overrideFlag", val + "");
+                        this.overrideFlag = val;
+                    })
+                });
+
+            new Setting(contentEl)
                 .addButton((btn) =>
                     btn
                         .setButtonText("Confirm")
                         .setCta()
-                        .onClick(() => {
+                        .onClick(async () => {
+                            if (this.key == null || this.key.trim() == "") {
+                                new Notice("Key could not be empty!");
+                                return;
+                            }
+                            if (this.val == null || this.val.trim() == "") {
+                                new Notice("Value could not be empty!");
+                                return;
+                            }
                             this.close();
                             let api = this.app.plugins.plugins["metaedit"].api;
-                            this.resultArr.forEach(async info => {
+                            let c_num = 0;
+                            let u_num = 0;
+                            for (let i = 0; i < this.resultArr.length; i++) {
+                                let info = this.resultArr[i];
                                 let val = await api.getPropertyValue(this.key, info);
                                 if (val == null) {
                                     api.createYamlProperty(this.key, this.val, info);
-                                } else {
+                                    c_num += 1;
+                                } else if (this.overrideFlag) {
                                     api.update(this.key, this.val, info);
+                                    u_num += 1;
                                 }
-                            })
+                            }
                             new Notice("Edit Success!");
+                            new Notice("Add " + c_num + " !");
+                            new Notice("Update " + u_num + " !");
                         }))
                 .addButton((btn) =>
                     btn

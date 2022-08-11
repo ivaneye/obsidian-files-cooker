@@ -1,11 +1,12 @@
-import { App, FileManager, Modal, Notice, Setting } from 'obsidian';
+import { App, FileManager, Modal, Notice, Setting, TFile } from 'obsidian';
 import { MoveInfo } from 'src/modal/move-info';
 
 /**
- *  弹窗确认要移动的文件
+ *  弹窗确认要移动/拷贝的文件
  */
 export class ConfirmModal extends Modal {
     moveInfos: MoveInfo[];
+    copyFlag: boolean;
 
     constructor(app: App, moveInfos: MoveInfo[]) {
         super(app);
@@ -15,11 +16,19 @@ export class ConfirmModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "Confirm Move?" });
+        contentEl.createEl("h1", { text: "Confirm Move/Copy?" });
 
         this.moveInfos.forEach(info => {
             contentEl.createEl("div", { text: info.sourceFile.path + " -> " + info.targetDir + "/" + info.sourceFile.name });
         })
+
+        new Setting(contentEl)
+            .addToggle((toggle) => {
+                toggle.setTooltip("Copy instead!");
+                toggle.onChange((val) => {
+                    this.copyFlag = val;
+                })
+            })
 
         new Setting(contentEl)
             .addButton((btn) =>
@@ -27,11 +36,19 @@ export class ConfirmModal extends Modal {
                     .setCta()
                     .onClick(async () => {
                         this.close();
-                        for (const key in this.moveInfos) {
-                            let info = this.moveInfos[key];
-                            await this.app.fileManager.renameFile(info.sourceFile, info.targetDir + "/" + info.sourceFile.name);
+                        if (this.copyFlag) {
+                            for (const key in this.moveInfos) {
+                                let info = this.moveInfos[key];
+                                await this.app.vault.copy((info.sourceFile as TFile), info.targetDir + "/" + info.sourceFile.name);
+                            }
+                            new Notice("Copy Success!");
+                        } else {
+                            for (const key in this.moveInfos) {
+                                let info = this.moveInfos[key];
+                                await this.app.fileManager.renameFile(info.sourceFile, info.targetDir + "/" + info.sourceFile.name);
+                            }
+                            new Notice("Move Success!");
                         }
-                        new Notice("Move Success!");
                     }))
             .addButton((btn) =>
                 btn
@@ -42,9 +59,4 @@ export class ConfirmModal extends Modal {
                         new Notice("Move Canceled!");
                     }));
     }
-
-    // onClose() {
-    //     let { contentEl } = this;
-    //     contentEl.empty();
-    // }
 }
