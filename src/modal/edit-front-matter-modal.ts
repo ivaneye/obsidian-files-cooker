@@ -84,7 +84,7 @@ export class EditFrontMatterModal extends Modal {
                                 if (val == null) {
                                     api.createYamlProperty(this.key, this.val, info);
                                     c_num += 1;
-                                } else if (this.overrideFlag) {
+                                } else if (this.overrideFlag || val.trim() == "") {
                                     api.update(this.key, this.val, info);
                                     u_num += 1;
                                 }
