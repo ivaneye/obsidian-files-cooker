@@ -8,6 +8,7 @@ import { CopyAction } from 'src/action/copy-action';
 import { getAPI } from "obsidian-dataview";
 import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
 import { RenameAction } from 'src/action/rename-action';
+import { ChooseFileModal } from 'src/modal/choose-file-modal';
 
 
 export default class FileCookerPlugin extends Plugin {
@@ -48,6 +49,43 @@ export default class FileCookerPlugin extends Plugin {
 			}
 		});
 
+		// Create Files
+		// this.addCommand({
+		// 	id: "create-links",
+		// 	name: "Create links in current file ...",
+		// 	callback: () => {
+		// 		new ChooseFolderModal(this.app, new CurrentFileReader(this.app)).open();
+		// 	}
+		// });
+
+		// Merge Files
+		this.addCommand({
+			id: 'merge-files-to',
+			name: 'Merge files to ...',
+			callback: () => {
+				new ChooseFileModal(this.app, new ClipboardReader(this.app)).open();
+			}
+		});
+
+		this.addCommand({
+			id: "merge-links-to",
+			name: "Merge links in current file to ...",
+			callback: () => {
+				new ChooseFileModal(this.app, new CurrentFileReader(this.app)).open();
+			}
+		});
+
+		this.addCommand({
+			id: 'merge-dataview-results-to',
+			name: 'Merge dataview query results to ...',
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (!checking) {
+					new ChooseFileModal(this.app, new DataviewReader(this.app, editor.getSelection())).open();
+				}
+				return dataviewApi != null;
+			}
+		});
+		
 		// Delete Files
 		this.addCommand({
 			id: 'delete-files-in-clipboard',
