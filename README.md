@@ -8,13 +8,13 @@ This plugin for Obsidian deals batch notes from search results、current file、
 
 - Move/Copy Multi-File to target folder
 - Rename Multi-File
-- Add or Change Multi-File's Props
+- Add or Change Multi-File's Props（need to install **MetaEdit** plugin）
 - Delete Multi-File
 - Copy Dataview result links to clipboard
 
 > - files from clipboard
 > - file links in current file
-> - files from dataview query
+> - files from dataview query（need to install **dataview** plugin）
 
 ![obsidian-file-cooker Demo Image](demo.png)
 

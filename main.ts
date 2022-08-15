@@ -99,7 +99,7 @@ export default class FileCookerPlugin extends Plugin {
 				if (!checking) {
 					new ClipboardReader(this.app).read(new EditFrontMatterAction(this.app));
 				}
-				return dataviewApi != null && metaedit != null;
+				return metaedit != null;
 			}
 		});
 
@@ -110,7 +110,7 @@ export default class FileCookerPlugin extends Plugin {
 				if (!checking) {
 					new CurrentFileReader(this.app).read(new EditFrontMatterAction(this.app));
 				}
-				return dataviewApi != null && metaedit != null;
+				return metaedit != null;
 			}
 		});
 
@@ -129,22 +129,16 @@ export default class FileCookerPlugin extends Plugin {
 		this.addCommand({
 			id: 'rename-in-clipboard-files',
 			name: 'Rename in clipboard files ...',
-			checkCallback: (checking: boolean) => {
-				if (!checking) {
-					new ClipboardReader(this.app).read(new RenameAction(this.app));
-				}
-				return dataviewApi != null && metaedit != null;
+			callback: () => {
+				new ClipboardReader(this.app).read(new RenameAction(this.app));
 			}
 		});
 
 		this.addCommand({
 			id: "rename-in-current-file-links",
 			name: "Rename in current file links ...",
-			checkCallback: (checking: boolean) => {
-				if (!checking) {
-					new CurrentFileReader(this.app).read(new RenameAction(this.app));
-				}
-				return dataviewApi != null && metaedit != null;
+			callback: () => {
+				new CurrentFileReader(this.app).read(new RenameAction(this.app));
 			}
 		});
 
@@ -155,7 +149,7 @@ export default class FileCookerPlugin extends Plugin {
 				if (!checking) {
 					new DataviewReader(this.app, editor.getSelection()).read(new RenameAction(this.app));
 				}
-				return dataviewApi != null && metaedit != null;
+				return dataviewApi != null;
 			}
 		});
 
