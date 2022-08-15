@@ -1,5 +1,4 @@
 import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
-import { text } from 'stream/consumers';
 
 /**
  *  弹窗编辑Front Matter属性

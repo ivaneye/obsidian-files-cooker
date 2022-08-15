@@ -1,5 +1,5 @@
 import { Plugin, Editor, MarkdownView } from 'obsidian';
-import { MoveModal } from 'src/modal/move-modal';
+import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
 import { ClipboardReader } from 'src/reader/clipboard-reader';
 import { DeleteAction } from 'src/action/delete-action';
 import { CurrentFileReader } from 'src/reader/current-file-reader';
@@ -7,6 +7,7 @@ import { DataviewReader } from 'src/reader/dataview-reader';
 import { CopyAction } from 'src/action/copy-action';
 import { getAPI } from "obsidian-dataview";
 import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
+import { RenameAction } from 'src/action/rename-action';
 
 
 export default class FileCookerPlugin extends Plugin {
@@ -24,7 +25,7 @@ export default class FileCookerPlugin extends Plugin {
 			id: 'move-files-to',
 			name: 'Move files to ...',
 			callback: () => {
-				new MoveModal(this.app, new ClipboardReader(this.app)).open();
+				new ChooseFolderModal(this.app, new ClipboardReader(this.app)).open();
 			}
 		});
 
@@ -32,7 +33,7 @@ export default class FileCookerPlugin extends Plugin {
 			id: "move-links-to",
 			name: "Move links in current file to ...",
 			callback: () => {
-				new MoveModal(this.app, new CurrentFileReader(this.app)).open();
+				new ChooseFolderModal(this.app, new CurrentFileReader(this.app)).open();
 			}
 		});
 
@@ -41,7 +42,7 @@ export default class FileCookerPlugin extends Plugin {
 			name: 'Move dataview query results to ...',
 			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
 				if (!checking) {
-					new MoveModal(this.app, new DataviewReader(this.app, editor.getSelection())).open();
+					new ChooseFolderModal(this.app, new DataviewReader(this.app, editor.getSelection())).open();
 				}
 				return dataviewApi != null;
 			}
@@ -124,9 +125,43 @@ export default class FileCookerPlugin extends Plugin {
 			}
 		});
 
-		// todo merge multi file
-		// todo deal tags
-		// todo deal yaml
+		// Rename Files
+		this.addCommand({
+			id: 'rename-in-clipboard-files',
+			name: 'Rename in clipboard files ...',
+			checkCallback: (checking: boolean) => {
+				if (!checking) {
+					new ClipboardReader(this.app).read(new RenameAction(this.app));
+				}
+				return dataviewApi != null && metaedit != null;
+			}
+		});
+
+		this.addCommand({
+			id: "rename-in-current-file-links",
+			name: "Rename in current file links ...",
+			checkCallback: (checking: boolean) => {
+				if (!checking) {
+					new CurrentFileReader(this.app).read(new RenameAction(this.app));
+				}
+				return dataviewApi != null && metaedit != null;
+			}
+		});
+
+		this.addCommand({
+			id: "rename-in-dataview-results",
+			name: "Rename in dataview results ...",
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (!checking) {
+					new DataviewReader(this.app, editor.getSelection()).read(new RenameAction(this.app));
+				}
+				return dataviewApi != null && metaedit != null;
+			}
+		});
+
+		// todo merge multi files
+		// todo create multi files
+		// todo deal multi tags
 		// console.log(this.app.plugins.plugins["metaedit"].api);
 	}
 

@@ -1,10 +1,10 @@
-import { App, FileManager, Modal, Notice, Setting, TFile } from 'obsidian';
+import { App, Modal, Notice, Setting, TFile } from 'obsidian';
 import { MoveInfo } from 'src/modal/move-info';
 
 /**
  *  弹窗确认要移动/拷贝的文件
  */
-export class ConfirmModal extends Modal {
+export class MoveConfirmModal extends Modal {
     moveInfos: MoveInfo[];
     copyFlag: boolean;
 

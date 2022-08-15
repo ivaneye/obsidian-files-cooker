@@ -1,14 +1,11 @@
-import { App, Notice, SuggestModal, TAbstractFile, TFolder } from 'obsidian';
-import { FROM_CLIPBOARD, FROM_CURRENT_FILE } from 'src/modal/move-info';
-import { ClipboardReader } from 'src/reader/clipboard-reader';
+import { App, SuggestModal, TAbstractFile, TFolder } from 'obsidian';
 import { MoveAction } from 'src/action/move-action';
-import { CurrentFileReader } from 'src/reader/current-file-reader';
 import { Readable } from 'src/reader/readable';
 
 /**
  * 选择目录弹窗
  */
-export class MoveModal extends SuggestModal<TAbstractFile> {
+export class ChooseFolderModal extends SuggestModal<TAbstractFile> {
 
 	type: string;
 	readable: Readable;

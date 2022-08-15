@@ -1,5 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
-import { ConfirmModal } from "../modal/confirm-modal";
+import { MoveConfirmModal } from "../modal/move-confirm-modal";
 import { MoveInfo } from "../modal/move-info";
 import { Action } from "./action";
 
@@ -24,7 +24,7 @@ export class MoveAction implements Action {
                     targetDir: this.targetPath
                 })
             })
-            new ConfirmModal(this.app, moveInfos).open();
+            new MoveConfirmModal(this.app, moveInfos).open();
         } else {
             new Notice("No Files Found!");
         }
