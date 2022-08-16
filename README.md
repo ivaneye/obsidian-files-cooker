@@ -2,7 +2,7 @@
 
 # obsidian-file-cooker
 
-This plugin for Obsidian deals batch notes from search results、current file、Dataview query string...
+This plugin for Obsidian deals multi notes from search results、current file、Dataview query string...
     
 ## Features
 
@@ -10,6 +10,9 @@ This plugin for Obsidian deals batch notes from search results、current file、
 - Rename Multi-File
 - Add or Change Multi-File's Props（need to install **MetaEdit** plugin）
 - Delete Multi-File
+- Merge Multi-File to target file
+- Create files from unresolved links
+- Sync Multi-File to flomo
 - Copy Dataview result links to clipboard
 
 > - files from clipboard
