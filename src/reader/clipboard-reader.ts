@@ -31,7 +31,6 @@ export class ClipboardReader implements Readable {
                     if (!f.endsWith(".md") && !f.endsWith(".MD") && !f.endsWith(".Md") && !f.endsWith(".mD")) {
                         f = f + ".md";
                     }
-                    console.log("f = " + f);
                     let ff = this.app.vault.getAbstractFileByPath(f);
                     if (ff != null) {
                         readInfo.add(ff);

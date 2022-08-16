@@ -1,4 +1,5 @@
 import { App, SuggestModal, TAbstractFile, TFolder } from 'obsidian';
+import { Action } from 'src/action/action';
 import { MoveAction } from 'src/action/move-action';
 import { Readable } from 'src/reader/readable';
 
@@ -9,10 +10,12 @@ export class ChooseFolderModal extends SuggestModal<TAbstractFile> {
 
 	type: string;
 	readable: Readable;
+	actionFunc: (path: string) => Action;
 
-	constructor(app: App, readable: Readable) {
+	constructor(app: App, readable: Readable, actionFunc: (path: string) => Action) {
 		super(app);
 		this.readable = readable;
+		this.actionFunc = actionFunc;
 	}
 
 	// Returns all available suggestions.
@@ -36,7 +39,7 @@ export class ChooseFolderModal extends SuggestModal<TAbstractFile> {
 
 	// Perform action on the selected suggestion.
 	onChooseSuggestion(folder: TAbstractFile, evt: MouseEvent | KeyboardEvent) {
-		let action = new MoveAction(this.app, folder.path);
+		let action = this.actionFunc(folder.path);
 		this.readable.read(action);
 	}
 }

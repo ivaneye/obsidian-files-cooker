@@ -9,6 +9,9 @@ import { getAPI } from "obsidian-dataview";
 import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
 import { RenameAction } from 'src/action/rename-action';
 import { ChooseFileModal } from 'src/modal/choose-file-modal';
+import { Action } from 'src/action/action';
+import { MoveAction } from 'src/action/move-action';
+import { CreateAction } from 'src/action/create-action';
 
 
 export default class FileCookerPlugin extends Plugin {
@@ -26,7 +29,8 @@ export default class FileCookerPlugin extends Plugin {
 			id: 'move-files-to',
 			name: 'Move files to ...',
 			callback: () => {
-				new ChooseFolderModal(this.app, new ClipboardReader(this.app)).open();
+				let actionFunc = (path: string): Action => { return new MoveAction(this.app, path); }
+				new ChooseFolderModal(this.app, new ClipboardReader(this.app), actionFunc).open();
 			}
 		});
 
@@ -34,7 +38,8 @@ export default class FileCookerPlugin extends Plugin {
 			id: "move-links-to",
 			name: "Move links in current file to ...",
 			callback: () => {
-				new ChooseFolderModal(this.app, new CurrentFileReader(this.app)).open();
+				let actionFunc = (path: string): Action => { return new MoveAction(this.app, path); }
+				new ChooseFolderModal(this.app, new CurrentFileReader(this.app), actionFunc).open();
 			}
 		});
 
@@ -43,20 +48,22 @@ export default class FileCookerPlugin extends Plugin {
 			name: 'Move dataview query results to ...',
 			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
 				if (!checking) {
-					new ChooseFolderModal(this.app, new DataviewReader(this.app, editor.getSelection())).open();
+					let actionFunc = (path: string): Action => { return new MoveAction(this.app, path); }
+					new ChooseFolderModal(this.app, new DataviewReader(this.app, editor.getSelection()), actionFunc).open();
 				}
 				return dataviewApi != null;
 			}
 		});
 
 		// Create Files
-		// this.addCommand({
-		// 	id: "create-links",
-		// 	name: "Create links in current file ...",
-		// 	callback: () => {
-		// 		new ChooseFolderModal(this.app, new CurrentFileReader(this.app)).open();
-		// 	}
-		// });
+		this.addCommand({
+			id: "create-links",
+			name: "Create links in current file ...",
+			callback: () => {
+				let actionFunc = (path: string): Action => { return new CreateAction(this.app, path); }
+				new ChooseFolderModal(this.app, new CurrentFileReader(this.app, true), actionFunc).open();
+			}
+		});
 
 		// Merge Files
 		this.addCommand({
@@ -85,7 +92,7 @@ export default class FileCookerPlugin extends Plugin {
 				return dataviewApi != null;
 			}
 		});
-		
+
 		// Delete Files
 		this.addCommand({
 			id: 'delete-files-in-clipboard',
