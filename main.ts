@@ -1,4 +1,4 @@
-import { Plugin, Editor, MarkdownView } from 'obsidian';
+import { Plugin, Editor, MarkdownView, App, PluginSettingTab, Setting } from 'obsidian';
 import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
 import { ClipboardReader } from 'src/reader/clipboard-reader';
 import { DeleteAction } from 'src/action/delete-action';
@@ -12,11 +12,16 @@ import { ChooseFileModal } from 'src/modal/choose-file-modal';
 import { Action } from 'src/action/action';
 import { MoveAction } from 'src/action/move-action';
 import { CreateAction } from 'src/action/create-action';
+import { SyncFlomoAction } from 'src/action/sync-flomo-action';
 
 
 export default class FileCookerPlugin extends Plugin {
+	settings: FileCookerPluginSettings;
 
 	async onload() {
+
+		await this.loadSettings();
+
 		// const ribbonIconEl = this.addRibbonIcon('clipboard-list', 'Move files to ...', (evt: MouseEvent) => {
 		// 	new MoveModal(this.app, FROM_CLIPBOARD).open();
 		// });
@@ -50,6 +55,34 @@ export default class FileCookerPlugin extends Plugin {
 				if (!checking) {
 					let actionFunc = (path: string): Action => { return new MoveAction(this.app, path); }
 					new ChooseFolderModal(this.app, new DataviewReader(this.app, editor.getSelection()), actionFunc).open();
+				}
+				return dataviewApi != null;
+			}
+		});
+
+		// Sync Files to flomo
+		this.addCommand({
+			id: 'sync-files-to-flomo',
+			name: 'Sync files to flomo ...',
+			callback: () => {
+				new ClipboardReader(this.app).read(new SyncFlomoAction(this));
+			}
+		});
+
+		this.addCommand({
+			id: "sync-links-to",
+			name: "Sync links in current file to flomo ...",
+			callback: () => {
+				new CurrentFileReader(this.app).read(new SyncFlomoAction(this));
+			}
+		});
+
+		this.addCommand({
+			id: 'sync-dataview-results-to',
+			name: 'Sync dataview query results to flomo ...',
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (!checking) {
+					new DataviewReader(this.app, editor.getSelection()).read(new SyncFlomoAction(this));
 				}
 				return dataviewApi != null;
 			}
@@ -198,12 +231,54 @@ export default class FileCookerPlugin extends Plugin {
 			}
 		});
 
-		// todo merge multi files
-		// todo create multi files
-		// todo deal multi tags
-		// console.log(this.app.plugins.plugins["metaedit"].api);
+		// This adds a settings tab so the user can configure various aspects of the plugin
+		this.addSettingTab(new FileCookerSettingTab(this.app, this));
 	}
 
 	onunload() {
+	}
+
+	async loadSettings() {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	}
+
+	async saveSettings() {
+		await this.saveData(this.settings);
+	}
+}
+
+const DEFAULT_SETTINGS: FileCookerPluginSettings = {
+	flomoAPI: ''
+}
+
+interface FileCookerPluginSettings {
+	flomoAPI: string;
+}
+
+class FileCookerSettingTab extends PluginSettingTab {
+	plugin: FileCookerPlugin;
+
+	constructor(app: App, plugin: FileCookerPlugin) {
+		super(app, plugin);
+		this.plugin = plugin;
+	}
+
+	display(): void {
+		const {containerEl} = this;
+
+		containerEl.empty();
+
+		containerEl.createEl('h2', {text: 'Settings for File Cooker!'});
+
+		new Setting(containerEl)
+			.setName('flomoAPI')
+			.setDesc('config flomo API to sync notes')
+			.addText(text => text
+				.setPlaceholder('Enter flomo API')
+				.setValue(this.plugin.settings.flomoAPI)
+				.onChange(async (value) => {
+					this.plugin.settings.flomoAPI = value;
+					await this.plugin.saveSettings();
+				}));
 	}
 }
