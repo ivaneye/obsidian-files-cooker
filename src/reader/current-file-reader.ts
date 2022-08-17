@@ -4,14 +4,19 @@ import { ReadInfo } from "./read-info";
 import { Readable } from "./readable";
 
 
+export enum ReadType {
+    LINKS, UN_RESOLVED_LINKS, CONTENT
+}
+
+
 export class CurrentFileReader implements Readable {
 
     app: App;
-    unResolvedFlag: boolean = false;
+    readType: ReadType = ReadType.LINKS;
 
-    constructor(app: App, unResolvedFlag?: boolean) {
+    constructor(app: App, readType?: ReadType) {
         this.app = app;
-        this.unResolvedFlag = unResolvedFlag;
+        this.readType = readType;
     }
 
     read(action: Action): void {
@@ -26,27 +31,35 @@ export class CurrentFileReader implements Readable {
 
         let currentFilePath = currentFile.path;
 
-        let linkObj;
-        if (!this.unResolvedFlag) {
-            linkObj = this.app.metadataCache.resolvedLinks[currentFilePath];
+        let paths = [];
+        if (this.readType == ReadType.CONTENT) {
+            paths.push(currentFilePath);
+        } else if (this.readType == ReadType.UN_RESOLVED_LINKS) {
+            let linkObj = this.app.metadataCache.unresolvedLinks[currentFilePath];
+            for (let key in linkObj) {
+                paths.push(key);
+            }
         } else {
-            linkObj = this.app.metadataCache.unresolvedLinks[currentFilePath];
+            let linkObj = this.app.metadataCache.resolvedLinks[currentFilePath];
+            for (let key in linkObj) {
+                paths.push(key);
+            }
         }
 
         try {
-            if (!this.unResolvedFlag) {
-                for (let key in linkObj) {
-                    let ff = this.app.vault.getAbstractFileByPath(key);
+            if (this.readType == ReadType.UN_RESOLVED_LINKS) {
+                // 未解析的链接，创建虚拟文件对象
+                paths.forEach(path => {
+                    let ff = new VirtualFile(path);
+                    readInfo.add(ff);
+                })
+            } else {
+                paths.forEach(path => {
+                    let ff = this.app.vault.getAbstractFileByPath(path);
                     if (ff != null) {
                         readInfo.add(ff);
                     }
-                }
-            } else {
-                // 未解析的链接，创建虚拟文件对象
-                for (let key in linkObj) {
-                    let ff = new VirtualFile(key);
-                    readInfo.add(ff);
-                }
+                })
             }
             action.act(readInfo.getFiles());
         } catch (e) {

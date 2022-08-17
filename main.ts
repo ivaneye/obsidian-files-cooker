@@ -2,7 +2,7 @@ import { Plugin, Editor, MarkdownView, App, PluginSettingTab, Setting } from 'ob
 import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
 import { ClipboardReader } from 'src/reader/clipboard-reader';
 import { DeleteAction } from 'src/action/delete-action';
-import { CurrentFileReader } from 'src/reader/current-file-reader';
+import { CurrentFileReader, ReadType } from 'src/reader/current-file-reader';
 import { DataviewReader } from 'src/reader/dataview-reader';
 import { CopyAction } from 'src/action/copy-action';
 import { getAPI } from "obsidian-dataview";
@@ -70,6 +70,14 @@ export default class FileCookerPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: "sync-content-to",
+			name: "Sync content in current file to flomo ...",
+			callback: () => {
+				new CurrentFileReader(this.app, ReadType.CONTENT).read(new SyncFlomoAction(this));
+			}
+		});
+
+		this.addCommand({
 			id: "sync-links-to",
 			name: "Sync links in current file to flomo ...",
 			callback: () => {
@@ -94,7 +102,7 @@ export default class FileCookerPlugin extends Plugin {
 			name: "Create links in current file ...",
 			callback: () => {
 				let actionFunc = (path: string): Action => { return new CreateAction(this.app, path); }
-				new ChooseFolderModal(this.app, new CurrentFileReader(this.app, true), actionFunc).open();
+				new ChooseFolderModal(this.app, new CurrentFileReader(this.app, ReadType.UN_RESOLVED_LINKS), actionFunc).open();
 			}
 		});
 

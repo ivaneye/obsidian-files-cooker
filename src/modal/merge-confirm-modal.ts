@@ -18,7 +18,7 @@ export class MergeConfirmModal extends Modal {
 
         contentEl.createEl("h1", { text: "Confirm Merge?" });
 
-        contentEl.createEl("div", { text: "Merge all files below -> " + this.targetFilePath + " !"});
+        contentEl.createEl("div", { text: "Merge all files below -> " + this.targetFilePath + " !" });
         this.resultArr.forEach(info => {
             contentEl.createEl("div", { text: info.path });
         })
@@ -35,8 +35,14 @@ export class MergeConfirmModal extends Modal {
                         }
                         for (const key in this.resultArr) {
                             let info = this.resultArr[key];
-                            let cont = await this.app.vault.read((info as TFile));
-                            await this.app.vault.append((targetFile as TFile), cont);
+                            if (info.name.endsWith(".md")) {
+                                let cont = await this.app.vault.read((info as TFile));
+                                cont = "# " + info.name.substring(0, info.name.length - 3) + "\n\n" + cont + "\n\n";
+                                await this.app.vault.append((targetFile as TFile), cont);
+                            } else {
+                                let cont = `![[${info.name}]]\n\n`;
+                                await this.app.vault.append((targetFile as TFile), cont);
+                            }
                         }
                         new Notice("Merge Success!");
                     }))
