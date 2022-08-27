@@ -6,11 +6,13 @@ import { App, Modal, Notice, Setting, TAbstractFile, TFile } from 'obsidian';
 export class MergeConfirmModal extends Modal {
     targetFilePath: string;
     resultArr: TAbstractFile[];
+    lineBreak: string;
 
     constructor(app: App, resultArr: TAbstractFile[], targetFilePath: string) {
         super(app);
         this.targetFilePath = targetFilePath;
         this.resultArr = resultArr;
+        this.lineBreak = getLinebreak();
     }
 
     onOpen() {
@@ -37,10 +39,12 @@ export class MergeConfirmModal extends Modal {
                             let info = this.resultArr[key];
                             if (info.name.endsWith(".md")) {
                                 let cont = await this.app.vault.read((info as TFile));
-                                cont = "# " + info.name.substring(0, info.name.length - 3) + "\n\n" + cont + "\n\n";
+                                cont = this.clearYaml(cont);
+                                cont = "# " + info.name.substring(0, info.name.length - 3)
+                                    + this.lineBreak + cont + this.lineBreak + this.lineBreak;
                                 await this.app.vault.append((targetFile as TFile), cont);
                             } else {
-                                let cont = `![[${info.name}]]\n\n`;
+                                let cont = `![[${info.name}]]${this.lineBreak}${this.lineBreak}`;
                                 await this.app.vault.append((targetFile as TFile), cont);
                             }
                         }
@@ -55,4 +59,36 @@ export class MergeConfirmModal extends Modal {
                         new Notice("Merge Canceled!");
                     }));
     }
+
+    clearYaml(cont: string): string {
+        if (cont.startsWith("---")) {
+            let lines = cont.split(this.lineBreak);
+            let results = "";
+            let appendFlag = true;
+            for (let idx in lines) {
+                if (lines[idx] == "---") {
+                    appendFlag = !appendFlag;
+                    continue;
+                }
+                if (appendFlag) {
+                    results = results + lines[idx] + this.lineBreak;
+                }
+            }
+            return results;
+        } else {
+            return cont;
+        }
+    }
+}
+
+function getLinebreak(): string {
+    let oss = ["Windows", "Mac", "Linux"];
+    let lineBreaks = ["\r\n", "\n", "\n"];
+    for (let i = 0; i < oss.length; i++) {
+        let os = oss[i];
+        if (navigator.userAgent.indexOf(os) != -1) {
+            return lineBreaks[i];
+        }
+    }
+    return "\n";
 }
