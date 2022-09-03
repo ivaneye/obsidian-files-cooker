@@ -41,7 +41,7 @@ export class DataviewCommand implements Command {
             name: "Rename in dataview results ...",
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
-                    new DataviewReader(this.plugin.app, editor.getSelection()).read(new RenameAction(this.plugin.app));
+                    new DataviewReader(this.plugin, editor.getSelection()).read(new RenameAction(this.plugin.app));
                 }
                 return dataviewApi != null;
             }
@@ -61,7 +61,7 @@ export class DataviewCommand implements Command {
             name: "Edit Front Matter in dataview results ...",
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
-                    new DataviewReader(this.plugin.app, editor.getSelection()).read(new EditFrontMatterAction(this.plugin.app));
+                    new DataviewReader(this.plugin, editor.getSelection()).read(new EditFrontMatterAction(this.plugin.app));
                 }
                 return dataviewApi != null && metaedit != null;
             }
@@ -74,7 +74,7 @@ export class DataviewCommand implements Command {
             name: 'Copy dataview result links!',
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
-                    new DataviewReader(this.plugin.app, editor.getSelection()).read(new CopyAction(this.plugin.app));
+                    new DataviewReader(this.plugin, editor.getSelection()).read(new CopyAction(this.plugin.app));
                 }
                 return dataviewApi != null;
             }
@@ -87,7 +87,7 @@ export class DataviewCommand implements Command {
             name: 'Delete dataview query results!',
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
-                    new DataviewReader(this.plugin.app, editor.getSelection()).read(new DeleteAction(this.plugin.app));
+                    new DataviewReader(this.plugin, editor.getSelection()).read(new DeleteAction(this.plugin.app));
                 }
                 return dataviewApi != null;
             }
@@ -100,7 +100,7 @@ export class DataviewCommand implements Command {
             name: 'Merge dataview query results to ...',
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
-                    new ChooseFileModal(this.plugin.app, new DataviewReader(this.plugin.app, editor.getSelection())).open();
+                    new ChooseFileModal(this.plugin.app, new DataviewReader(this.plugin, editor.getSelection())).open();
                 }
                 return dataviewApi != null;
             }
@@ -113,7 +113,7 @@ export class DataviewCommand implements Command {
             name: 'Sync dataview query results to flomo ...',
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
-                    new DataviewReader(this.plugin.app, editor.getSelection()).read(new SyncFlomoAction(this.plugin));
+                    new DataviewReader(this.plugin, editor.getSelection()).read(new SyncFlomoAction(this.plugin));
                 }
                 return dataviewApi != null;
             }
@@ -127,7 +127,7 @@ export class DataviewCommand implements Command {
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
                     let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
-                    new ChooseFolderModal(this.plugin.app, new DataviewReader(this.plugin.app, editor.getSelection()), actionFunc).open();
+                    new ChooseFolderModal(this.plugin.app, new DataviewReader(this.plugin, editor.getSelection()), actionFunc).open();
                 }
                 return dataviewApi != null;
             }

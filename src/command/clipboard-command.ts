@@ -32,7 +32,7 @@ export class ClipboardCommand implements Command {
             id: 'rename-in-clipboard-files',
             name: 'Rename in clipboard files ...',
             callback: () => {
-                new ClipboardReader(this.plugin.app).read(new RenameAction(this.plugin.app));
+                new ClipboardReader(this.plugin).read(new RenameAction(this.plugin.app));
             }
         });
     }
@@ -49,7 +49,7 @@ export class ClipboardCommand implements Command {
             name: 'Edit Front Matter in clipboard files ...',
             checkCallback: (checking: boolean) => {
                 if (!checking) {
-                    new ClipboardReader(this.plugin.app).read(new EditFrontMatterAction(this.plugin.app));
+                    new ClipboardReader(this.plugin).read(new EditFrontMatterAction(this.plugin.app));
                 }
                 return metaedit != null;
             }
@@ -61,7 +61,7 @@ export class ClipboardCommand implements Command {
             id: 'delete-files-in-clipboard',
             name: 'Delete files in clipboard!',
             callback: () => {
-                new ClipboardReader(this.plugin.app).read(new DeleteAction(this.plugin.app));
+                new ClipboardReader(this.plugin).read(new DeleteAction(this.plugin.app));
             }
         });
     }
@@ -71,7 +71,7 @@ export class ClipboardCommand implements Command {
             id: 'merge-files-to',
             name: 'Merge files to ...',
             callback: () => {
-                new ChooseFileModal(this.plugin.app, new ClipboardReader(this.plugin.app)).open();
+                new ChooseFileModal(this.plugin.app, new ClipboardReader(this.plugin)).open();
             }
         });
     }
@@ -81,7 +81,7 @@ export class ClipboardCommand implements Command {
             id: 'sync-files-to-flomo',
             name: 'Sync files to flomo ...',
             callback: () => {
-                new ClipboardReader(this.plugin.app).read(new SyncFlomoAction(this.plugin));
+                new ClipboardReader(this.plugin).read(new SyncFlomoAction(this.plugin));
             }
         });
     }
@@ -92,7 +92,7 @@ export class ClipboardCommand implements Command {
             name: 'Move files to ...',
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
-                new ChooseFolderModal(this.plugin.app, new ClipboardReader(this.plugin.app), actionFunc).open();
+                new ChooseFolderModal(this.plugin.app, new ClipboardReader(this.plugin), actionFunc).open();
             }
         });
     }

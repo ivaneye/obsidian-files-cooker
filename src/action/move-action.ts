@@ -1,7 +1,7 @@
 import { App, Notice, TAbstractFile } from "obsidian";
 import { MoveConfirmModal } from "../modal/move-confirm-modal";
 import { MoveInfo } from "../modal/move-info";
-import { Action } from "./action";
+import { Action, ActionModel } from "./action";
 
 export class MoveAction implements Action {
 
@@ -13,12 +13,13 @@ export class MoveAction implements Action {
         this.targetPath = targetPath;
     }
 
-    act(resultArr: TAbstractFile[]) {
+    act(actionModels: ActionModel[]) {
 
         const moveInfos: MoveInfo[] = [];
 
-        if (resultArr.length > 0) {
-            resultArr.forEach(ff => {
+        if (actionModels.length > 0) {
+            actionModels.forEach(model => {
+                let ff = model.file;
                 moveInfos.push({
                     sourceFile: ff,
                     targetDir: this.targetPath

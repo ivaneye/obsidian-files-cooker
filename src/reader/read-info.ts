@@ -1,6 +1,5 @@
 import { TAbstractFile } from "obsidian";
-import * as internal from "stream";
-
+import { ActionModel } from "src/action/action";
 
 /**
  * 读取的信息
@@ -8,21 +7,34 @@ import * as internal from "stream";
 export class ReadInfo {
 
     limit: number;
-    resultArr: TAbstractFile[];
+    actionModels: ActionModel[];
 
-    constructor(limit: number = 300) {
-        this.limit = limit;
-        this.resultArr = [];
+    constructor(limit: string) {
+        try {
+            this.limit = limit as unknown as number;
+        } catch (e) {
+            throw new Error("limit [" + this.limit + "] must be a number!");
+        }
+        this.actionModels = [];
     }
 
-    add(file: TAbstractFile) {
-        if (this.resultArr.length >= this.limit) {
+    addFile(file: TAbstractFile) {
+        if (this.actionModels.length >= this.limit) {
             throw new Error("Load more than " + this.limit + " files!");
         }
-        this.resultArr.push(file);
+        let model = new ActionModel(file);
+        this.actionModels.push(model);
     }
 
-    getFiles() {
-        return this.resultArr;
+    addContent(cont: string) {
+        if (this.actionModels.length >= this.limit) {
+            throw new Error("Load more than " + this.limit + " files!");
+        }
+        let model = new ActionModel(null, cont);
+        this.actionModels.push(model);
+    }
+
+    getModels() {
+        return this.actionModels;
     }
 }

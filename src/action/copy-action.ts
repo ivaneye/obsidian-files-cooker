@@ -1,5 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
-import { Action } from "./action";
+import { Action, ActionModel } from "./action";
 
 export class CopyAction implements Action {
 
@@ -9,11 +9,12 @@ export class CopyAction implements Action {
         this.app = app;
     }
 
-    act(resultArr: TAbstractFile[]) {
+    act(actionModels: ActionModel[]) {
 
-        if (resultArr.length > 0) {
+        if (actionModels.length > 0) {
             let str = "";
-            resultArr.forEach(ff => {
+            actionModels.forEach(model => {
+                let ff = model.file;
                 let name = ff.name;
                 if (name.endsWith(".md")) {
                     name = name.substring(0, name.lastIndexOf("."));

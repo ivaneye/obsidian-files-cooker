@@ -1,6 +1,6 @@
 import { App, Notice, TAbstractFile } from "obsidian";
 import { EditFrontMatterModal } from "src/modal/edit-front-matter-modal";
-import { Action } from "./action";
+import { Action, ActionModel } from "./action";
 
 export class EditFrontMatterAction implements Action {
 
@@ -10,9 +10,10 @@ export class EditFrontMatterAction implements Action {
         this.app = app;
     }
 
-    act(resultArr: TAbstractFile[]) {
-        if (resultArr.length > 0) {
-            new EditFrontMatterModal(this.app, resultArr).open();
+    act(actionModels: ActionModel[]) {
+        if (actionModels.length > 0) {
+            let files = actionModels.map(model => model.file);
+            new EditFrontMatterModal(this.app, files).open();
         } else {
             new Notice("No Files Found!");
         }

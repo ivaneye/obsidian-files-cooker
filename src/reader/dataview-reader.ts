@@ -3,19 +3,22 @@ import { Action } from "src/action/action";
 import { Readable } from "./readable";
 import { getAPI } from "obsidian-dataview";
 import { ReadInfo } from "./read-info";
+import FileCookerPlugin from "main";
 
 export class DataviewReader implements Readable {
 
+    plugin: FileCookerPlugin;
     app: App;
     queryStr: string;
 
-    constructor(app: App, queryStr: string) {
-        this.app = app;
+    constructor(plugin: FileCookerPlugin, queryStr: string) {
+        this.plugin = plugin;
+        this.app = plugin.app;
         this.queryStr = queryStr;
     }
 
     read(action: Action): void {
-        let readInfo = new ReadInfo();
+        let readInfo = new ReadInfo(this.plugin.settings.limit);
 
         let api = getAPI();
 
@@ -50,10 +53,10 @@ export class DataviewReader implements Readable {
                     filePaths.forEach((filePath: { toString: () => string; }) => {
                         let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
                         if (ff != null) {
-                            readInfo.add(ff);
+                            readInfo.addFile(ff);
                         }
                     })
-                    action.act(readInfo.getFiles());
+                    action.act(readInfo.getModels());
                 } catch (e) {
                     new Notice(e.message);
                 }

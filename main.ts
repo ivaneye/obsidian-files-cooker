@@ -2,6 +2,7 @@ import { Plugin, App, PluginSettingTab, Setting } from 'obsidian';
 import { ClipboardCommand } from 'src/command/clipboard-command';
 import { CurrentFileCommand } from 'src/command/current-file-command';
 import { DataviewCommand } from 'src/command/dataview-command';
+import * as internal from 'stream';
 
 export default class FileCookerPlugin extends Plugin {
 	settings: FileCookerPluginSettings;
@@ -31,11 +32,13 @@ export default class FileCookerPlugin extends Plugin {
 }
 
 const DEFAULT_SETTINGS: FileCookerPluginSettings = {
-	flomoAPI: ''
+	flomoAPI: '',
+	limit: '300'
 }
 
 interface FileCookerPluginSettings {
 	flomoAPI: string;
+	limit: string;
 }
 
 class FileCookerSettingTab extends PluginSettingTab {
@@ -47,11 +50,22 @@ class FileCookerSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Settings for File Cooker!'});
+		containerEl.createEl('h2', { text: 'Settings for File Cooker!' });
+
+		new Setting(containerEl)
+			.setName('Limit')
+			.setDesc('config batch file limit')
+			.addText(text => text
+				.setPlaceholder('Enter batch file limit')
+				.setValue(this.plugin.settings.limit)
+				.onChange(async (value) => {
+					this.plugin.settings.limit = value;
+					await this.plugin.saveSettings();
+				}));
 
 		new Setting(containerEl)
 			.setName('flomoAPI')

@@ -1,6 +1,6 @@
 import { App, Notice, TAbstractFile } from "obsidian";
 import { MergeConfirmModal } from "src/modal/merge-confirm-modal";
-import { Action } from "./action";
+import { Action, ActionModel } from "./action";
 
 export class MergeAction implements Action {
 
@@ -12,10 +12,11 @@ export class MergeAction implements Action {
         this.targetFilePath = targetFilePath;
     }
 
-    async act(resultArr: TAbstractFile[]) {
+    async act(actionModels: ActionModel[]) {
 
-        if (resultArr.length > 0) {
-            new MergeConfirmModal(this.app, resultArr, this.targetFilePath).open();
+        if (actionModels.length > 0) {
+            let files = actionModels.map(model => model.file);
+            new MergeConfirmModal(this.app, files, this.targetFilePath).open();
         } else {
             new Notice("No Files Found!");
         }

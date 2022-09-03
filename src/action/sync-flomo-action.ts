@@ -1,7 +1,7 @@
 import FileCookerPlugin from "main";
-import { Notice, TAbstractFile } from "obsidian";
+import { Notice } from "obsidian";
 import { SyncFlomoConfirmModal } from "src/modal/sync-flomo-confirm-modal";
-import { Action } from "./action";
+import { Action, ActionModel } from "./action";
 
 export class SyncFlomoAction implements Action {
 
@@ -11,14 +11,14 @@ export class SyncFlomoAction implements Action {
         this.plugin = plugin;
     }
 
-    act(resultArr: TAbstractFile[]) {
+    act(actionModels: ActionModel[]) {
         let flomoAPI = this.plugin.settings.flomoAPI;
         if (!flomoAPI || flomoAPI.trim() == "") {
             new Notice("Please config flomoAPI first!");
             return;
         }
-        if (resultArr.length > 0) {
-            new SyncFlomoConfirmModal(this.plugin, resultArr).open();
+        if (actionModels.length > 0) {
+            new SyncFlomoConfirmModal(this.plugin, actionModels).open();
         } else {
             new Notice("No Files Found!");
         }

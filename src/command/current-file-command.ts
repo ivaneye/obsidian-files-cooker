@@ -1,4 +1,5 @@
 import FileCookerPlugin from 'main';
+import { Editor, MarkdownView } from 'obsidian';
 import { Action } from 'src/action/action';
 import { CreateAction } from 'src/action/create-action';
 import { DeleteAction } from 'src/action/delete-action';
@@ -22,6 +23,7 @@ export class CurrentFileCommand implements Command {
     regist(): void {
         this.registMoveFile();
         this.registSyncContentToFlomo();
+        this.registSyncSelectionToFlomo();
         this.registSyncFileToFlomo();
         this.registCreateFile();
         this.registMergeFile();
@@ -35,7 +37,7 @@ export class CurrentFileCommand implements Command {
             id: "rename-in-current-file-links",
             name: "Rename in current file links ...",
             callback: () => {
-                new CurrentFileReader(this.plugin.app).read(new RenameAction(this.plugin.app));
+                new CurrentFileReader(this.plugin).read(new RenameAction(this.plugin.app));
             }
         });
     }
@@ -52,7 +54,7 @@ export class CurrentFileCommand implements Command {
             name: "Edit Front Matter in current file links ...",
             checkCallback: (checking: boolean) => {
                 if (!checking) {
-                    new CurrentFileReader(this.plugin.app).read(new EditFrontMatterAction(this.plugin.app));
+                    new CurrentFileReader(this.plugin).read(new EditFrontMatterAction(this.plugin.app));
                 }
                 return metaedit != null;
             }
@@ -64,7 +66,7 @@ export class CurrentFileCommand implements Command {
             id: "delete-links-in-current-file",
             name: "Delete link-files in current file!",
             callback: () => {
-                new CurrentFileReader(this.plugin.app).read(new DeleteAction(this.plugin.app));
+                new CurrentFileReader(this.plugin).read(new DeleteAction(this.plugin.app));
             }
         });
     }
@@ -74,7 +76,7 @@ export class CurrentFileCommand implements Command {
             id: "merge-links-to",
             name: "Merge links in current file to ...",
             callback: () => {
-                new ChooseFileModal(this.plugin.app, new CurrentFileReader(this.plugin.app)).open();
+                new ChooseFileModal(this.plugin.app, new CurrentFileReader(this.plugin)).open();
             }
         });
     }
@@ -85,7 +87,7 @@ export class CurrentFileCommand implements Command {
             name: "Create links in current file ...",
             callback: () => {
                 let actionFunc = (path: string): Action => { return new CreateAction(this.plugin.app, path); };
-                new ChooseFolderModal(this.plugin.app, new CurrentFileReader(this.plugin.app, ReadType.UN_RESOLVED_LINKS), actionFunc).open();
+                new ChooseFolderModal(this.plugin.app, new CurrentFileReader(this.plugin, ReadType.UN_RESOLVED_LINKS), actionFunc).open();
             }
         });
     }
@@ -95,7 +97,7 @@ export class CurrentFileCommand implements Command {
             id: "sync-links-to",
             name: "Sync links in current file to flomo ...",
             callback: () => {
-                new CurrentFileReader(this.plugin.app).read(new SyncFlomoAction(this.plugin));
+                new CurrentFileReader(this.plugin).read(new SyncFlomoAction(this.plugin));
             }
         });
     }
@@ -105,7 +107,20 @@ export class CurrentFileCommand implements Command {
             id: "sync-content-to",
             name: "Sync content in current file to flomo ...",
             callback: () => {
-                new CurrentFileReader(this.plugin.app, ReadType.CONTENT).read(new SyncFlomoAction(this.plugin));
+                new CurrentFileReader(this.plugin, ReadType.CONTENT).read(new SyncFlomoAction(this.plugin));
+            }
+        });
+    }
+
+    private registSyncSelectionToFlomo() {
+        this.plugin.addCommand({
+            id: "sync-selection-to",
+            name: "Sync selection in current file to flomo ...",
+            editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+                if (!checking) {
+                    new CurrentFileReader(this.plugin, ReadType.SELECTION, editor.getSelection()).read(new SyncFlomoAction(this.plugin));
+                }
+                return editor.getSelection() != "";
             }
         });
     }
@@ -116,7 +131,7 @@ export class CurrentFileCommand implements Command {
             name: "Move links in current file to ...",
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
-                new ChooseFolderModal(this.plugin.app, new CurrentFileReader(this.plugin.app), actionFunc).open();
+                new ChooseFolderModal(this.plugin.app, new CurrentFileReader(this.plugin), actionFunc).open();
             }
         });
     }

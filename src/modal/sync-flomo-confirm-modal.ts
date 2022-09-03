@@ -1,18 +1,19 @@
 import FileCookerPlugin from 'main';
-import { Modal, Notice, Setting, TAbstractFile, TFile } from 'obsidian';
+import { Modal, Notice, Setting, TFile } from 'obsidian';
 import fetch from 'node-fetch';
+import { ActionModel } from 'src/action/action';
 
 /**
  *  弹窗确认要同步到flomo的文件
  */
 export class SyncFlomoConfirmModal extends Modal {
-    resultArr: TAbstractFile[];
+    actionModels: ActionModel[];
     plugin: FileCookerPlugin;
 
-    constructor(plugin: FileCookerPlugin, resultArr: TAbstractFile[]) {
+    constructor(plugin: FileCookerPlugin, actionModels: ActionModel[]) {
         super(plugin.app);
         this.plugin = plugin;
-        this.resultArr = resultArr;
+        this.actionModels = actionModels;
     }
 
     async onOpen() {
@@ -20,7 +21,7 @@ export class SyncFlomoConfirmModal extends Modal {
 
         contentEl.createEl("h1", { text: "Confirm Sync to flomo?" });
 
-        if (this.resultArr.length == 0) {
+        if (this.actionModels.length == 0) {
             contentEl.createEl("div", { text: "No files found!" });
 
             new Setting(contentEl)
@@ -32,8 +33,12 @@ export class SyncFlomoConfirmModal extends Modal {
                             this.close();
                         }));
         } else {
-            this.resultArr.forEach(info => {
-                contentEl.createEl("div", { text: info.path });
+            this.actionModels.forEach(info => {
+                if (info.file != null) {
+                    contentEl.createEl("div", { text: info.file.path });
+                } else {
+                    contentEl.createEl("div", { text: "Sync Selection" });
+                }
             })
 
             new Setting(contentEl)
@@ -43,9 +48,14 @@ export class SyncFlomoConfirmModal extends Modal {
                         .setCta()
                         .onClick(async () => {
                             this.close();
-                            for(let i = 0; i < this.resultArr.length; i++) {
-                                let info = this.resultArr[i];
-                                let cont = await this.app.vault.read((info as TFile));
+                            for (let i = 0; i < this.actionModels.length; i++) {
+                                let info = this.actionModels[i];
+                                let cont;
+                                if (info.file != null) {
+                                    cont = await this.app.vault.read((info.file as TFile));
+                                } else {
+                                    cont = info.content;
+                                }
                                 // 👇️ const response: Response
                                 const response = await fetch(this.plugin.settings.flomoAPI, {
                                     method: 'POST',

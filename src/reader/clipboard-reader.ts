@@ -1,3 +1,4 @@
+import FileCookerPlugin from "main";
 import { App, Notice, TAbstractFile } from "obsidian";
 import { Action } from "src/action/action";
 import { ReadInfo } from "./read-info";
@@ -6,14 +7,16 @@ import { Readable } from "./readable";
 
 export class ClipboardReader implements Readable {
 
+    plugin: FileCookerPlugin;
     app: App;
 
-    constructor(app: App) {
-        this.app = app;
+    constructor(plugin: FileCookerPlugin) {
+        this.plugin = plugin;
+        this.app = plugin.app;
     }
 
     read(action: Action): void {
-        let readInfo = new ReadInfo();
+        let readInfo = new ReadInfo(this.plugin.settings.limit);
 
         let promiseStr = navigator.clipboard.readText();
 
@@ -33,10 +36,10 @@ export class ClipboardReader implements Readable {
                     }
                     let ff = this.app.vault.getAbstractFileByPath(f);
                     if (ff != null) {
-                        readInfo.add(ff);
+                        readInfo.addFile(ff);
                     }
                 });
-                action.act(readInfo.getFiles());
+                action.act(readInfo.getModels());
             } catch (e) {
                 new Notice(e.message);
             }

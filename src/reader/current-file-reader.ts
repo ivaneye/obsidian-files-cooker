@@ -1,26 +1,29 @@
+import FileCookerPlugin from "main";
 import { App, Notice, TAbstractFile, TFile, TFolder, Vault } from "obsidian";
 import { Action } from "src/action/action";
 import { ReadInfo } from "./read-info";
 import { Readable } from "./readable";
 
-
 export enum ReadType {
-    LINKS, UN_RESOLVED_LINKS, CONTENT
+    LINKS, UN_RESOLVED_LINKS, CONTENT, SELECTION
 }
-
 
 export class CurrentFileReader implements Readable {
 
+    plugin: FileCookerPlugin;
     app: App;
     readType: ReadType = ReadType.LINKS;
+    selection: string;
 
-    constructor(app: App, readType?: ReadType) {
-        this.app = app;
+    constructor(plugin: FileCookerPlugin, readType?: ReadType, selection?: string) {
+        this.plugin = plugin;
+        this.app = plugin.app;
         this.readType = readType;
+        this.selection = selection;
     }
 
     read(action: Action): void {
-        let readInfo = new ReadInfo();
+        let readInfo = new ReadInfo(this.plugin.settings.limit);
 
         let currentFile = this.app.workspace.getActiveFile();
 
@@ -51,17 +54,20 @@ export class CurrentFileReader implements Readable {
                 // 未解析的链接，创建虚拟文件对象
                 paths.forEach(path => {
                     let ff = new VirtualFile(path);
-                    readInfo.add(ff);
+                    readInfo.addFile(ff);
                 })
+            } else if (this.readType == ReadType.SELECTION) {
+                // 同步内容
+                readInfo.addContent(this.selection);
             } else {
                 paths.forEach(path => {
                     let ff = this.app.vault.getAbstractFileByPath(path);
                     if (ff != null) {
-                        readInfo.add(ff);
+                        readInfo.addFile(ff);
                     }
                 })
             }
-            action.act(readInfo.getFiles());
+            action.act(readInfo.getModels());
         } catch (e) {
             new Notice(e.message);
         }

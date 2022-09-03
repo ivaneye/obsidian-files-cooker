@@ -1,6 +1,6 @@
 import { App, Notice, TAbstractFile } from "obsidian";
 import { DeleteConfirmModal } from "src/modal/delete-confirm-modal";
-import { Action } from "./action";
+import { Action, ActionModel } from "./action";
 
 export class DeleteAction implements Action {
 
@@ -10,9 +10,10 @@ export class DeleteAction implements Action {
         this.app = app;
     }
 
-    act(resultArr: TAbstractFile[]) {
-        if (resultArr.length > 0) {
-            new DeleteConfirmModal(this.app, resultArr).open();
+    act(actionModels: ActionModel[]) {
+        if (actionModels.length > 0) {
+            let files = actionModels.map(model => model.file);
+            new DeleteConfirmModal(this.app, files).open();
         } else {
             new Notice("No Files Found!");
         }

@@ -62,21 +62,25 @@ export class RenameConfirmModal extends Modal {
             tName = tName.replace(".md", "");
             suf = ".md";
         }
-        if (this.prefix.startsWith("-")) {
-            let t = this.prefix.substring(1, this.prefix.length);
-            if (tName.startsWith(t)) {
-                tName = tName.substring(t.length, tName.length);
+        if (this.prefix && this.prefix.trim() != "") {
+            if (this.prefix.startsWith("-")) {
+                let t = this.prefix.substring(1, this.prefix.length);
+                if (tName.startsWith(t)) {
+                    tName = tName.substring(t.length, tName.length);
+                }
+            } else {
+                tName = this.prefix + tName;
             }
-        } else {
-            tName = this.prefix + tName;
         }
-        if (this.suffix.startsWith("-")) {
-            let t = this.suffix.substring(1, this.suffix.length);
-            if (tName.endsWith(t)) {
-                tName = tName.substring(0, tName.length - t.length);
+        if (this.suffix && this.suffix.trim() != "") {
+            if (this.suffix.startsWith("-")) {
+                let t = this.suffix.substring(1, this.suffix.length);
+                if (tName.endsWith(t)) {
+                    tName = tName.substring(0, tName.length - t.length);
+                }
+            } else {
+                tName = tName + this.suffix;
             }
-        } else {
-            tName = tName + this.suffix;
         }
         return tName + suf;
     }
