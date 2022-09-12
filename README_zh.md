@@ -2,7 +2,7 @@
 
 # obsidian-file-cooker
 
-批量操作搜索结果、当前文件中的链接以及Dataview结果的插件～
+支持对文件进行批量操作的Obsidian插件。
     
 ## 功能
 
@@ -10,110 +10,41 @@
 - 批量编辑目标文档属性（新增or修改，需要安装MetaEdit插件）
 - 批量删除目标文档
 - 批量重命名目标文档
-- 批量创建链接文档
+- 批量基于链接创建文档
 - 合并多个文档到指定文档
-- 批量同步文档内容到flomo
+- 同步内容到flomo
 - 拷贝Dataview结果链接到剪切板
 
 > **目标文档**：
-> - 搜索出的文档
+> - Obsidian搜索出的文档
 > - 当前文档中的所有链接对应的文档
-> - Dataview插件的结果（需要安装dataview插件）
+> - Dataview插件的搜索结果（需要安装dataview插件）
 
 ![obsidian-file-cooker Demo Image](demo.png)
 
 ## 使用方法
 
-### 批量移动/拷贝文档
-#### 将搜索结果移动到目标目录
-`from v1.0.0`
-- 通过ob的搜索功能进行文档搜索
-- 拷贝搜索结果
-- 执行命令「Move files to ...」
-- 选择目标文件夹
-- 确定
-- 选择移动或拷贝
-- 确定
+- **选择**：选择想处理的一个或多个文档
+- **处理**：执行对应的处理命令
+- **确认**：确认执行
 
-#### 将当前文档中所有链接对应的文件移动/拷贝到目标目录
-`from v1.1.0`
-- 执行命令「Move links in current file to ...」
-- 选择目标文件夹
-- 确定
-- 选择移动或拷贝
-- 确定
+### 选择
 
-#### 将Dataview查询结果移动/拷贝到目标目录
-`from v1.3.0`
-- 选中Dataview查询语句
-- 执行命令「Move dataview query results to ...」
-- 选择目标文件夹
-- 确定
-- 选择移动或拷贝
-- 确定
+目前支持三种**选择**方式：
+- 拷贝需要处理的文件链接，例如：拷贝Obsidian的搜索结果到剪贴板
+- 当前文档中的内容、链接
+- Dataview搜索命令
 
+### 处理
 
-### 批量重命名文档
-`from v1.5.0`
-#### 重命名搜索结果
-- 通过ob的搜索功能进行文档搜索
-- 拷贝搜索结果
-- 执行命令「Rename in clipboard files ...」
-- 填写名称前缀和后缀（如果前面添加'-'，表示删除）
-- 确定
+根据不同的**选择**方式，执行对应的命令即可。只需要确保：
+- 在执行剪贴板相关命令时，剪贴板中有对应的文档链接
+- 在执行当前文档相关命令时，已经打开了「当前文档」
+- 在执行Dataview相关命令时，选中了对应的Dataview命令
 
-#### 重命名当前文档中所有链接对应的文件
-- 执行命令「Rename in current file links ...」
-- 填写名称前缀和后缀（如果前面添加'-'，表示删除）
-- 确定
+### 确认
 
-#### 重命名Dataview查询结果
-- 选中Dataview查询语句
-- 执行命令「Rename in dataview results ...」
-- 填写名称前缀和后缀（如果前面添加'-'，表示删除）
-- 确定
-
-### 批量编辑文档属性
-
-> 需要安装MetaEdit插件
-
-`from v1.4.0`
-#### 搜索出的文档
-- 通过ob的搜索功能进行文档搜索
-- 拷贝搜索结果
-- 执行命令「Edit Front Matter in clipboard files ...」
-- 填写key和value
-- 确定
-
-#### 当前文件中的文档
-- 执行命令「Edit Front Matter in current file links ...」
-- 填写key和value
-- 确定
-
-#### Dataview查询出的文档
-- 选中Dataview查询语句
-- 执行命令「Edit Front Matter in dataview results ...」
-- 填写key和value
-- 确定
-
-### 批量删除文档
-#### 删除搜索结果
-`from v1.2.0`
-- 通过ob的搜索功能进行文档搜索
-- 拷贝搜索结果
-- 执行命令「Delete files in clipboard ...」
-- 确定
-
-#### 删除当前文档中所有链接对应的文件
-`from v1.2.0`
-- 执行命令「Delete link-files in current file ...」
-- 确定
-
-#### 删除Dataview查询结果
-`from v1.3.0`
-- 选中Dataview查询语句
-- 执行命令「Delete dataview query results!」
-- 确定
+所有的执行都会弹出一个确认页面，在你确认后，才会对目标文档进行对应的操作，避免误操作。
 
 ## 如何安装
 
