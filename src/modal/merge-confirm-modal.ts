@@ -40,6 +40,7 @@ export class MergeConfirmModal extends Modal {
                             if (info.name.endsWith(".md")) {
                                 let cont = await this.app.vault.read((info as TFile));
                                 cont = this.clearYaml(cont);
+                                cont = this.demoteHeader(cont);
                                 cont = "# " + info.name.substring(0, info.name.length - 3)
                                     + this.lineBreak + cont + this.lineBreak + this.lineBreak;
                                 await this.app.vault.append((targetFile as TFile), cont);
@@ -78,6 +79,11 @@ export class MergeConfirmModal extends Modal {
         } else {
             return cont;
         }
+    }
+
+    demoteHeader(cont: string): string {
+        let reg = /# /g;
+        return cont.replace(reg, "## ");
     }
 }
 
