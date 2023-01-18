@@ -29,8 +29,8 @@ export class DataviewReader implements Readable {
             let tmpStr = this.queryStr.substring(idx + 8);
             let tmpIdx = tmpStr.indexOf(")");
             tmpStr = tmpStr.substring(0, tmpIdx - 1);
-            let resArr = api.pages(tmpStr);
             try {
+                let resArr = api.pages(tmpStr);
                 resArr.values.forEach((it: { file: { path: string; }; }) => {
                     let ff = this.app.vault.getAbstractFileByPath(it.file.path);
                     if (ff != null) {
