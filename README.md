@@ -16,7 +16,7 @@ This plugin for Obsidian deals multi notes from search results、current file、
 - Merge Multi-File to target file
 - Create files from unresolved links
 - Sync Multi-File to flomo
-- Copy Dataview result links to clipboard
+- Copy Dataview result links to clipboard(DataviewJS pages queries is supported since **v1.7.1**))
 
 > - files from clipboard
 > - file links in current file
@@ -35,7 +35,7 @@ This plugin for Obsidian deals multi notes from search results、current file、
 Support 3 selects ways：
 - Copy file links to clipboard. e.g. Copy obsidian search results
 - Content or links in current file
-- Dataview search command
+- Dataview search command/DataviewJS pages queries(**New in v1.7.1**)
 
 ### Cook
 
