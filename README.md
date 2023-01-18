@@ -8,6 +8,7 @@ This plugin for Obsidian deals multi notes from search results、current file、
     
 ## Features
 
+- Add Multi-File to target Canvas --- **New in v1.7.0**
 - Move/Copy Multi-File to target folder
 - Rename Multi-File
 - Add or Change Multi-File's Props（need to install **MetaEdit** plugin）
