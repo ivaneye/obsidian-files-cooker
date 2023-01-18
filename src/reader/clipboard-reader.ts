@@ -31,7 +31,11 @@ export class ClipboardReader implements Readable {
                     if (f.endsWith("]]")) {
                         f = f.substring(0, f.length - 2);
                     }
-                    if (!f.endsWith(".md") && !f.endsWith(".MD") && !f.endsWith(".Md") && !f.endsWith(".mD")) {
+                    if (!f.endsWith(".md") 
+                        && !f.endsWith(".MD") 
+                        && !f.endsWith(".Md") 
+                        && !f.endsWith(".mD")
+                        && !f.endsWith(".canvas")) {
                         f = f + ".md";
                     }
                     let ff = this.app.vault.getAbstractFileByPath(f);

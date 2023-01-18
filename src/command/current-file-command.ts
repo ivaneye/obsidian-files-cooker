@@ -7,6 +7,7 @@ import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
 import { MoveAction } from 'src/action/move-action';
 import { RenameAction } from 'src/action/rename-action';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
+import { ChooseCanvasModal } from 'src/modal/choose-canvas-modal';
 import { ChooseFileModal } from 'src/modal/choose-file-modal';
 import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
 import { CurrentFileReader, ReadType } from 'src/reader/current-file-reader';
@@ -30,6 +31,8 @@ export class CurrentFileCommand implements Command {
         this.registDeleteFile();
         this.registEditProp();
         this.registRenameFile();
+        // Canvas
+        this.registAddFile2Canvas();
     }
 
     private registRenameFile() {
@@ -135,4 +138,15 @@ export class CurrentFileCommand implements Command {
             }
         });
     }
+
+    private registAddFile2Canvas() {
+        this.plugin.addCommand({
+            id: "add-links-to-canvas",
+            name: "Add links in current file to target canvas ...",
+            callback: () => {
+                new ChooseCanvasModal(this.plugin.app, new CurrentFileReader(this.plugin)).open();
+            }
+        });
+    }
+
 }

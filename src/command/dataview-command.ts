@@ -8,6 +8,7 @@ import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
 import { MoveAction } from 'src/action/move-action';
 import { RenameAction } from 'src/action/rename-action';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
+import { ChooseCanvasModal } from 'src/modal/choose-canvas-modal';
 import { ChooseFileModal } from 'src/modal/choose-file-modal';
 import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
 import { DataviewReader } from 'src/reader/dataview-reader';
@@ -33,6 +34,8 @@ export class DataviewCommand implements Command {
 
         // Rename Files
         this.registRenameFile(dataviewApi);
+        // Canvas
+        this.registAddFile2Canvas(dataviewApi);
     }
 
     private registRenameFile(dataviewApi: DataviewApi) {
@@ -128,6 +131,19 @@ export class DataviewCommand implements Command {
                 if (!checking) {
                     let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
                     new ChooseFolderModal(this.plugin.app, new DataviewReader(this.plugin, editor.getSelection()), actionFunc).open();
+                }
+                return dataviewApi != null;
+            }
+        });
+    }
+
+    private registAddFile2Canvas(dataviewApi: DataviewApi) {
+        this.plugin.addCommand({
+            id: 'add-dataview-results-to-canvas',
+            name: 'Add dataview query results to canvas...',
+            editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+                if (!checking) {
+                    new ChooseCanvasModal(this.plugin.app, new DataviewReader(this.plugin, editor.getSelection())).open();
                 }
                 return dataviewApi != null;
             }

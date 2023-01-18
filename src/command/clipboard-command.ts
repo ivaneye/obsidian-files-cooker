@@ -1,10 +1,12 @@
 import FileCookerPlugin from 'main';
 import { Action } from 'src/action/action';
+import { AddToCanvasAction } from 'src/action/add-to-canvas-action';
 import { DeleteAction } from 'src/action/delete-action';
 import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
 import { MoveAction } from 'src/action/move-action';
 import { RenameAction } from 'src/action/rename-action';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
+import { ChooseCanvasModal } from 'src/modal/choose-canvas-modal';
 import { ChooseFileModal } from 'src/modal/choose-file-modal';
 import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
 import { ClipboardReader } from 'src/reader/clipboard-reader';
@@ -25,12 +27,14 @@ export class ClipboardCommand implements Command {
         this.registDeleteFile();
         this.registEditProp();
         this.registRenameFile();
+        // Canvas
+        this.registAddFile2Canvas();
     }
 
     private registRenameFile() {
         this.plugin.addCommand({
-            id: 'rename-in-clipboard-files',
-            name: 'Rename in clipboard files ...',
+            id: 'rename-files-in-clipboard',
+            name: 'Rename files in clipboard ...',
             callback: () => {
                 new ClipboardReader(this.plugin).read(new RenameAction(this.plugin.app));
             }
@@ -68,8 +72,8 @@ export class ClipboardCommand implements Command {
 
     private registMergeFile() {
         this.plugin.addCommand({
-            id: 'merge-files-to',
-            name: 'Merge files to ...',
+            id: 'merge-files-in-clipboard-to',
+            name: 'Merge files in clipboard to ...',
             callback: () => {
                 new ChooseFileModal(this.plugin.app, new ClipboardReader(this.plugin)).open();
             }
@@ -78,8 +82,8 @@ export class ClipboardCommand implements Command {
 
     private registSyncFlomo() {
         this.plugin.addCommand({
-            id: 'sync-files-to-flomo',
-            name: 'Sync files to flomo ...',
+            id: 'sync-files-in-clipboard-to-flomo',
+            name: 'Sync files in clipboard to flomo ...',
             callback: () => {
                 new ClipboardReader(this.plugin).read(new SyncFlomoAction(this.plugin));
             }
@@ -88,11 +92,22 @@ export class ClipboardCommand implements Command {
 
     private registMoveFile() {
         this.plugin.addCommand({
-            id: 'move-files-to',
-            name: 'Move files to ...',
+            id: 'move-files-in-clipboard-to',
+            name: 'Move files in clipboard to ...',
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
                 new ChooseFolderModal(this.plugin.app, new ClipboardReader(this.plugin), actionFunc).open();
+            }
+        });
+    }
+
+    private registAddFile2Canvas() {
+        this.plugin.addCommand({
+            id: "add-files-in-clipboard-to-canvas",
+            name: "Add files in clipboard to target canvas ...",
+            callback: () => {
+                let actionFunc = (path: string): Action => { return new AddToCanvasAction(this.plugin.app, path); };
+                new ChooseCanvasModal(this.plugin.app, new ClipboardReader(this.plugin, actionFunc)).open();
             }
         });
     }
