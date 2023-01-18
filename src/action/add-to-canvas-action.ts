@@ -1,5 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
-import { AddToCanvasConfirmModal } from "src/modal/add-to-canvas-confirm-modal copy";
+import { AddToCanvasConfirmModal } from "src/modal/add-to-canvas-confirm-modal";
 import { Action, ActionModel } from "./action";
 
 export class AddToCanvasAction implements Action {

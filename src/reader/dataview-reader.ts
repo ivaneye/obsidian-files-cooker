@@ -24,46 +24,66 @@ export class DataviewReader implements Readable {
 
         let qStr = formatStr(this.queryStr);
 
-        api.query(qStr).then(res => {
-            if (res.successful) {
-                let filePaths: any = [];
-                if (res.value.type == "list") {
-                    // LIST
-                    res.value.values.forEach(it => {
-                        filePaths.push(it.path);
-                    });
-                } else if (res.value.type == "table") {
-                    // TABLE
-                    filePaths = res.value.values;
-                    res.value.values.forEach(it => {
-                        it.forEach(innerIt => {
-                            if (innerIt && innerIt.path) {
-                                filePaths.push(innerIt.path);
-                                return;
+        let idx = this.queryStr.indexOf(".pages(");
+        if (idx > 0) {
+            let tmpStr = this.queryStr.substring(idx + 8);
+            let tmpIdx = tmpStr.indexOf(")");
+            tmpStr = tmpStr.substring(0, tmpIdx - 1);
+            let resArr = api.pages(tmpStr);
+            try {
+                resArr.values.forEach((it: { file: { path: string; }; }) => {
+                    let ff = this.app.vault.getAbstractFileByPath(it.file.path);
+                    if (ff != null) {
+                        readInfo.addFile(ff);
+                    }
+                })
+                action.act(readInfo.getModels());
+            } catch (e) {
+                new Notice(e.message);
+            }
+        } else {
+            // DQL
+            api.query(qStr).then(res => {
+                if (res.successful) {
+                    let filePaths: any = [];
+                    if (res.value.type == "list") {
+                        // LIST
+                        res.value.values.forEach(it => {
+                            filePaths.push(it.path);
+                        });
+                    } else if (res.value.type == "table") {
+                        // TABLE
+                        filePaths = res.value.values;
+                        res.value.values.forEach(it => {
+                            it.forEach(innerIt => {
+                                if (innerIt && innerIt.path) {
+                                    filePaths.push(innerIt.path);
+                                    return;
+                                }
+                            })
+                        });
+                    } else {
+                        // TASK
+                        res.value.values.forEach(it => {
+                            filePaths.push(it.link.path);
+                        });
+                    }
+                    try {
+                        filePaths.forEach((filePath: { toString: () => string; }) => {
+                            let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
+                            if (ff != null) {
+                                readInfo.addFile(ff);
                             }
                         })
-                    });
+                        action.act(readInfo.getModels());
+                    } catch (e) {
+                        new Notice(e.message);
+                    }
                 } else {
-                    // TASK
-                    res.value.values.forEach(it => {
-                        filePaths.push(it.link.path);
-                    });
+                    new Notice("Query string error![" + this.queryStr + "]");
                 }
-                try {
-                    filePaths.forEach((filePath: { toString: () => string; }) => {
-                        let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
-                        if (ff != null) {
-                            readInfo.addFile(ff);
-                        }
-                    })
-                    action.act(readInfo.getModels());
-                } catch (e) {
-                    new Notice(e.message);
-                }
-            } else {
-                new Notice("Query string error![" + this.queryStr + "]");
-            }
-        })
+            })
+        }
     }
 }
 
