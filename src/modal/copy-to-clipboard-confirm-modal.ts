@@ -1,5 +1,6 @@
-import { App, Modal, Notice, Setting, TAbstractFile, TFile } from 'obsidian';
-import { MoveInfo } from 'src/modal/move-info';
+import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
+import hasMarkdownSuffix from 'src/utils/file-type-util';
+import { getLinebreak } from 'src/utils/line-break-util';
 
 /**
  *  弹窗确认拷贝到剪贴板的文件
@@ -7,10 +8,12 @@ import { MoveInfo } from 'src/modal/move-info';
 export class CopyToClipboardConfirmModal extends Modal {
     resultArr: TAbstractFile[];
     nameOnlyFlag: boolean;
+    lineBreak: string;
 
     constructor(app: App, resultArr: TAbstractFile[]) {
         super(app);
         this.resultArr = resultArr;
+        this.lineBreak = getLinebreak();
     }
 
     onOpen() {
@@ -57,18 +60,18 @@ export class CopyToClipboardConfirmModal extends Modal {
         if (this.nameOnlyFlag) {
             this.resultArr.forEach(ff => {
                 let name = ff.name;
-                if (name.endsWith(".md")) {
+                if (hasMarkdownSuffix(name)) {
                     name = name.substring(0, name.lastIndexOf("."));
                 }
-                str += "[[" + name + "]]\n";
+                str += "[[" + name + "]]" + this.lineBreak;
             })
         } else {
             this.resultArr.forEach(ff => {
                 let name = ff.name;
-                if (name.endsWith(".md")) {
+                if (hasMarkdownSuffix(name)) {
                     name = name.substring(0, name.lastIndexOf("."));
                 }
-                str += "[[" + ff.path + "|" + name + "]]\n";
+                str += "[[" + ff.path + "|" + name + "]]" + this.lineBreak;
             })
         }
         return str;
@@ -79,7 +82,7 @@ export class CopyToClipboardConfirmModal extends Modal {
         if (this.nameOnlyFlag) {
             this.resultArr.forEach(ff => {
                 let name = ff.name;
-                if (name.endsWith(".md")) {
+                if (hasMarkdownSuffix(name)) {
                     name = name.substring(0, name.lastIndexOf("."));
                 }
                 str += "[[" + name + "]]<br>";
@@ -87,7 +90,7 @@ export class CopyToClipboardConfirmModal extends Modal {
         } else {
             this.resultArr.forEach(ff => {
                 let name = ff.name;
-                if (name.endsWith(".md")) {
+                if (hasMarkdownSuffix(name)) {
                     name = name.substring(0, name.lastIndexOf("."));
                 }
                 str += "[[" + ff.path + "|" + name + "]]<br>";

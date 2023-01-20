@@ -1,4 +1,6 @@
 import { App, Modal, Notice, Setting, TAbstractFile, TFile } from 'obsidian';
+import hasMarkdownSuffix from 'src/utils/file-type-util';
+import { getLinebreak } from 'src/utils/line-break-util';
 
 /**
  *  弹窗确认要合并的文件
@@ -37,7 +39,7 @@ export class MergeConfirmModal extends Modal {
                         }
                         for (const key in this.resultArr) {
                             let info = this.resultArr[key];
-                            if (info.name.endsWith(".md")) {
+                            if (hasMarkdownSuffix(info.name)) {
                                 let cont = await this.app.vault.read((info as TFile));
                                 cont = this.clearYaml(cont);
                                 cont = this.demoteHeader(cont);
@@ -85,16 +87,4 @@ export class MergeConfirmModal extends Modal {
         let reg = /# /g;
         return cont.replace(reg, "## ");
     }
-}
-
-function getLinebreak(): string {
-    let oss = ["Windows", "Mac", "Linux"];
-    let lineBreaks = ["\r\n", "\n", "\n"];
-    for (let i = 0; i < oss.length; i++) {
-        let os = oss[i];
-        if (navigator.userAgent.indexOf(os) != -1) {
-            return lineBreaks[i];
-        }
-    }
-    return "\n";
 }

@@ -1,6 +1,7 @@
 import FileCookerPlugin from "main";
 import { App, Notice, TAbstractFile } from "obsidian";
 import { Action } from "src/action/action";
+import hasMarkdownSuffix, { hasCanvasSuffix } from "src/utils/file-type-util";
 import { ReadInfo } from "./read-info";
 import { Readable } from "./readable";
 
@@ -31,11 +32,7 @@ export class ClipboardReader implements Readable {
                     if (f.endsWith("]]")) {
                         f = f.substring(0, f.length - 2);
                     }
-                    if (!f.endsWith(".md")
-                        && !f.endsWith(".MD")
-                        && !f.endsWith(".Md")
-                        && !f.endsWith(".mD")
-                        && !f.endsWith(".canvas")) {
+                    if (!hasMarkdownSuffix(f) && !hasCanvasSuffix(f)) {
                         f = f + ".md";
                     }
                     let ff = this.app.vault.getAbstractFileByPath(f);

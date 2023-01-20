@@ -1,6 +1,7 @@
 import FileCookerPlugin from "main";
 import { App, Notice, TAbstractFile, TFile, TFolder, Vault } from "obsidian";
 import { Action } from "src/action/action";
+import hasMarkdownSuffix from "src/utils/file-type-util";
 import { ReadInfo } from "./read-info";
 import { Readable } from "./readable";
 
@@ -87,7 +88,7 @@ class VirtualFile {
 
     constructor(path: string) {
         let idx = path.lastIndexOf("/");
-        if (!path.endsWith(".md")) {
+        if (!hasMarkdownSuffix(path)) {
             path = path + ".md";
         }
         this.path = path;

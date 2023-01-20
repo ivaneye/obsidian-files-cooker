@@ -1,4 +1,5 @@
 import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
+import hasMarkdownSuffix from 'src/utils/file-type-util';
 
 /**
  *  重命名确认弹窗
@@ -58,7 +59,7 @@ export class RenameConfirmModal extends Modal {
     newName(name: String): String {
         let tName = name + "";
         let suf = "";
-        if (tName.endsWith(".md")) {
+        if (hasMarkdownSuffix(tName)) {
             tName = tName.replace(".md", "");
             suf = ".md";
         }

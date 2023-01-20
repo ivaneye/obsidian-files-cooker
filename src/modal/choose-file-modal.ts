@@ -1,6 +1,7 @@
-import { App, SuggestModal, TAbstractFile, TFile, TFolder } from 'obsidian';
+import { App, SuggestModal, TFile } from 'obsidian';
 import { MergeAction } from 'src/action/merge-action';
 import { Readable } from 'src/reader/readable';
+import hasMarkdownSuffix from 'src/utils/file-type-util';
 
 /**
  * 选择文档弹窗
@@ -26,7 +27,7 @@ export class ChooseFileModal extends SuggestModal<string> {
 			}
 		});
 		if (files.length == 0) {
-			if (query.endsWith(".md")) {
+			if (hasMarkdownSuffix(query)) {
 				files.push(query);
 			} else {
 				files.push(query + ".md");
