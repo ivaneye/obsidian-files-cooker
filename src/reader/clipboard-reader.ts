@@ -21,7 +21,7 @@ export class ClipboardReader implements Readable {
         let promiseStr = navigator.clipboard.readText();
 
         promiseStr.then(str => {
-            let lines = str.split("\n");
+            let lines = str.split(/\r?\n/);
             try {
                 lines.forEach(line => {
                     let f = line;
@@ -31,9 +31,9 @@ export class ClipboardReader implements Readable {
                     if (f.endsWith("]]")) {
                         f = f.substring(0, f.length - 2);
                     }
-                    if (!f.endsWith(".md") 
-                        && !f.endsWith(".MD") 
-                        && !f.endsWith(".Md") 
+                    if (!f.endsWith(".md")
+                        && !f.endsWith(".MD")
+                        && !f.endsWith(".Md")
                         && !f.endsWith(".mD")
                         && !f.endsWith(".canvas")) {
                         f = f + ".md";
@@ -41,6 +41,8 @@ export class ClipboardReader implements Readable {
                     let ff = this.app.vault.getAbstractFileByPath(f);
                     if (ff != null) {
                         readInfo.addFile(ff);
+                    } else {
+                        console.log("can not find file :" + f);
                     }
                 });
                 action.act(readInfo.getModels());
