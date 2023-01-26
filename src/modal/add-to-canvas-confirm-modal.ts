@@ -1,5 +1,9 @@
 import { App, ItemView, Modal, Notice, requireApiVersion, Setting, TAbstractFile, TFile } from 'obsidian';
 
+const width = 400;
+const height = 400;
+const between = 40;
+
 /**
  *  弹窗确认要添加到Canvas的文件
  */
@@ -29,13 +33,18 @@ export class AddToCanvasConfirmModal extends Modal {
                     .setCta()
                     .onClick(async () => {
                         this.close();
-                        let targetFile = this.app.vault.getAbstractFileByPath(this.targetFilePath);
-                        if (targetFile == null) {
-                            console.log("can not find " + this.targetFilePath)
-                            targetFile = await this.app.vault.create(this.targetFilePath, "");
+                        let activeFile = this.app.workspace.getActiveFile();
+
+                        // 如果当前活动文档与目标文档不同，则尝试打开目标文档
+                        if (activeFile == null || this.targetFilePath != activeFile.path) {
+                            let targetFile = this.app.vault.getAbstractFileByPath(this.targetFilePath);
+                            if (targetFile == null) {
+                                console.log("can not find " + this.targetFilePath)
+                                targetFile = await this.app.vault.create(this.targetFilePath, "");
+                            }
+                            // 如果打开的不是目标文件，则尝试在新窗口打开；如果没有打开任何文件，则在当前窗口打开
+                            await this.app.workspace.getLeaf(activeFile != null).openFile(targetFile as TFile);
                         }
-                        console.log(targetFile);
-                        await this.app.workspace.getLeaf(true).openFile(targetFile as TFile);
 
                         // Conditions to check
                         const canvasView = app.workspace.getActiveViewOfType(ItemView);
@@ -48,21 +57,21 @@ export class AddToCanvasConfirmModal extends Modal {
                                 let file = this.resultArr[key] as TFile;
                                 let tempChildNode;
                                 if (!requireApiVersion("1.1.10")) {
-                                    tempChildNode = canvas.createFileNode(file, "", { x: 20 + (220 * idx), y: 20, height: 200, width: 200 }, true);
+                                    tempChildNode = canvas.createFileNode(file, "", { x: between + ((width + between) * idx), y: between, height: height, width: width }, true);
                                 } else {
                                     tempChildNode = canvas.createFileNode({
                                         file: file,
                                         pos: {
-                                            x: 20 + (220 * idx),
-                                            y: 20,
-                                            width: 200,
-                                            height: 200
+                                            x: between + ((width + between) * idx),
+                                            y: between,
+                                            width: width,
+                                            height: height
                                         },
                                         size: {
-                                            x: 20,
-                                            y: 20,
-                                            width: 200,
-                                            height: 200
+                                            x: between,
+                                            y: between,
+                                            width: width,
+                                            height: height
                                         },
                                         save: true,
                                         focus: false,
