@@ -10,6 +10,7 @@ const between = 40;
 export class AddToCanvasConfirmModal extends Modal {
     targetFilePath: string;
     resultArr: TAbstractFile[];
+    includeReslovedLinksFlag: boolean;
 
     constructor(app: App, resultArr: TAbstractFile[], targetFilePath: string) {
         super(app);
@@ -28,11 +29,22 @@ export class AddToCanvasConfirmModal extends Modal {
         })
 
         new Setting(contentEl)
+            .addToggle((toggle) => {
+                toggle.setTooltip("Include resolved links!");
+                toggle.onChange((val) => {
+                    this.includeReslovedLinksFlag = val;
+                })
+            })
+
+        new Setting(contentEl)
             .addButton((btn) =>
                 btn.setButtonText("Confirm")
                     .setCta()
                     .onClick(async () => {
                         this.close();
+
+                        let pathNodeMap = new Map();
+
                         let activeFile = this.app.workspace.getActiveFile();
 
                         // 如果当前活动文档与目标文档不同，则尝试打开目标文档
@@ -55,38 +67,35 @@ export class AddToCanvasConfirmModal extends Modal {
                             let idx = 0;
                             for (const key in this.resultArr) {
                                 let file = this.resultArr[key] as TFile;
-                                let tempChildNode;
-                                if (!requireApiVersion("1.1.10")) {
-                                    tempChildNode = canvas.createFileNode(file, "", { x: between + ((width + between) * idx), y: between, height: height, width: width }, true);
-                                } else {
-                                    tempChildNode = canvas.createFileNode({
-                                        file: file,
-                                        pos: {
-                                            x: between + ((width + between) * idx),
-                                            y: between,
-                                            width: width,
-                                            height: height
-                                        },
-                                        size: {
-                                            x: between,
-                                            y: between,
-                                            width: width,
-                                            height: height
-                                        },
-                                        save: true,
-                                        focus: false,
-                                    });
-                                }
-                                canvas.deselectAll();
-                                canvas.addNode(tempChildNode);
+                                let tempChildNode = this.createFileNode(canvas, file, idx);
                                 idx++;
-                            }
 
+                                if (this.includeReslovedLinksFlag) {
+                                    // 同时添加内页
+                                    pathNodeMap.set(file.path, tempChildNode);
+
+                                    let linkObj = this.app.metadataCache.resolvedLinks[file.path];
+                                    for (let innerFilePath in linkObj) {
+                                        let existFileNode = pathNodeMap.get(innerFilePath);
+                                        if (existFileNode) {
+                                            this.createEdge(tempChildNode, existFileNode, canvas);
+                                        } else {
+                                            console.log(innerFilePath);
+                                            let resolvedFile = this.app.vault.getAbstractFileByPath(innerFilePath) as TFile;
+                                            console.log(resolvedFile);
+                                            let innerChildNode = this.createFileNode(canvas, resolvedFile, idx);
+                                            idx++;
+                                            pathNodeMap.set(innerFilePath, innerChildNode);
+                                            this.createEdge(tempChildNode, innerChildNode, canvas);
+                                        }
+                                    }
+                                }
+                            }
                             canvas.requestSave();
 
                             new Notice("Add to Canvas Success!");
                         } else {
-                            new Notice(targetFile.name + " is not a Canvas!");
+                            new Notice(this.targetFilePath + " is not a Canvas!");
                         }
                     }))
             .addButton((btn) =>
@@ -97,5 +106,55 @@ export class AddToCanvasConfirmModal extends Modal {
                         this.close();
                         new Notice("Add to Canvas Canceled!");
                     }));
+    }
+
+    private createFileNode(canvas: any, file: TFile, idx: number) {
+        let tempChildNode;
+        if (!requireApiVersion("1.1.10")) {
+            tempChildNode = canvas.createFileNode(file, "", { x: between + ((width + between) * idx), y: between, height: height, width: width }, true);
+        } else {
+            tempChildNode = canvas.createFileNode({
+                file: file,
+                pos: {
+                    x: between + ((width + between) * idx),
+                    y: between,
+                    width: width,
+                    height: height
+                },
+                size: {
+                    x: between,
+                    y: between,
+                    width: width,
+                    height: height
+                },
+                save: true,
+                focus: false,
+            });
+        }
+        canvas.deselectAll();
+        canvas.addNode(tempChildNode);
+        return tempChildNode;
+    }
+
+    random(e: number) {
+        let t = [];
+        for (let n = 0; n < e; n++) {
+            t.push((16 * Math.random() | 0).toString(16));
+        }
+        return t.join("")
+    }
+
+    createEdge(node1: any, node2: any, canvas: any) {
+
+        const edge = canvas.edges.get(canvas.getData().edges.first()?.id);
+
+        if (edge) {
+            const tempEdge = new edge.constructor(canvas, this.random(16), { side: "right", node: node1 }, { side: "left", node: node2 })
+            canvas.addEdge(tempEdge);
+            tempEdge.attach();
+            tempEdge.render();
+        } else {
+            console.log("You should have at least one edge in the canvas to use this feature!");
+        }
     }
 }
