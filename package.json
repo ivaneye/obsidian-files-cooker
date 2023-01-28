@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-file-cooker",
-	"version": "1.7.4",
+	"version": "1.7.5",
 	"description": "Deal batch notes from Search results、current file、Dataview query string...",
 	"main": "main.js",
 	"scripts": {
