@@ -12,6 +12,7 @@ import { ChooseFileModal } from 'src/modal/choose-file-modal';
 import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
 import { CurrentFileReader, ReadType } from 'src/reader/current-file-reader';
 import { Command } from './command';
+import { AddToCanvasAction } from 'src/action/add-to-canvas-action';
 
 export class CurrentFileCommand implements Command {
 
@@ -33,6 +34,7 @@ export class CurrentFileCommand implements Command {
         this.registRenameFile();
         // Canvas
         this.registAddFile2Canvas();
+        this.registAddSelectionToCanvas();
     }
 
     private registRenameFile() {
@@ -122,6 +124,19 @@ export class CurrentFileCommand implements Command {
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
                     new CurrentFileReader(this.plugin, ReadType.SELECTION, editor.getSelection()).read(new SyncFlomoAction(this.plugin));
+                }
+                return editor.getSelection() != "";
+            }
+        });
+    }
+
+    private registAddSelectionToCanvas() {
+        this.plugin.addCommand({
+            id: "Add-selection-to",
+            name: "Add selection in current file to canvas ...",
+            editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+                if (!checking) {
+                    new ChooseCanvasModal(this.plugin.app, new CurrentFileReader(this.plugin, ReadType.SELECTION, editor.getSelection())).open();
                 }
                 return editor.getSelection() != "";
             }

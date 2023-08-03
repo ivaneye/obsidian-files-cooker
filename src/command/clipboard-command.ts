@@ -11,6 +11,7 @@ import { ChooseFileModal } from 'src/modal/choose-file-modal';
 import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
 import { ClipboardReader } from 'src/reader/clipboard-reader';
 import { Command } from './command';
+import { ClipboardContentReader } from 'src/reader/clipboard-content-reader';
 
 export class ClipboardCommand implements Command {
 
@@ -29,6 +30,7 @@ export class ClipboardCommand implements Command {
         this.registRenameFile();
         // Canvas
         this.registAddFile2Canvas();
+        this.registAddContToCanvas();
     }
 
     private registRenameFile() {
@@ -97,6 +99,17 @@ export class ClipboardCommand implements Command {
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
                 new ChooseFolderModal(this.plugin.app, new ClipboardReader(this.plugin), actionFunc).open();
+            }
+        });
+    }
+
+    private registAddContToCanvas() {
+        this.plugin.addCommand({
+            id: "Add-content-to",
+            name: "Add content in clipboard to canvas ...",
+            callback: () => {
+                let actionFunc = (path: string): Action => { return new AddToCanvasAction(this.plugin.app, path); };
+                new ChooseCanvasModal(this.plugin.app, new ClipboardContentReader(this.plugin, actionFunc)).open();
             }
         });
     }

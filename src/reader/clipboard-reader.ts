@@ -47,7 +47,7 @@ export class ClipboardReader implements Readable {
                 new Notice(e.message);
             }
         }).catch(e => {
-            new Notice("Clipboard Content Error!" + e);
+            new Notice("Clipboard File Content Error!" + e);
         });
     }
 
