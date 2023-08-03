@@ -1,9 +1,10 @@
 import { App, Notice } from "obsidian";
-import { Action } from "src/action/action";
+import { Action, ActionModel } from "src/action/action";
 import { Readable } from "./readable";
 import { getAPI } from "obsidian-dataview";
 import { ReadInfo } from "./read-info";
 import FileCookerPlugin from "main";
+import { getLinebreak } from "src/utils/line-break-util";
 
 export class DataviewReader implements Readable {
 
@@ -11,10 +12,14 @@ export class DataviewReader implements Readable {
     app: App;
     queryStr: string;
 
-    constructor(plugin: FileCookerPlugin, queryStr: string) {
+    // 是否读取task内容
+    taskFlag: boolean;
+
+    constructor(plugin: FileCookerPlugin, queryStr: string, taskFlag?: boolean) {
         this.plugin = plugin;
         this.app = plugin.app;
         this.queryStr = queryStr;
+        this.taskFlag = taskFlag;
     }
 
     read(action: Action): void {
@@ -84,13 +89,25 @@ export class DataviewReader implements Readable {
                         });
                     }
                     try {
-                        filePaths.forEach((filePath: { toString: () => string; }) => {
-                            let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
-                            if (ff != null) {
-                                readInfo.addFile(ff);
-                            }
-                        })
-                        action.act(readInfo.getModels());
+                        if (this.taskFlag) {
+                            let strArr: string[] = [];
+                            res.value.values.forEach(it => {
+                                strArr.push("- [ ] " + it.text);
+                            });
+
+                            let actionModels = [];
+                            let model = new ActionModel(null, strArr.join(getLinebreak()));
+                            actionModels.push(model);
+                            action.act(actionModels);
+                        } else {
+                            filePaths.forEach((filePath: { toString: () => string; }) => {
+                                let ff = this.app.vault.getAbstractFileByPath(filePath.toString());
+                                if (ff != null) {
+                                    readInfo.addFile(ff);
+                                }
+                            })
+                            action.act(readInfo.getModels());
+                        }
                     } catch (e) {
                         new Notice(e.message);
                     }

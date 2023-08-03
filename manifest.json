@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-file-cooker",
 	"name": "File Cooker",
-	"version": "1.7.6",
+	"version": "1.7.7",
 	"minAppVersion": "1.2.0",
 	"description": "Deal multi notes from Search results、current file、Dataview query string...",
 	"author": "iuian",

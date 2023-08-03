@@ -36,6 +36,7 @@ export class DataviewCommand implements Command {
         this.registRenameFile(dataviewApi);
         // Canvas
         this.registAddFile2Canvas(dataviewApi);
+        this.registAddTask2Canvas(dataviewApi);
     }
 
     private registRenameFile(dataviewApi: DataviewApi) {
@@ -144,6 +145,19 @@ export class DataviewCommand implements Command {
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
                     new ChooseCanvasModal(this.plugin.app, new DataviewReader(this.plugin, editor.getSelection())).open();
+                }
+                return dataviewApi != null;
+            }
+        });
+    }
+
+    private registAddTask2Canvas(dataviewApi: DataviewApi) {
+        this.plugin.addCommand({
+            id: 'add-dataview-task-to-canvas',
+            name: 'Add dataview task to canvas...',
+            editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+                if (!checking) {
+                    new ChooseCanvasModal(this.plugin.app, new DataviewReader(this.plugin, editor.getSelection(), true)).open();
                 }
                 return dataviewApi != null;
             }
