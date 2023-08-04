@@ -70,5 +70,5 @@
 
 # Buy me a coffee
 
-![wxpay](wx_pay.png)
-![alipay](alipay.png)
+<img src="./wx_pay.png" width="300px"/>
+<img src="./wx_pay.png" width="300px"/>
