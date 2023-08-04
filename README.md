@@ -73,5 +73,6 @@ Note: On some machines the `.obsidian` folder may be hidden. On MacOS you should
 
 <div display="flex">
   <img src="./wx_pay.png" width="300px"/>
+  <span style="margin:0 3px"></span>
   <img src="./alipay.png" width="300px"/>
 </div>
