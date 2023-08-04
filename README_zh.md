@@ -7,6 +7,8 @@
 ## 功能
 
 - 批量添加目标文档到指定Canvas---**v1.7.0新增**
+- 添加文本到指定Canvas---**v1.7.6新增**
+- 添加Dataview Task到指定Canvas---**v1.7.7新增**
 - 批量移动/拷贝目标文档到指定目录
 - 批量编辑目标文档属性（新增or修改，需要安装MetaEdit插件）
 - 批量删除目标文档
@@ -65,3 +67,8 @@
 注意: 某些机器上`.obsidian`目录是被隐藏的. 在MacOS上你可以按`Command+Shift+Dot`来显示隐藏目录。
 - 重启Obsidian
 - 如果提示安全模式，你可以关闭安全模式来启动插件。
+
+# Buy me a coffee
+
+![wxpay](wx_pay.png)
+![alipay](alipay.png)

@@ -9,6 +9,8 @@ This plugin for Obsidian deals multi notes from search results、current file、
 ## Features
 
 - Add Multi-File to target Canvas --- **New in v1.7.0**
+- Add text to target Canvas---**New in v1.7.6**
+- Add Dataview Task to target Canvas---**New in v1.7.7**
 - Move/Copy Multi-File to target folder
 - Rename Multi-File
 - Add or Change Multi-File's Props（need to install **MetaEdit** plugin）
@@ -66,3 +68,8 @@ You can activate this plugin within Obsidian by doing the following:
 Note: On some machines the `.obsidian` folder may be hidden. On MacOS you should be able to press `Command+Shift+Dot` to show the folder in Finder.
 - Reload Obsidian
 - If prompted about Safe Mode, you can disable safe mode and enable the plugin.
+
+# Buy me a coffee
+
+![wxpay](wx_pay.png)
+![alipay](alipay.png)
