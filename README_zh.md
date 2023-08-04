@@ -70,5 +70,7 @@
 
 # Buy me a coffee
 
-<img src="./wx_pay.png" width="300px"/>
-<img src="./wx_pay.png" width="300px"/>
+<div display="flex">
+  <img src="./wx_pay.png" width="300px"/>
+  <img src="./alipay.png" width="300px"/>
+</div>

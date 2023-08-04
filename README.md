@@ -71,5 +71,7 @@ Note: On some machines the `.obsidian` folder may be hidden. On MacOS you should
 
 # Buy me a coffee
 
-<img src="./wx_pay.png" width="300px"/>
-<img src="./wx_pay.png" width="300px"/>
+<div display="flex">
+  <img src="./wx_pay.png" width="300px"/>
+  <img src="./alipay.png" width="300px"/>
+</div>
