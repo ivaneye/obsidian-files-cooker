@@ -92,7 +92,7 @@ export class DataviewReader implements Readable {
                         if (this.taskFlag) {
                             let strArr: string[] = [];
                             res.value.values.forEach(it => {
-                                strArr.push("- [ ] " + it.text);
+                                strArr.push("- [ ] [[" + it.link.path + "|" + it.text + "]]");
                             });
 
                             let actionModels = [];
