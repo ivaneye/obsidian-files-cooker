@@ -2,6 +2,7 @@ import { Plugin, App, PluginSettingTab, Setting } from 'obsidian';
 import { ClipboardCommand } from 'src/command/clipboard-command';
 import { CurrentFileCommand } from 'src/command/current-file-command';
 import { DataviewCommand } from 'src/command/dataview-command';
+import { SearchCommand } from 'src/command/search-command';
 import * as internal from 'stream';
 
 export default class FileCookerPlugin extends Plugin {
@@ -14,6 +15,7 @@ export default class FileCookerPlugin extends Plugin {
 		new CurrentFileCommand(this).regist();
 		new ClipboardCommand(this).regist();
 		new DataviewCommand(this).regist();
+		new SearchCommand(this).regist();
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new FileCookerSettingTab(this.app, this));

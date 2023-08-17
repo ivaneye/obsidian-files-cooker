@@ -8,6 +8,7 @@ This plugin for Obsidian deals multi notes from search results、current file、
     
 ## Features
 
+- Add Search-Results-Command,can deal with search results directly---**New in v1.7.8**
 - Add Multi-File to target Canvas --- **New in v1.7.0**
 - Add text to target Canvas---**New in v1.7.6**
 - Add Dataview Task to target Canvas---**New in v1.7.7**

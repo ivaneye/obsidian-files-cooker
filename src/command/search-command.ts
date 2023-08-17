@@ -9,11 +9,10 @@ import { SyncFlomoAction } from 'src/action/sync-flomo-action';
 import { ChooseCanvasModal } from 'src/modal/choose-canvas-modal';
 import { ChooseFileModal } from 'src/modal/choose-file-modal';
 import { ChooseFolderModal } from 'src/modal/choose-folder-modal';
-import { ClipboardReader } from 'src/reader/clipboard-reader';
+import { SearchResultsReader } from 'src/reader/search-results-reader';
 import { Command } from './command';
-import { ClipboardContentReader } from 'src/reader/clipboard-content-reader';
 
-export class ClipboardCommand implements Command {
+export class SearchCommand implements Command {
 
     plugin: FileCookerPlugin;
 
@@ -30,15 +29,14 @@ export class ClipboardCommand implements Command {
         this.registRenameFile();
         // Canvas
         this.registAddFile2Canvas();
-        this.registAddContToCanvas();
     }
 
     private registRenameFile() {
         this.plugin.addCommand({
-            id: 'rename-files-in-clipboard',
-            name: 'Rename files in clipboard ...',
+            id: 'rename-files-in-searchresults',
+            name: 'Rename files in searchresults ...',
             callback: () => {
-                new ClipboardReader(this.plugin).read(new RenameAction(this.plugin.app));
+                new SearchResultsReader(this.plugin).read(new RenameAction(this.plugin.app));
             }
         });
     }
@@ -51,11 +49,11 @@ export class ClipboardCommand implements Command {
         let metaedit = this.plugin.app.plugins.plugins["metaedit"];
 
         this.plugin.addCommand({
-            id: 'edit-front-matter-in-clipboard-files',
-            name: 'Edit Front Matter in clipboard files ...',
+            id: 'edit-front-matter-in-searchresults-files',
+            name: 'Edit Front Matter in searchresults files ...',
             checkCallback: (checking: boolean) => {
                 if (!checking) {
-                    new ClipboardReader(this.plugin).read(new EditFrontMatterAction(this.plugin.app));
+                    new SearchResultsReader(this.plugin).read(new EditFrontMatterAction(this.plugin.app));
                 }
                 return metaedit != null;
             }
@@ -64,61 +62,51 @@ export class ClipboardCommand implements Command {
 
     private registDeleteFile() {
         this.plugin.addCommand({
-            id: 'delete-files-in-clipboard',
-            name: 'Delete files in clipboard!',
+            id: 'delete-files-in-searchresults',
+            name: 'Delete files in searchresults!',
             callback: () => {
-                new ClipboardReader(this.plugin).read(new DeleteAction(this.plugin.app));
+                new SearchResultsReader(this.plugin).read(new DeleteAction(this.plugin.app));
             }
         });
     }
 
     private registMergeFile() {
         this.plugin.addCommand({
-            id: 'merge-files-in-clipboard-to',
-            name: 'Merge files in clipboard to ...',
+            id: 'merge-files-in-searchresults-to',
+            name: 'Merge files in searchresults to ...',
             callback: () => {
-                new ChooseFileModal(this.plugin.app, new ClipboardReader(this.plugin)).open();
+                new ChooseFileModal(this.plugin.app, new SearchResultsReader(this.plugin)).open();
             }
         });
     }
 
     private registSyncFlomo() {
         this.plugin.addCommand({
-            id: 'sync-files-in-clipboard-to-flomo',
-            name: 'Sync files in clipboard to flomo ...',
+            id: 'sync-files-in-searchresults-to-flomo',
+            name: 'Sync files in searchresults to flomo ...',
             callback: () => {
-                new ClipboardReader(this.plugin).read(new SyncFlomoAction(this.plugin));
+                new SearchResultsReader(this.plugin).read(new SyncFlomoAction(this.plugin));
             }
         });
     }
 
     private registMoveFile() {
         this.plugin.addCommand({
-            id: 'move-files-in-clipboard-to',
-            name: 'Move files in clipboard to ...',
+            id: 'move-files-in-searchresults-to',
+            name: 'Move files in searchresults to ...',
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
-                new ChooseFolderModal(this.plugin.app, new ClipboardReader(this.plugin), actionFunc).open();
-            }
-        });
-    }
-
-    private registAddContToCanvas() {
-        this.plugin.addCommand({
-            id: "Add-content-to",
-            name: "Add content in clipboard to canvas ...",
-            callback: () => {
-                new ChooseCanvasModal(this.plugin.app, new ClipboardContentReader(this.plugin)).open();
+                new ChooseFolderModal(this.plugin.app, new SearchResultsReader(this.plugin), actionFunc).open();
             }
         });
     }
 
     private registAddFile2Canvas() {
         this.plugin.addCommand({
-            id: "add-files-in-clipboard-to-canvas",
-            name: "Add files in clipboard to target canvas ...",
+            id: "add-files-in-searchresults-to-canvas",
+            name: "Add files in searchresults to target canvas ...",
             callback: () => {
-                new ChooseCanvasModal(this.plugin.app, new ClipboardReader(this.plugin,)).open();
+                new ChooseCanvasModal(this.plugin.app, new SearchResultsReader(this.plugin)).open();
             }
         });
     }
