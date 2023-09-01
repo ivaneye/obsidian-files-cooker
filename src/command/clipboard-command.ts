@@ -2,7 +2,7 @@ import FileCookerPlugin from 'main';
 import { Action } from 'src/action/action';
 import { AddToCanvasAction } from 'src/action/add-to-canvas-action';
 import { DeleteAction } from 'src/action/delete-action';
-import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
+import { EditPropertiesAction } from 'src/action/edit-properties-action';
 import { MoveAction } from 'src/action/move-action';
 import { RenameAction } from 'src/action/rename-action';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
@@ -44,20 +44,15 @@ export class ClipboardCommand implements Command {
     }
 
     /**
-     * Edit Front Matter 
+     * Edit Properties 
      * https://github.com/lijyze/obsidian-state-switcher/blob/d0a80081b0fcc1b899eed2e3d7e834c2d5703875/src/util.ts#L42
      */
     private registEditProp() {
-        let metaedit = this.plugin.app.plugins.plugins["metaedit"];
-
         this.plugin.addCommand({
             id: 'edit-front-matter-in-clipboard-files',
-            name: 'Edit Front Matter in clipboard files ...',
-            checkCallback: (checking: boolean) => {
-                if (!checking) {
-                    new ClipboardReader(this.plugin).read(new EditFrontMatterAction(this.plugin.app));
-                }
-                return metaedit != null;
+            name: 'Edit Properties in clipboard files ...',
+            callback: () => {
+                new ClipboardReader(this.plugin).read(new EditPropertiesAction(this.plugin.app));
             }
         });
     }

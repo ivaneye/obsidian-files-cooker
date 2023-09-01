@@ -14,7 +14,7 @@ This plugin for Obsidian deals multi notes from search results、current file、
 - Add Dataview Task to target Canvas---**New in v1.7.7**
 - Move/Copy Multi-File to target folder
 - Rename Multi-File
-- Add or Change Multi-File's Props（need to install **MetaEdit** plugin）
+- Add/Edit/Remove（propValue:-） Multi-File's Props（no need to install **MetaEdit** plugin from 1.8.0）
 - Delete Multi-File
 - Merge Multi-File to target file
 - Create files from unresolved links

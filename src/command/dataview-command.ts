@@ -4,7 +4,7 @@ import { DataviewApi, getAPI } from 'obsidian-dataview';
 import { Action } from 'src/action/action';
 import { CopyAction } from 'src/action/copy-action';
 import { DeleteAction } from 'src/action/delete-action';
-import { EditFrontMatterAction } from 'src/action/edit-front-matter-action';
+import { EditPropertiesAction } from 'src/action/edit-properties-action';
 import { MoveAction } from 'src/action/move-action';
 import { RenameAction } from 'src/action/rename-action';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
@@ -53,21 +53,19 @@ export class DataviewCommand implements Command {
     }
 
     /**
-     * Edit Front Matter 
+     * Edit Properties 
      * https://github.com/lijyze/obsidian-state-switcher/blob/d0a80081b0fcc1b899eed2e3d7e834c2d5703875/src/util.ts#L42
      * @param dataviewApi        
      */
     private registEditProp(dataviewApi: DataviewApi) {
-        let metaedit = this.plugin.app.plugins.plugins["metaedit"];
-
         this.plugin.addCommand({
             id: "edit-front-matter-in-dataview-results",
-            name: "Edit Front Matter in dataview results ...",
+            name: "Edit Properties in dataview results ...",
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
-                    new DataviewReader(this.plugin, editor.getSelection()).read(new EditFrontMatterAction(this.plugin.app));
+                    new DataviewReader(this.plugin, editor.getSelection()).read(new EditPropertiesAction(this.plugin.app));
                 }
-                return dataviewApi != null && metaedit != null;
+                return dataviewApi != null;
             }
         });
     }

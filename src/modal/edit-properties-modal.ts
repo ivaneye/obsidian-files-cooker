@@ -1,9 +1,9 @@
-import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
+import { App, Modal, Notice, Setting, TAbstractFile, TFile } from 'obsidian';
 
 /**
- *  弹窗编辑Front Matter属性
+ *  弹窗编辑Properties属性
  */
-export class EditFrontMatterModal extends Modal {
+export class EditPropertiesModal extends Modal {
     resultArr: TAbstractFile[];
     key: String;
     val: String;
@@ -21,7 +21,7 @@ export class EditFrontMatterModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "Edit Front Matter" });
+        contentEl.createEl("h1", { text: "Edit Properties" });
 
         if (this.resultArr.length == 0) {
             contentEl.createEl("div", { text: "No files found!" });
@@ -41,12 +41,12 @@ export class EditFrontMatterModal extends Modal {
 
             new Setting(contentEl)
                 .addText((txt) =>
-                    txt.setPlaceholder("Front Matter Key")
+                    txt.setPlaceholder("Properties Key")
                         .onChange((val) => {
                             this.key = val;
                         })
                 ).addText((txt) =>
-                    txt.setPlaceholder("Front Matter Value")
+                    txt.setPlaceholder("Properties Value")
                         .onChange((val) => {
                             this.val = val;
                         })
@@ -74,23 +74,21 @@ export class EditFrontMatterModal extends Modal {
                                 return;
                             }
                             this.close();
-                            let api = this.app.plugins.plugins["metaedit"].api;
-                            let c_num = 0;
-                            let u_num = 0;
                             for (let i = 0; i < this.resultArr.length; i++) {
-                                let info = this.resultArr[i];
-                                let val = await api.getPropertyValue(this.key, info);
-                                if (val == null) {
-                                    api.createYamlProperty(this.key, this.val, info);
-                                    c_num += 1;
-                                } else if (this.overrideFlag || val.trim() == "") {
-                                    api.update(this.key, this.val, info);
-                                    u_num += 1;
-                                }
+                                let info = this.resultArr[i] as TFile;
+                                let _this = this;
+                                this.app.fileManager.processFrontMatter(info, (props) => {
+                                    if (_this.val === '-') {
+                                        // 删除属性
+                                        delete props[_this.key];
+                                    } else {
+                                        if (_this.overrideFlag || !props[_this.key]) {
+                                            props[_this.key] = _this.val;
+                                        }
+                                    }
+                                });
                             }
-                            new Notice("Edit Success!");
-                            new Notice("Add " + c_num + " !");
-                            new Notice("Update " + u_num + " !");
+                            new Notice("Edit Property Success!");
                         }))
                 .addButton((btn) =>
                     btn
