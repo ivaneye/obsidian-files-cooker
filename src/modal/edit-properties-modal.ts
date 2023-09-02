@@ -77,18 +77,47 @@ export class EditPropertiesModal extends Modal {
                             for (let i = 0; i < this.resultArr.length; i++) {
                                 let info = this.resultArr[i] as TFile;
                                 let _this = this;
+                                // todo : 支持添加、删除单个标签值，alias值
                                 this.app.fileManager.processFrontMatter(info, (props) => {
-                                    if (_this.val === '-') {
-                                        // 删除属性
-                                        delete props[_this.key];
+                                    let _k = _this.key.trim();
+                                    let _v = _this.val.trim();
+                                    if (_k === 'tags' || _k === 'alias' || _k === 'cssclasses') {
+                                        // 多值标签
+                                        let _vals = _v.split(',');
+                                        // 初始化属性
+                                        if (!props[_k]) {
+                                            props[_k] = [];
+                                        } else if (!(props[_k] instanceof Array)) {
+                                            props[_k] = props[_k].split(',');
+                                        }
+                                        _vals.forEach(_t => {
+                                            let it = _t.trim();
+                                            if (it.indexOf('-') === 0) {
+                                                let _tv = it.substring(1, it.length);
+                                                let idx = -1;
+                                                for (let i = 0; i < props[_k].length; i++) {
+                                                    if (props[_k][i] === _tv) {
+                                                        idx = i;
+                                                        break;
+                                                    }
+                                                }
+                                                delete props[_k][idx];
+                                            } else {
+                                                props[_k].push(it);
+                                            }
+                                        })
                                     } else {
-                                        if (_this.overrideFlag || !props[_this.key]) {
-                                            props[_this.key] = _this.val;
+                                        // 单值标签
+                                        if (_v === '-') {
+                                            // 删除属性
+                                            delete props[_k];
+                                        } else if (_this.overrideFlag || !props[_k]) {
+                                            props[_k] = _v;
                                         }
                                     }
                                 });
                             }
-                            new Notice("Edit Property Success!");
+                            new Notice("Modify Property Success!");
                         }))
                 .addButton((btn) =>
                     btn
@@ -96,7 +125,7 @@ export class EditPropertiesModal extends Modal {
                         .setCta()
                         .onClick(() => {
                             this.close();
-                            new Notice("Edit Canceled!");
+                            new Notice("Modify Property Canceled!");
                         }));
         }
     }

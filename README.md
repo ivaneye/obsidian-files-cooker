@@ -8,13 +8,15 @@ This plugin for Obsidian deals multi notes from search results、current file、
     
 ## Features
 
+- Add/Delete values to tags、alias、cssclasses（delete values when values start with - ,multi values split by ,）---**vNew in 1.8.1**
 - Add Search-Results-Command,can deal with search results directly---**New in v1.7.8**
 - Add Multi-File to target Canvas --- **New in v1.7.0**
 - Add text to target Canvas---**New in v1.7.6**
 - Add Dataview Task to target Canvas---**New in v1.7.7**
 - Move/Copy Multi-File to target folder
 - Rename Multi-File
-- Add/Edit/Remove（propValue:-） Multi-File's Props（no need to install **MetaEdit** plugin from 1.8.0）
+- Add/Edit/- Add/Edit/Delete:-） Multi-File's Props（no need to install **MetaEdit** plugin from 1.8.0）
+（propValue:-） Multi-File's Props（no need to install **MetaEdit** plugin from 1.8.0）
 - Delete Multi-File
 - Merge Multi-File to target file
 - Create files from unresolved links
