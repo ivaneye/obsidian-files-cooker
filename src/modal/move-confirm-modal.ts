@@ -1,5 +1,6 @@
-import { App, Modal, Notice, Setting, TFile } from 'obsidian';
+import { App, Modal, Notice, TFile } from 'obsidian';
 import { MoveInfo } from 'src/modal/move-info';
+import { addLabeledToggleField, addModalActions, renderModalLayout } from './modal-ui';
 
 /**
  *  弹窗确认要移动/拷贝的文件
@@ -11,52 +12,57 @@ export class MoveConfirmModal extends Modal {
     constructor(app: App, moveInfos: MoveInfo[]) {
         super(app);
         this.moveInfos = moveInfos;
+        this.copyFlag = false;
     }
 
     onOpen() {
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "Confirm Move/Copy?" });
+        const targetDir = this.moveInfos[0]?.targetDir ?? '-';
+        const listItems = this.moveInfos.map((info) => `${info.sourceFile.path} -> ${info.targetDir}/${info.sourceFile.name}`);
+        renderModalLayout(contentEl, {
+            title: 'Move or copy files',
+            description: 'Review source files and choose move/copy mode before confirm.',
+            summaryLines: [
+                `${this.moveInfos.length} files will be processed.`,
+                `Target: ${targetDir}`,
+            ],
+            listItems,
+            listLabel: 'Affected files',
+            emptyMessage: 'No files to process.',
+            variant: 'confirm',
+        });
 
-        this.moveInfos.forEach(info => {
-            contentEl.createEl("div", { text: info.sourceFile.path + " -> " + info.targetDir + "/" + info.sourceFile.name });
-        })
+		addLabeledToggleField(contentEl, 'Copy instead of moving files', 'Copy files to target instead of moving them', this.copyFlag, (val) => {
+			this.copyFlag = val;
+		});
 
-        new Setting(contentEl)
-            .addToggle((toggle) => {
-                toggle.setTooltip("Copy instead!");
-                toggle.onChange((val) => {
-                    this.copyFlag = val;
-                })
-            })
-
-        new Setting(contentEl)
-            .addButton((btn) =>
-                btn.setButtonText("Confirm")
-                    .setCta()
-                    .onClick(async () => {
-                        this.close();
-                        if (this.copyFlag) {
-                            for (const key in this.moveInfos) {
-                                let info = this.moveInfos[key];
-                                await this.app.vault.copy((info.sourceFile as TFile), info.targetDir + "/" + info.sourceFile.name);
-                            }
-                            new Notice("Copy Success!");
-                        } else {
-                            for (const key in this.moveInfos) {
-                                let info = this.moveInfos[key];
-                                await this.app.fileManager.renameFile(info.sourceFile, info.targetDir + "/" + info.sourceFile.name);
-                            }
-                            new Notice("Move Success!");
+		addModalActions(contentEl, [
+			{
+				text: 'Apply operation',
+				cta: true,
+				onClick: async () => {
+                    this.close();
+                    if (this.copyFlag) {
+                        for (const info of this.moveInfos) {
+                            await this.app.vault.copy((info.sourceFile as TFile), `${info.targetDir}/${info.sourceFile.name}`);
                         }
-                    }))
-            .addButton((btn) =>
-                btn
-                    .setButtonText("Cancel")
-                    .setCta()
-                    .onClick(() => {
-                        this.close();
-                        new Notice("Move Canceled!");
-                    }));
+                        new Notice('Files copied.');
+                    } else {
+                        for (const info of this.moveInfos) {
+                            await this.app.fileManager.renameFile(info.sourceFile, `${info.targetDir}/${info.sourceFile.name}`);
+                        }
+                        new Notice('Files moved.');
+                    }
+                },
+            },
+            {
+                text: 'Cancel',
+                onClick: () => {
+                    this.close();
+                    new Notice('Operation canceled.');
+                },
+            },
+        ]);
     }
 }

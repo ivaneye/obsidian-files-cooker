@@ -29,12 +29,12 @@ export class RenameConfirmModal extends Modal {
         new Setting(contentEl)
             .addButton((btn) =>
                 btn
-                    .setButtonText("Confirm")
+                    .setButtonText("Apply rename")
                     .setCta()
                     .onClick(async () => {
                         if ((this.prefix == null || this.prefix.trim() == "")
                             && (this.suffix == null || this.suffix.trim() == "")) {
-                            new Notice("Prefix and Suffix could not be all empty!");
+                            new Notice("Prefix or suffix is required.");
                             return;
                         }
                         this.close();
@@ -43,16 +43,16 @@ export class RenameConfirmModal extends Modal {
                             let name = this.newName(info.name);
                             await this.app.fileManager.renameFile(info, info.parent.path + "/" + name);
                         }
-                        new Notice("Rename Success!");
+                        new Notice("Rename completed.");
                     }))
             .addButton((btn) =>
                 btn
                     .setButtonText("Cancel")
                     .setCta()
-                    .onClick(() => {
-                        this.close();
-                        new Notice("Rename Canceled!");
-                    }));
+                        .onClick(() => {
+                            this.close();
+                            new Notice("Operation canceled.");
+                        }));
 
     }
 

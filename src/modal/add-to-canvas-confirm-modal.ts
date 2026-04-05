@@ -1,5 +1,6 @@
 import { App, ItemView, Modal, Notice, requireApiVersion, Setting, TAbstractFile, TFile } from 'obsidian';
 import { ActionModel } from 'src/action/action';
+import { addLabeledToggleField } from './modal-ui';
 
 const width = 400;
 const height = 400;
@@ -52,18 +53,13 @@ export class AddToCanvasConfirmModal extends Modal {
             contentEl.createEl("div", { text: line });
         }
 
-
-        new Setting(contentEl)
-            .addToggle((toggle) => {
-                toggle.setTooltip("Split by line!");
-                toggle.onChange((val) => {
-                    this.splitByLineFlag = val;
-                })
-            })
+        addLabeledToggleField(contentEl, 'Split content by line', 'Create one canvas text node per line', Boolean(this.splitByLineFlag), (val) => {
+            this.splitByLineFlag = val;
+        });
 
         new Setting(contentEl)
             .addButton((btn) =>
-                btn.setButtonText("Confirm")
+                btn.setButtonText("Add to canvas")
                     .setCta()
                     .onClick(async () => {
                         this.close();
@@ -86,7 +82,7 @@ export class AddToCanvasConfirmModal extends Modal {
                             }
                             canvas.requestSave();
 
-                            new Notice("Add to Canvas Success!");
+                            new Notice("Added to canvas.");
                         } else {
                             new Notice(this.targetFilePath + " is not a Canvas!");
                         }
@@ -97,7 +93,7 @@ export class AddToCanvasConfirmModal extends Modal {
                     .setCta()
                     .onClick(() => {
                         this.close();
-                        new Notice("Add to Canvas Canceled!");
+                        new Notice("Operation canceled.");
                     }));
     }
 
@@ -130,17 +126,13 @@ export class AddToCanvasConfirmModal extends Modal {
             contentEl.createEl("div", { text: info.path });
         })
 
-        new Setting(contentEl)
-            .addToggle((toggle) => {
-                toggle.setTooltip("Include resolved links!");
-                toggle.onChange((val) => {
-                    this.includeReslovedLinksFlag = val;
-                })
-            })
+        addLabeledToggleField(contentEl, 'Include resolved links', 'Also add resolved linked files and connect edges', Boolean(this.includeReslovedLinksFlag), (val) => {
+            this.includeReslovedLinksFlag = val;
+        });
 
         new Setting(contentEl)
             .addButton((btn) =>
-                btn.setButtonText("Confirm")
+                btn.setButtonText("Add to canvas")
                     .setCta()
                     .onClick(async () => {
                         this.close();
@@ -181,7 +173,7 @@ export class AddToCanvasConfirmModal extends Modal {
                             }
                             canvas.requestSave();
 
-                            new Notice("Add to Canvas Success!");
+                            new Notice("Added to canvas.");
                         } else {
                             new Notice(this.targetFilePath + " is not a Canvas!");
                         }
@@ -192,7 +184,7 @@ export class AddToCanvasConfirmModal extends Modal {
                     .setCta()
                     .onClick(() => {
                         this.close();
-                        new Notice("Add to Canvas Canceled!");
+                        new Notice("Operation canceled.");
                     }));
     }
 

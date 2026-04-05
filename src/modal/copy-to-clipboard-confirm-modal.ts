@@ -1,6 +1,7 @@
 import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
 import hasMarkdownSuffix from 'src/utils/file-type-util';
 import { getLinebreak } from 'src/utils/line-break-util';
+import { addLabeledToggleField } from './modal-ui';
 
 /**
  *  弹窗确认拷贝到剪贴板的文件
@@ -25,25 +26,21 @@ export class CopyToClipboardConfirmModal extends Modal {
         let el = contentEl.createEl("div");
         el.innerHTML = htmlStr;
 
-        new Setting(contentEl)
-            .addToggle((toggle) => {
-                toggle.setTooltip("Copy name only!");
-                toggle.onChange((val) => {
-                    this.nameOnlyFlag = val;
-                    htmlStr = this.prepareHTMLStr();
-                    el.innerHTML = htmlStr;
-                })
-            })
+        addLabeledToggleField(contentEl, 'Copy file names only', 'Copy wiki links using names only', Boolean(this.nameOnlyFlag), (val) => {
+            this.nameOnlyFlag = val;
+            htmlStr = this.prepareHTMLStr();
+            el.innerHTML = htmlStr;
+        });
 
         new Setting(contentEl)
             .addButton((btn) =>
-                btn.setButtonText("Confirm")
+                btn.setButtonText("Copy links")
                     .setCta()
                     .onClick(async () => {
                         this.close();
                         let str = this.prepareStr();
                         navigator.clipboard.writeText(str);
-                        new Notice("Copy links success!")
+                        new Notice("Links copied.")
                     }))
             .addButton((btn) =>
                 btn
@@ -51,7 +48,7 @@ export class CopyToClipboardConfirmModal extends Modal {
                     .setCta()
                     .onClick(() => {
                         this.close();
-                        new Notice("Copy to Clipboard Canceled!");
+                        new Notice("Operation canceled.");
                     }));
     }
 

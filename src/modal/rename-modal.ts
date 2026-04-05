@@ -1,5 +1,12 @@
-import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
+import { App, Modal, Notice, TAbstractFile } from 'obsidian';
 import { RenameConfirmModal } from './rename-confirm-modal';
+import {
+	addLabeledTextField,
+	addModalActions,
+	isBlank,
+	renderModalLayout,
+	showValidationNotice,
+} from './modal-ui';
 
 /**
  *  重命名设置弹窗
@@ -17,59 +24,53 @@ export class RenameModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "Rename Files" });
+        renderModalLayout(contentEl, {
+            title: 'Rename files',
+            description: 'Set prefix or suffix before continuing to preview changes.',
+            summaryLines: [`${this.resultArr.length} files selected.`],
+            listItems: this.resultArr.map((info) => info.path),
+            listLabel: 'Affected files',
+            emptyMessage: 'No files to rename.',
+            variant: 'input',
+        });
 
-        if (this.resultArr.length == 0) {
-            contentEl.createEl("div", { text: "No files found!" });
-
-            new Setting(contentEl)
-                .addButton((btn) =>
-                    btn
-                        .setButtonText("Close")
-                        .setCta()
-                        .onClick(() => {
-                            this.close();
-                        }));
+        if (this.resultArr.length === 0) {
+            addModalActions(contentEl, [
+                {
+                    text: 'Close',
+                    onClick: () => this.close(),
+                },
+            ]);
         } else {
-            this.resultArr.forEach(info => {
-                contentEl.createEl("div", { text: info.path });
-            })
 
-            new Setting(contentEl)
-                .addText((txt) =>
-                    txt.setPlaceholder("Prefix")
-                        .onChange((val) => {
-                            this.prefix = val;
-                        })
-                ).addText((txt) =>
-                    txt.setPlaceholder("Suffix")
-                        .onChange((val) => {
-                            this.suffix = val;
-                        })
-                );
+            addLabeledTextField(contentEl, 'Prefix', 'Input prefix', (val) => {
+				this.prefix = val;
+			});
+            addLabeledTextField(contentEl, 'Suffix', 'Input suffix', (val) => {
+				this.suffix = val;
+			});
 
-            new Setting(contentEl)
-                .addButton((btn) =>
-                    btn
-                        .setButtonText("Confirm")
-                        .setCta()
-                        .onClick(async () => {
-                            if ((this.prefix == null || this.prefix.trim() == "")
-                               && (this.suffix == null || this.suffix.trim() == "")) {
-                                new Notice("Prefix and Suffix could not be all empty!");
-                                return;
-                            }
-                            this.close();
-                            new RenameConfirmModal(this.app, this.resultArr, this.prefix, this.suffix).open();
-                        }))
-                .addButton((btn) =>
-                    btn
-                        .setButtonText("Cancel")
-                        .setCta()
-                        .onClick(() => {
-                            this.close();
-                            new Notice("Rename Canceled!");
-                        }));
+            addModalActions(contentEl, [
+                {
+                    text: 'Continue',
+                    cta: true,
+                    onClick: async () => {
+                        if (isBlank(this.prefix as string) && isBlank(this.suffix as string)) {
+                            showValidationNotice('Prefix or suffix is required.');
+                            return;
+                        }
+                        this.close();
+                        new RenameConfirmModal(this.app, this.resultArr, this.prefix, this.suffix).open();
+                    },
+                },
+                {
+                    text: 'Cancel',
+                    onClick: () => {
+                        this.close();
+                        new Notice('Operation canceled.');
+                    },
+                },
+            ]);
         }
     }
 }
