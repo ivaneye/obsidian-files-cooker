@@ -1,4 +1,4 @@
-> 欢迎加微讨论：SuppleThinking
+> 欢迎加微讨论：IvyOdds
 
 > [中文文档](README_zh.md)
 
@@ -22,6 +22,7 @@ This plugin for Obsidian deals multi notes from search results、current file、
 - Create files from unresolved links
 - Sync Multi-File to flomo
 - Copy Dataview result links to clipboard(DataviewJS pages queries is supported since **v1.7.1**))
+- Add Bases query results as a file-only source (ignores non-file rows with count notice)
 
 > - files from clipboard
 > - file links in current file
@@ -41,6 +42,25 @@ Support 3 selects ways：
 - Copy file links to clipboard. e.g. Copy obsidian search results
 - Content or links in current file
 - Dataview search command/DataviewJS pages queries(**New in v1.7.1**)
+
+### Bases query file operations (New in v2.0.0)
+
+When the Bases data source is available, File Cooker provides a full Bases command group aligned with Dataview file commands:
+
+- Move bases query results to ...
+- Sync bases query results to flomo ...
+- Merge bases query results to ...
+- Delete bases query results!
+- Copy bases result links!
+- Edit Properties in bases results ...
+- Rename in bases results ...
+- Add bases query results to canvas...
+- Add bases task to canvas...
+
+Behavior boundaries:
+- **File-only mapping**: only rows that can be mapped to real vault files are processed.
+- **Ignore non-file rows**: unmapped rows are skipped, and a notice reports the ignored count.
+- **No row writes**: File Cooker does **not** modify Bases row fields in this flow.
 
 ### Cook
 

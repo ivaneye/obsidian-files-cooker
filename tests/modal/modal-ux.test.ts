@@ -12,6 +12,7 @@ import { CreateConfirmModal } from 'src/modal/create-confirm-modal';
 import { MergeConfirmModal } from 'src/modal/merge-confirm-modal';
 import { SyncFlomoConfirmModal } from 'src/modal/sync-flomo-confirm-modal';
 import { RenameModal } from 'src/modal/rename-modal';
+import { RenameConfirmModal } from 'src/modal/rename-confirm-modal';
 import { EditPropertiesModal } from 'src/modal/edit-properties-modal';
 import { CopyToClipboardConfirmModal } from 'src/modal/copy-to-clipboard-confirm-modal';
 import { AddToCanvasConfirmModal } from 'src/modal/add-to-canvas-confirm-modal';
@@ -221,6 +222,22 @@ describe('Modal UX / 输入类', () => {
 		await confirm?.click();
 
 		expect(__getNotices()).toContain('Prefix or suffix is required.');
+	});
+
+	it('4.1 重命名二次确认弹窗应使用统一布局并可确认执行', async () => {
+		const app = createApp();
+		const files = [{ path: 'foo/a.md', name: 'a.md', parent: { path: 'foo' } }];
+		const modal = new RenameConfirmModal(app as never, files as any, 'new-', '');
+
+		modal.onOpen();
+
+		expect(findElementByText(modal.contentEl, 'Rename preview')).toBe(true);
+		expect(findElementByText(modal.contentEl, 'Planned changes')).toBe(true);
+		expect(findElementByText(modal.contentEl, 'a.md -> new-a.md')).toBe(true);
+
+		const confirm = findButtonByText('Apply rename');
+		await confirm?.click();
+		expect(app.fileManager.renameFile).toHaveBeenCalledTimes(1);
 	});
 
 	it('4.1 属性编辑弹窗在必填为空时应提示并且取消不产生副作用', async () => {

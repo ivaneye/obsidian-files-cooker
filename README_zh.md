@@ -1,4 +1,4 @@
-> 欢迎加微讨论：SuppleThinking
+> 欢迎加微讨论：IvyOdds
 
 # obsidian-file-cooker
 
@@ -19,6 +19,7 @@
 - 合并多个文档到指定文档
 - 同步内容到flomo
 - 拷贝Dataview结果链接到剪切板(**v1.7.1支持DataviewJS的页面查询语句**)
+- 支持 Bases 查询结果作为文件批处理来源（不可映射 row 会忽略并提示数量）
 
 > **目标文档**：
 > - Obsidian搜索出的文档
@@ -39,6 +40,25 @@
 - 拷贝需要处理的文件链接，例如：拷贝Obsidian的搜索结果到剪贴板
 - 当前文档中的内容、链接
 - Dataview搜索命令
+
+### Bases 查询文件操作（v2.0.0新增）
+
+当 Bases 数据源可用时，File Cooker 提供与 Dataview 文件命令范围一致的 Bases 命令组：
+
+- Move bases query results to ...
+- Sync bases query results to flomo ...
+- Merge bases query results to ...
+- Delete bases query results!
+- Copy bases result links!
+- Edit Properties in bases results ...
+- Rename in bases results ...
+- Add bases query results to canvas...
+- Add bases task to canvas...
+
+边界说明：
+- **仅文件映射**：只处理可映射到 vault 文件的结果。
+- **忽略非文件 row**：不可映射项会被跳过，并提示忽略数量。
+- **不写入 row 字段**：本流程不会对 Bases row 字段做新增/修改/删除。
 
 ### 处理
 

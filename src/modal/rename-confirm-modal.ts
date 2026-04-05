@@ -1,5 +1,6 @@
-import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
+import { App, Modal, Notice, TAbstractFile } from 'obsidian';
 import hasMarkdownSuffix from 'src/utils/file-type-util';
+import { addModalActions, renderModalLayout } from './modal-ui';
 
 /**
  *  重命名确认弹窗
@@ -19,40 +20,43 @@ export class RenameConfirmModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "Rename Files" });
+        renderModalLayout(contentEl, {
+            title: 'Rename preview',
+            description: 'Review renamed file names before applying changes.',
+            summaryLines: [`${this.resultArr.length} files will be renamed.`],
+            listItems: this.resultArr.map((info) => `${info.name} -> ${this.newName(info.name)}`),
+            listLabel: 'Planned changes',
+            emptyMessage: 'No files to rename.',
+            variant: 'confirm',
+        });
 
-        this.resultArr.forEach(info => {
-            let name = this.newName(info.name);
-            contentEl.createEl("div", { text: info.name + "->" + name });
-        })
-
-        new Setting(contentEl)
-            .addButton((btn) =>
-                btn
-                    .setButtonText("Apply rename")
-                    .setCta()
-                    .onClick(async () => {
-                        if ((this.prefix == null || this.prefix.trim() == "")
-                            && (this.suffix == null || this.suffix.trim() == "")) {
-                            new Notice("Prefix or suffix is required.");
-                            return;
-                        }
-                        this.close();
-                        for (let i = 0; i < this.resultArr.length; i++) {
-                            let info = this.resultArr[i];
-                            let name = this.newName(info.name);
-                            await this.app.fileManager.renameFile(info, info.parent.path + "/" + name);
-                        }
-                        new Notice("Rename completed.");
-                    }))
-            .addButton((btn) =>
-                btn
-                    .setButtonText("Cancel")
-                    .setCta()
-                        .onClick(() => {
-                            this.close();
-                            new Notice("Operation canceled.");
-                        }));
+        addModalActions(contentEl, [
+            {
+                text: 'Apply rename',
+                cta: true,
+                onClick: async () => {
+                    if ((this.prefix == null || this.prefix.trim() == "")
+                        && (this.suffix == null || this.suffix.trim() == "")) {
+                        new Notice("Prefix or suffix is required.");
+                        return;
+                    }
+                    this.close();
+                    for (let i = 0; i < this.resultArr.length; i++) {
+                        let info = this.resultArr[i];
+                        let name = this.newName(info.name);
+                        await this.app.fileManager.renameFile(info, info.parent.path + "/" + name);
+                    }
+                    new Notice("Rename completed.");
+                },
+            },
+            {
+                text: 'Cancel',
+                onClick: () => {
+                    this.close();
+                    new Notice("Operation canceled.");
+                },
+            },
+        ]);
 
     }
 
