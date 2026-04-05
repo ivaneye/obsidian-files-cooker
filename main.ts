@@ -4,6 +4,7 @@ import { CurrentFileCommand } from 'src/command/current-file-command';
 import { DataviewCommand } from 'src/command/dataview-command';
 import { PresentationCommand } from 'src/command/presentation-command';
 import { SearchCommand } from 'src/command/search-command';
+import { ContextMenuCommand } from 'src/command/context-menu-command';
 
 export default class FileCookerPlugin extends Plugin {
 	settings: FileCookerPluginSettings;
@@ -17,6 +18,7 @@ export default class FileCookerPlugin extends Plugin {
 		new DataviewCommand(this).regist();
 		new SearchCommand(this).regist();
 		new PresentationCommand(this).regist();
+		new ContextMenuCommand(this).regist();
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new FileCookerSettingTab(this.app, this));

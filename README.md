@@ -53,6 +53,20 @@ Depends on the different way to select, execute a different command.Ensure:
 
 All commands open a popup to be confirmed.
 
+### Context menu entry (New)
+
+File Cooker now also adds context-menu entries in two places:
+
+- **Editor context menu**
+  - `File Cooker > Selection`: sync selected text to flomo / add selection to canvas (only available when selection is not empty)
+  - `File Cooker > Current file links`: run link-based operations from the current file
+- **File explorer context menu**
+  - `File Cooker > Target file`: run single-file operations on the file you right-clicked
+
+Notes:
+- Destructive actions (like delete) still require confirmation.
+- If no active file exists, current-file-link operations are safely blocked with a notice.
+
 ## How to install
 
 ### From within Obsidian

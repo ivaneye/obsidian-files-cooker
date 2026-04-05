@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "vitest run",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [],
@@ -21,7 +22,8 @@
 		"obsidian": "^1.12.3",
 		"obsidian-dataview": "^0.5.38",
 		"tslib": "2.3.1",
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"vitest": "^2.1.5"
 	},
 	"dependencies": {
 		"node-fetch": "^2.6.1"
