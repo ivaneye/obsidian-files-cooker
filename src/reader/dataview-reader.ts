@@ -85,14 +85,18 @@ export class DataviewReader implements Readable {
                     } else {
                         // TASK
                         res.value.values.forEach(it => {
-                            filePaths.push(it.link.path);
+                            if ('link' in it && it.link?.path) {
+                                filePaths.push(it.link.path);
+                            }
                         });
                     }
                     try {
                         if (this.taskFlag) {
                             let strArr: string[] = [];
                             res.value.values.forEach(it => {
-                                strArr.push("- [ ] [[" + it.link.path + "|" + it.text + "]]");
+                                if ('link' in it && 'text' in it && it.link?.path) {
+                                    strArr.push("- [ ] [[" + it.link.path + "|" + it.text + "]]");
+                                }
                             });
 
                             let actionModels = [];

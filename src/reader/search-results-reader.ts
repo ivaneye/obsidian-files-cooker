@@ -19,9 +19,10 @@ export class SearchResultsReader implements Readable {
     read(action: Action): void {
         let readInfo = new ReadInfo(this.plugin.settings.limit);
 
-        let results = this.app.workspace.getLeavesOfType('search')[0].view.dom.resultDomLookup;
+        let searchLeaf = this.app.workspace.getLeavesOfType('search')[0];
+        let results = (searchLeaf?.view as any)?.dom?.resultDomLookup;
 
-        if (results.size == 0) {
+        if (results == null || results.size == 0) {
             new Notice("Has no search results!Please search first!");
         } else {
             let arr = [...results.keys()];

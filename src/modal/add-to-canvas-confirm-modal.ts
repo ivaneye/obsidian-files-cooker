@@ -71,7 +71,7 @@ export class AddToCanvasConfirmModal extends Modal {
                         const canvasView = await this.getCanvas();
 
                         if (canvasView?.getViewType() === "canvas") {
-                            const canvas = canvasView?.canvas;
+                            const canvas = (canvasView as any)?.canvas;
 
                             if (this.splitByLineFlag) {
                                 let lines = this.cont.split(/\r?\n/);
@@ -116,7 +116,7 @@ export class AddToCanvasConfirmModal extends Modal {
         }
 
         // Conditions to check
-        const canvasView = app.workspace.getActiveViewOfType(ItemView);
+        const canvasView = this.app.workspace.getActiveViewOfType(ItemView);
         return canvasView;
     }
 
@@ -150,7 +150,7 @@ export class AddToCanvasConfirmModal extends Modal {
                         const canvasView = await this.getCanvas();
 
                         if (canvasView?.getViewType() === "canvas") {
-                            const canvas = canvasView?.canvas;
+                            const canvas = (canvasView as any)?.canvas;
 
                             let idx = 0;
                             for (const key in this.resultArr) {

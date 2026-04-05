@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-file-cooker",
-	"version": "1.8.1",
+	"version": "2.0.0",
 	"description": "Deal batch notes from Search results、current file、Dataview query string...",
 	"main": "main.js",
 	"scripts": {
@@ -12,16 +12,16 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^16.11.6",
+		"@types/node": "^20.19.9",
 		"@types/node-fetch": "^2.6.2",
 		"@typescript-eslint/eslint-plugin": "^5.2.0",
 		"@typescript-eslint/parser": "^5.2.0",
 		"builtin-modules": "^3.2.0",
 		"esbuild": "0.13.12",
-		"obsidian": "^1.4.4",
+		"obsidian": "^1.12.3",
 		"obsidian-dataview": "^0.5.38",
 		"tslib": "2.3.1",
-		"typescript": "4.4.4"
+		"typescript": "^5.8.3"
 	},
 	"dependencies": {
 		"node-fetch": "^2.6.1"
