@@ -25,38 +25,38 @@ export class RenameModal extends Modal {
         const { contentEl } = this;
 
         renderModalLayout(contentEl, {
-            title: 'Rename files',
-            description: 'Set prefix or suffix before continuing to preview changes.',
-            summaryLines: [`${this.resultArr.length} files selected.`],
+            title: '重命名文件',
+            description: '先设置前缀或后缀，再继续预览变更。',
+            summaryLines: [`已选中 ${this.resultArr.length} 个文件。`],
             listItems: this.resultArr.map((info) => info.path),
-            listLabel: 'Affected files',
-            emptyMessage: 'No files to rename.',
+            listLabel: '受影响的文件',
+            emptyMessage: '没有可重命名的文件。',
             variant: 'input',
         });
 
         if (this.resultArr.length === 0) {
             addModalActions(contentEl, [
                 {
-                    text: 'Close',
+                    text: '关闭',
                     onClick: () => this.close(),
                 },
             ]);
         } else {
 
-            addLabeledTextField(contentEl, 'Prefix', 'Input prefix', (val) => {
+            addLabeledTextField(contentEl, '前缀', '输入前缀', (val) => {
 				this.prefix = val;
 			});
-            addLabeledTextField(contentEl, 'Suffix', 'Input suffix', (val) => {
+            addLabeledTextField(contentEl, '后缀', '输入后缀', (val) => {
 				this.suffix = val;
 			});
 
             addModalActions(contentEl, [
                 {
-                    text: 'Continue',
+                    text: '继续',
                     cta: true,
                     onClick: async () => {
                         if (isBlank(this.prefix as string) && isBlank(this.suffix as string)) {
-                            showValidationNotice('Prefix or suffix is required.');
+                            showValidationNotice('前缀或后缀不能同时为空。');
                             return;
                         }
                         this.close();
@@ -64,10 +64,10 @@ export class RenameModal extends Modal {
                     },
                 },
                 {
-                    text: 'Cancel',
+                    text: '取消',
                     onClick: () => {
                         this.close();
-                        new Notice('Operation canceled.');
+                        new Notice('操作已取消。');
                     },
                 },
             ]);

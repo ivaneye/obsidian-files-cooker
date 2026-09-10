@@ -1,4 +1,5 @@
-import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
+import { App, Modal, Notice, Setting, TAbstractFile, TFile } from 'obsidian';
+import { getBackup } from 'src/backup/backup-service';
 import { addModalActions, renderModalLayout } from './modal-ui';
 
 /**
@@ -16,46 +17,54 @@ export class DeleteConfirmModal extends Modal {
         const { contentEl } = this;
 
         renderModalLayout(contentEl, {
-            title: 'Delete files',
-            description: 'Please review the files before deleting.',
+            title: '删除文件',
+            description: '请先确认要删除的文件。',
             summaryLines:
                 this.resultArr.length > 0
-                    ? [`${this.resultArr.length} files will be deleted permanently.`]
+                    ? [`${this.resultArr.length} 个文件将被永久删除。`]
                     : undefined,
             listItems: this.resultArr.map((info) => info.path),
-            listLabel: 'Affected files',
-            emptyMessage: 'No files to delete.',
+            listLabel: '受影响的文件',
+            emptyMessage: '没有可删除的文件。',
             variant: 'danger',
         });
 
         if (this.resultArr.length === 0) {
             addModalActions(contentEl, [
                 {
-                    text: 'Close',
+                    text: '关闭',
                     onClick: () => this.close(),
                 },
             ]);
         } else {
             addModalActions(contentEl, [
                 {
-                    text: 'Delete now',
+                    text: '立即删除',
                     cta: true,
                     warning: true,
-                    onClick: () => {
-                        // 事件分支：仅确认时执行删除
+                    onClick: async () => {
+                        // 事件分支：仅确认时执行删除；删除为内容写，undo 用快照重建文件
                         this.close();
-                        this.resultArr.forEach(info => {
-                            this.app.vault.trash(info, true);
-                        });
-                        new Notice('Delete completed.');
+                        const recorder = getBackup().begin('delete', '删除文件');
+                        try {
+                        for (const info of this.resultArr) {
+                            await recorder.snapshotContentBefore(info as TFile);
+                            await this.app.vault.trash(info, true);
+                        }
+                        await recorder.finish();
+                        new Notice('删除完成。');
+                        } catch (e) {
+                            recorder.abort();
+                            new Notice('操作失败：' + (e as Error).message);
+                        }
                     },
                 },
                 {
-                    text: 'Cancel',
+                    text: '取消',
                     onClick: () => {
                         // 事件分支：取消时仅关闭与反馈
                         this.close();
-                        new Notice('Operation canceled.');
+                        new Notice('操作已取消。');
                     },
                 },
             ]);

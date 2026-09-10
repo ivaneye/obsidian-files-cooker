@@ -20,21 +20,21 @@ export class SyncFlomoConfirmModal extends Modal {
     async onOpen() {
         const { contentEl } = this;
 
-        const listItems = this.actionModels.map((info) => (info.file ? info.file.path : 'Sync Selection'));
+        const listItems = this.actionModels.map((info) => (info.file ? info.file.path : '同步选区'));
         renderModalLayout(contentEl, {
-            title: 'Sync to flomo',
-            description: 'Review items before syncing to flomo API.',
-            summaryLines: [`${this.actionModels.length} items will be synced.`],
+            title: '同步到 flomo',
+            description: '同步到 flomo 前请确认内容。',
+            summaryLines: [`${this.actionModels.length} 条内容将被同步。`],
             listItems,
-            listLabel: 'Affected files',
-            emptyMessage: 'No files to sync.',
+            listLabel: '受影响的文件',
+            emptyMessage: '没有可同步的内容。',
             variant: 'confirm',
         });
 
         if (this.actionModels.length === 0) {
             addModalActions(contentEl, [
                 {
-                    text: 'Close',
+                    text: '关闭',
                     onClick: () => this.close(),
                 },
             ]);
@@ -43,7 +43,7 @@ export class SyncFlomoConfirmModal extends Modal {
 
         addModalActions(contentEl, [
             {
-                text: 'Sync now',
+                text: '立即同步',
                 cta: true,
                 onClick: async () => {
                     this.close();
@@ -60,18 +60,18 @@ export class SyncFlomoConfirmModal extends Modal {
                         });
 
                         if (!response.ok) {
-                            new Notice(`Sync failed [${response.status}].`);
+                            new Notice(`同步失败 [${response.status}]。`);
                             return;
                         }
                     }
-                    new Notice('Sync completed.');
+                    new Notice('同步完成。');
                 },
             },
             {
-                text: 'Cancel',
+                text: '取消',
                 onClick: () => {
                     this.close();
-                    new Notice('Operation canceled.');
+                    new Notice('操作已取消。');
                 },
             },
         ]);

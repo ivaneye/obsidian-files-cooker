@@ -83,12 +83,28 @@ Behavior boundaries:
 
 > Notes: destructive actions (like delete) still require confirmation. If no active file exists, current-file-link operations are safely blocked with a notice.
 
+## 🛟 Backup & Undo (new)
+
+Every batch write operation — **edit properties / move / rename / delete / merge / create** — now takes a **snapshot before applying**, so you can **undo** a whole batch or **revert selected files individually** afterwards.
+
+- **Automatic snapshots**: applied operations create a persistent backup record (content + paths); canceled or failed operations leave no residue
+- **Undo history**: `Undo last batch operation ...` opens history and focuses the most recent record; `Open backup & undo history ...` lists all records (time / type / file count / status)
+- **Per-file revert**: expand a record, check the files you want to restore, and revert — move/rename are reversed via Obsidian's rename (links auto-updated), deletes are rebuilt from the snapshot, created/copied files are trashed
+- **Drift protection**: if a file was modified after the operation, it is marked **modified** and disabled — enable **force override** to overwrite it explicitly; nothing is ever silently overwritten
+- **Retention**: keeps the most recent `N` records (default 20) and cleans up older backups automatically
+
+> **Backup folder**: backups are stored inside your vault (default `.file-cooker/backups`). The dot prefix hides it from the file explorer by default; you can also add it to **Settings → Files and links → Excluded files** (e.g. `.file-cooker`) to keep it out of search and graph.
+> **Out of scope**: **Canvas** operations and **flomo** sync are not backed up (they write through internal APIs / the network and don't touch vault files).
+
 ## ⚙️ Settings
 
 | Setting | Purpose | Default |
 | :--- | :--- | :--- |
 | Limit | Maximum number of files processed per batch | `300` |
 | flomoAPI | flomo API endpoint, used to sync notes to flomo | empty |
+| Enable backup | Create a snapshot for every batch write so it can be reverted | on |
+| Backup folder | Vault folder where backups are stored (dot-prefix hides it) | `.file-cooker/backups` |
+| Retention | Number of recent backup records to keep | `20` |
 
 > flomo sync commands will notify "Please config flomoAPI first!" when the API is not configured.
 
@@ -118,6 +134,7 @@ Behavior boundaries:
 
 - **Always confirm**: every command opens a confirmation modal before any change is made
 - **Delete is highlighted**: delete commands are marked in red in the confirmation modal
+- **Backup before apply**: every batch write takes a snapshot first and can be reverted from history; drifted (mid-edited) files are never silently overwritten
 - **Batch limit**: a single batch is limited to 300 files by default (adjustable in Settings)
 - **Visible failures**: no files, no active file, missing config, etc. are always reported via Notice — never silently
 
@@ -133,6 +150,11 @@ If File Cooker helps you, please share it with your Obsidian friends 🙏
 - Issues and pull requests are welcome
 
 ## 📝 Changelog
+
+### 2.2.0
+
+- New **Backup & Undo**: every batch write (properties / move / rename / delete / merge / create) is snapshotted and can be reverted per-file from history; drift detection prevents silent overwrites
+- New settings: backup toggle, backup folder, retention
 
 ### 2.0.0
 

@@ -21,33 +21,33 @@ export class CopyToClipboardConfirmModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "Confirm copy to clipboard?" });
+        contentEl.createEl("h1", { text: "确认复制到剪贴板？" });
 
         this.previewEl = contentEl.createEl("div");
         this.renderPreview();
 
-        addLabeledToggleField(contentEl, 'Copy file names only', 'Copy wiki links using names only', Boolean(this.nameOnlyFlag), (val) => {
+        addLabeledToggleField(contentEl, '仅复制文件名', '仅使用文件名生成 Wiki 链接', Boolean(this.nameOnlyFlag), (val) => {
             this.nameOnlyFlag = val;
             this.renderPreview();
         });
 
         new Setting(contentEl)
             .addButton((btn) =>
-                btn.setButtonText("Copy links")
+                btn.setButtonText("复制链接")
                     .setCta()
                     .onClick(async () => {
                         this.close();
                         let str = this.prepareStr();
                         navigator.clipboard.writeText(str);
-                        new Notice("Links copied.")
+                        new Notice("链接已复制。")
                     }))
             .addButton((btn) =>
                 btn
-                    .setButtonText("Cancel")
+                    .setButtonText("取消")
                     .setCta()
                     .onClick(() => {
                         this.close();
-                        new Notice("Operation canceled.");
+                        new Notice("操作已取消。");
                     }));
     }
 

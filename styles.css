@@ -148,3 +148,58 @@
 	min-width: 96px;
 	font-weight: 600;
 }
+
+/* Undo history modal: record cards + indented file rows */
+.file-cooker-modal__record {
+	margin: 0 0 10px;
+	padding: 4px 10px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background-color: var(--background-secondary);
+}
+
+.file-cooker-modal__record-title {
+	padding: 6px 2px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-normal);
+	cursor: pointer;
+	user-select: none;
+	border-radius: 4px;
+}
+
+.file-cooker-modal__record-title:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* 文件行相对标题缩进，形成“标题 → 文件”的层级关系 */
+.file-cooker-modal__record .file-cooker-modal__field-row {
+	grid-template-columns: minmax(0, 1fr) auto;
+	padding-left: 20px;
+	border-top: 1px dashed var(--background-modifier-border);
+}
+
+.file-cooker-modal__record .file-cooker-modal__field-label {
+	font-weight: 400;
+	word-break: break-all;
+}
+
+/* 底部操作区：与列表用分隔线隔开；控件（开关/按钮）右对齐，不再挤在左边 */
+.file-cooker-modal__footer {
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.file-cooker-modal__footer .file-cooker-modal__field-row {
+	grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.file-cooker-modal__record .file-cooker-modal__field-row .setting-item-control,
+.file-cooker-modal__footer .file-cooker-modal__field-row .setting-item-control {
+	justify-content: flex-end;
+}
+
+.file-cooker-modal__footer .setting-item-control {
+	justify-content: flex-end;
+}

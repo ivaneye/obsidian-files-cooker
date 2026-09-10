@@ -1,4 +1,5 @@
 import { App, Modal, Notice, Setting, TAbstractFile, TFile } from 'obsidian';
+import { getBackup } from 'src/backup/backup-service';
 import hasMarkdownSuffix from 'src/utils/file-type-util';
 import { getLinebreak } from 'src/utils/line-break-util';
 import { addModalActions, renderModalLayout } from './modal-ui';
@@ -22,25 +23,29 @@ export class MergeConfirmModal extends Modal {
         const { contentEl } = this;
 
         renderModalLayout(contentEl, {
-            title: 'Merge files',
-            description: 'Review the source files before merge.',
-            summaryLines: [`${this.resultArr.length} files will be merged.`, `Target: ${this.targetFilePath}`],
+            title: '合并文件',
+            description: '合并前请确认源文件。',
+            summaryLines: [`${this.resultArr.length} 个文件将被合并。`, `目标：${this.targetFilePath}`],
             listItems: this.resultArr.map((info) => info.path),
-            listLabel: 'Affected files',
-            emptyMessage: 'No files to merge.',
+            listLabel: '受影响的文件',
+            emptyMessage: '没有可合并的文件。',
             variant: 'confirm',
         });
 
         addModalActions(contentEl, [
             {
-                text: 'Merge files',
+                text: '合并文件',
                 cta: true,
                 onClick: async () => {
                     this.close();
+                    // 合并仅记录目标文件（源文件只读不记录），回滚还原目标内容
+                    const recorder = getBackup().begin('merge', '合并文件');
+                    try {
                     let targetFile = this.app.vault.getAbstractFileByPath(this.targetFilePath);
                     if (targetFile == null) {
                         targetFile = await this.app.vault.create(this.targetFilePath, '');
                     }
+                    await recorder.snapshotContentBefore(targetFile as TFile);
                     for (const info of this.resultArr) {
                         if (hasMarkdownSuffix(info.name)) {
                             let cont = await this.app.vault.read((info as TFile));
@@ -53,14 +58,19 @@ export class MergeConfirmModal extends Modal {
                             await this.app.vault.append((targetFile as TFile), cont);
                         }
                     }
-                    new Notice('Files merged.');
+                    await recorder.finish();
+                    new Notice('文件合并完成。');
+                    } catch (e) {
+                        recorder.abort();
+                        new Notice('操作失败：' + (e as Error).message);
+                    }
                 },
             },
             {
-                text: 'Cancel',
+                text: '取消',
                 onClick: () => {
                     this.close();
-                    new Notice('Operation canceled.');
+                    new Notice('操作已取消。');
                 },
             },
         ]);

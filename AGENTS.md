@@ -11,7 +11,9 @@
 - `src/reader/`: readers that collect files/content and pass `ActionModel[]` into actions.
 - `src/action/`: action implementations such as move, rename, delete, merge, sync, and canvas operations.
 - `src/modal/`: confirmation and picker modals used by actions and commands.
+- `src/backup/`: backup & undo module — `backup-service.ts` (snapshot/commit/revert/drift/retention + singleton), `undo-record.ts` (data model + manifest serialization), `backup-settings.ts` (defaults + deep merge + settings UI).
 - `src/utils/`: small utility helpers.
+- `tests/`: vitest tests; `tests/mocks/obsidian.ts` (Obsidian API mocks) and `tests/mocks/vault-mock.ts` (in-memory vault/fileManager for backup tests).
 - `manifest.json`, `versions.json`: Obsidian plugin metadata.
 - `esbuild.config.mjs`: bundling config.
 
@@ -62,19 +64,22 @@ npm run version
 - If linting is needed, first add an explicit lint script and dependency in a dedicated change.
 
 ### Tests
-- There is currently **no test framework configured**.
-- No Jest/Vitest config files were found.
-- No `test` script exists in `package.json`.
-- Do **not** claim tests were run unless you first add a test runner.
+- The repository uses **vitest** with `npm test` (`vitest run`).
+- `tests/mocks/obsidian.ts` replaces the `obsidian` module in tests via `vi.mock('obsidian', ...)` + the `obsidian` alias in `vitest.config.mjs`.
+- `tests/mocks/vault-mock.ts` provides an in-memory `VaultMock` / `FileManagerMock` / `createAppMock` for backup-service and modal integration tests.
+- Backup & undo behavior lives in `tests/backup/` (`undo-record`, `backup-service`, `undo-history-modal`, `modal-integration`).
+- Do **not** claim tests were run unless `npm test` actually ran.
 
 ### Running a single test
-- Not currently possible in the repository's present state because no test framework or test script is configured.
-- If tests are added later, document the exact single-test command here and in `package.json`.
+```bash
+npx vitest run <path-to-test-file>          # e.g. tests/backup/backup-service.test.ts
+npx vitest run <path> -t "<test name"       # filter by test name
+```
 
 ## Current command reality check
-- `npm run build` currently fails in this environment.
-- Main failure reason: TypeScript cannot resolve `obsidian` types and many Obsidian API-derived members.
-- Treat build verification carefully; if you modify build tooling, verify whether the repo expects Obsidian-provided type definitions from a different setup.
+- `npm run build` passes in this environment (`tsc -noEmit -skipLibCheck && esbuild production`).
+- `npm test` passes with vitest (all test files green).
+- Treat build verification as real: always run `npm run build` after build-affecting changes.
 
 ## Architecture conventions
 - The codebase follows a clear pipeline:
@@ -85,6 +90,13 @@ npm run version
 - Preserve that separation when adding features.
 - New batch operations should usually be added as a new `Action` plus wiring from one or more existing readers/commands.
 - New selection sources should usually be added as a new `Readable` implementation.
+
+## Backup & undo conventions
+- All batch write operations (properties / move / rename / delete / merge / create) go through the backup channel: `getBackup().begin(opType, opLabel)` in the modal apply branch, per-file `snapshot*` calls, then `finish()` on success / `abort()` on failure.
+- `src/backup/backup-service.ts` exposes a module-level singleton via `initBackup(app, settings)` (called from `main.ts onload`) and `getBackup()`; `__resetBackupForTest()` resets it in tests.
+- Blob files and `manifest.json` are written through `vault.adapter` (no vault events); manifest commit is atomic (temp file + rename).
+- Revert supports per-file selection and drift detection; drift entries are never silently overwritten (force flag required).
+- Backup storage lives in a vault folder (default `.file-cooker/backups`, dot-prefixed and hidden); retention (default 20) cleans up the oldest records.
 
 ## Import conventions
 - Existing code mixes single and double quotes, but many command files use single quotes consistently.
@@ -168,13 +180,9 @@ npm run version
 
 ## Known repository gaps
 - No AGENTS-specific secondary rule files are present.
-- No automated tests are configured.
-- No lint script is configured.
-- Build currently fails in the present environment due to type-resolution/setup issues.
+- No lint script is configured (eslint config exists but no runner script).
+- Automated tests are configured (vitest) and passing; `npm run build` passes.
 
 ## Practical recommendation for future contributors
-- If you need stronger agent reliability, first add:
-  1. a working Obsidian type-check setup,
-  2. an `npm run lint` script,
-  3. a test runner with a documented single-test command.
+- If you need stronger agent reliability, first add an `npm run lint` script; the type-check setup and vitest runner already work.
 - Until then, favor minimal, architecture-consistent changes and explicit reporting of what was and was not validated.

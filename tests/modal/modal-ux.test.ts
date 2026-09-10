@@ -100,12 +100,12 @@ describe('Modal UX / 危险确认类', () => {
 
 		await modal.onOpen();
 
-		expect(findElementByText(modal.contentEl, 'Delete files')).toBe(true);
-		expect(findElementByText(modal.contentEl, '2 files will be deleted permanently.')).toBe(true);
+		expect(findElementByText(modal.contentEl, '删除文件')).toBe(true);
+		expect(findElementByText(modal.contentEl, '2 个文件将被永久删除。')).toBe(true);
 
 		const buttons = findButtons(0);
-		const confirm = buttons.find((btn: any) => btn.buttonText === 'Delete now');
-		const cancel = buttons.find((btn: any) => btn.buttonText === 'Cancel');
+		const confirm = buttons.find((btn: any) => btn.buttonText === '立即删除');
+		const cancel = buttons.find((btn: any) => btn.buttonText === '取消');
 
 		expect(confirm?.isWarning).toBe(true);
 		expect(confirm?.isCta).toBe(true);
@@ -113,13 +113,13 @@ describe('Modal UX / 危险确认类', () => {
 
 		await confirm?.click();
 		expect(app.vault.trash).toHaveBeenCalledTimes(2);
-		expect(__getNotices()).toContain('Delete completed.');
+		expect(__getNotices()).toContain('删除完成。');
 
 		app.vault.trash.mockReset();
 		__resetNotices();
 		await cancel?.click();
 		expect(app.vault.trash).not.toHaveBeenCalled();
-		expect(__getNotices()).toContain('Operation canceled.');
+		expect(__getNotices()).toContain('操作已取消。');
 	});
 
 	it('2.1 删除弹窗在空态时应安全关闭且不触发删除', async () => {
@@ -128,9 +128,9 @@ describe('Modal UX / 危险确认类', () => {
 
 		await modal.onOpen();
 
-		expect(findElementByText(modal.contentEl, 'No files to delete.')).toBe(true);
+		expect(findElementByText(modal.contentEl, '没有可删除的文件。')).toBe(true);
 
-		const closeButton = findButtons(0).find((btn: any) => btn.buttonText === 'Close');
+		const closeButton = findButtons(0).find((btn: any) => btn.buttonText === '关闭');
 		await closeButton?.click();
 
 		expect((modal as any).closed).toBe(true);
@@ -155,18 +155,18 @@ describe('Modal UX / 普通确认类', () => {
 
 		modal.onOpen();
 
-		expect(findElementByText(modal.contentEl, 'Move or copy files')).toBe(true);
-		expect(findElementByText(modal.contentEl, '2 files will be processed.')).toBe(true);
-		expect(findElementByText(modal.contentEl, 'Target: folder-a')).toBe(true);
-		expect(findElementByText(modal.contentEl, 'Affected files')).toBe(true);
+		expect(findElementByText(modal.contentEl, '移动或复制文件')).toBe(true);
+		expect(findElementByText(modal.contentEl, '2 个文件将被处理。')).toBe(true);
+		expect(findElementByText(modal.contentEl, '目标：folder-a')).toBe(true);
+		expect(findElementByText(modal.contentEl, '受影响的文件')).toBe(true);
 		expect(findElementByText(modal.contentEl, '#1')).toBe(true);
-		expect(findElementByText(modal.contentEl, 'Copy instead of moving files')).toBe(true);
+		expect(findElementByText(modal.contentEl, '复制而不是移动')).toBe(true);
 		expect(Array.from(modal.contentEl.children).some((child: any) => child.cls === 'file-cooker-modal__list')).toBe(true);
 
 		const buttons = findButtons(1);
-		const cancel = buttons.find((btn: any) => btn.buttonText === 'Cancel');
+		const cancel = buttons.find((btn: any) => btn.buttonText === '取消');
 		await cancel?.click();
-		expect(__getNotices()).toContain('Operation canceled.');
+		expect(__getNotices()).toContain('操作已取消。');
 	});
 
 	it('3.1 创建/合并/同步弹窗应展示统一摘要并保持确认取消语义一致', async () => {
@@ -178,13 +178,13 @@ describe('Modal UX / 普通确认类', () => {
 
 		const createModal = new CreateConfirmModal(app as never, infos as any);
 		createModal.onOpen();
-		expect(findElementByText(createModal.contentEl, 'Create files')).toBe(true);
-		expect(findElementByText(createModal.contentEl, '2 files will be created.')).toBe(true);
+		expect(findElementByText(createModal.contentEl, '创建文件')).toBe(true);
+		expect(findElementByText(createModal.contentEl, '2 个文件将被创建。')).toBe(true);
 
 		const mergeModal = new MergeConfirmModal(app as never, [{ path: 'foo/a.md', name: 'a.md' }] as any, 'merged.md');
 		mergeModal.onOpen();
-		expect(findElementByText(mergeModal.contentEl, 'Merge files')).toBe(true);
-		expect(findElementByText(mergeModal.contentEl, 'Target: merged.md')).toBe(true);
+		expect(findElementByText(mergeModal.contentEl, '合并文件')).toBe(true);
+		expect(findElementByText(mergeModal.contentEl, '目标：merged.md')).toBe(true);
 
 		const plugin = {
 			app: createApp(),
@@ -192,8 +192,8 @@ describe('Modal UX / 普通确认类', () => {
 		};
 		const syncModal = new SyncFlomoConfirmModal(plugin as any, [{ file: { path: 'foo/a.md' } }] as any);
 		await syncModal.onOpen();
-		expect(findElementByText(syncModal.contentEl, 'Sync to flomo')).toBe(true);
-		expect(findElementByText(syncModal.contentEl, '1 items will be synced.')).toBe(true);
+		expect(findElementByText(syncModal.contentEl, '同步到 flomo')).toBe(true);
+		expect(findElementByText(syncModal.contentEl, '1 条内容将被同步。')).toBe(true);
 	});
 });
 
@@ -215,13 +215,13 @@ describe('Modal UX / 输入类', () => {
 
 		modal.onOpen();
 
-		expect(findElementByText(modal.contentEl, 'Rename files')).toBe(true);
-		expect(findElementByText(modal.contentEl, 'Prefix')).toBe(true);
-		expect(findElementByText(modal.contentEl, 'Suffix')).toBe(true);
-		const confirm = findButtonByText('Continue');
+		expect(findElementByText(modal.contentEl, '重命名文件')).toBe(true);
+		expect(findElementByText(modal.contentEl, '前缀')).toBe(true);
+		expect(findElementByText(modal.contentEl, '后缀')).toBe(true);
+		const confirm = findButtonByText('继续');
 		await confirm?.click();
 
-		expect(__getNotices()).toContain('Prefix or suffix is required.');
+		expect(__getNotices()).toContain('前缀或后缀不能同时为空。');
 	});
 
 	it('4.1 重命名二次确认弹窗应使用统一布局并可确认执行', async () => {
@@ -231,11 +231,11 @@ describe('Modal UX / 输入类', () => {
 
 		modal.onOpen();
 
-		expect(findElementByText(modal.contentEl, 'Rename preview')).toBe(true);
-		expect(findElementByText(modal.contentEl, 'Planned changes')).toBe(true);
+		expect(findElementByText(modal.contentEl, '重命名预览')).toBe(true);
+		expect(findElementByText(modal.contentEl, '计划变更')).toBe(true);
 		expect(findElementByText(modal.contentEl, 'a.md -> new-a.md')).toBe(true);
 
-		const confirm = findButtonByText('Apply rename');
+		const confirm = findButtonByText('应用重命名');
 		await confirm?.click();
 		expect(app.fileManager.renameFile).toHaveBeenCalledTimes(1);
 	});
@@ -246,19 +246,19 @@ describe('Modal UX / 输入类', () => {
 		const modal = new EditPropertiesModal(app as never, files as any);
 
 		modal.onOpen();
-		expect(findElementByText(modal.contentEl, 'Edit properties')).toBe(true);
-		expect(findElementByText(modal.contentEl, 'Property Key')).toBe(true);
-		expect(findElementByText(modal.contentEl, 'Property Value')).toBe(true);
+		expect(findElementByText(modal.contentEl, '编辑属性')).toBe(true);
+		expect(findElementByText(modal.contentEl, '属性键')).toBe(true);
+		expect(findElementByText(modal.contentEl, '属性值')).toBe(true);
 
-		const confirm = findButtonByText('Apply properties');
+		const confirm = findButtonByText('应用属性');
 		await confirm?.click();
-		expect(__getNotices()).toContain('Property key is required.');
+		expect(__getNotices()).toContain('属性键不能为空。');
 
 		__resetNotices();
-		const cancel = findButtonByText('Cancel');
+		const cancel = findButtonByText('取消');
 		await cancel?.click();
 		expect(app.fileManager.processFrontMatter).not.toHaveBeenCalled();
-		expect(__getNotices()).toContain('Operation canceled.');
+		expect(__getNotices()).toContain('操作已取消。');
 	});
 });
 
@@ -275,7 +275,7 @@ describe('Modal UX / Toggle 可见标签', () => {
 
 		modal.onOpen();
 
-		expect(findElementByText(modal.contentEl, 'Copy file names only')).toBe(true);
+		expect(findElementByText(modal.contentEl, '仅复制文件名')).toBe(true);
 	});
 
 	it('add-to-canvas 弹窗应在两种模式下显示 toggle 标签', () => {
@@ -287,7 +287,7 @@ describe('Modal UX / Toggle 可见标签', () => {
 			'board.canvas'
 		);
 		contentModeModal.onOpen();
-		expect(findElementByText(contentModeModal.contentEl, 'Split content by line')).toBe(true);
+		expect(findElementByText(contentModeModal.contentEl, '按行拆分内容')).toBe(true);
 
 		const fileModeModal = new AddToCanvasConfirmModal(
 			app as never,
@@ -295,6 +295,6 @@ describe('Modal UX / Toggle 可见标签', () => {
 			'board.canvas'
 		);
 		fileModeModal.onOpen();
-		expect(findElementByText(fileModeModal.contentEl, 'Include resolved links')).toBe(true);
+		expect(findElementByText(fileModeModal.contentEl, '包含解析的链接')).toBe(true);
 	});
 });

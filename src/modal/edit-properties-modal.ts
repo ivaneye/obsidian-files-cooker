@@ -1,4 +1,5 @@
 import { App, Modal, Notice, TAbstractFile, TFile } from 'obsidian';
+import { getBackup } from 'src/backup/backup-service';
 import {
 	addLabeledTextField,
 	addLabeledToggleField,
@@ -30,34 +31,34 @@ export class EditPropertiesModal extends Modal {
         const { contentEl } = this;
 
         renderModalLayout(contentEl, {
-            title: 'Edit properties',
-            description: 'Configure key/value and override option for selected files.',
-            summaryLines: [`${this.resultArr.length} files selected.`],
+            title: '编辑属性',
+            description: '为选中的文件配置属性键/值和覆盖选项。',
+            summaryLines: [`已选中 ${this.resultArr.length} 个文件。`],
             listItems: this.resultArr.map((info) => info.path),
-            listLabel: 'Affected files',
-            emptyMessage: 'No files to edit.',
+            listLabel: '受影响的文件',
+            emptyMessage: '没有可编辑的文件。',
             variant: 'input',
         });
 
         if (this.resultArr.length === 0) {
             addModalActions(contentEl, [
                 {
-                    text: 'Close',
+                    text: '关闭',
                     onClick: () => this.close(),
                 },
             ]);
         } else {
 
-            addLabeledTextField(contentEl, 'Property Key', 'Input property key', (val) => {
+            addLabeledTextField(contentEl, '属性键', '输入属性键', (val) => {
 				this.key = val;
 			});
-            addLabeledTextField(contentEl, 'Property Value', 'Input property value', (val) => {
+            addLabeledTextField(contentEl, '属性值', '输入属性值', (val) => {
 				this.val = val;
 			});
             addLabeledToggleField(
 				contentEl,
-				'Override Existing',
-				'Override if exists!',
+				'覆盖已有属性',
+				'属性已存在时覆盖！',
 				Boolean(this.overrideFlag),
 				(val) => {
 					localStorage.setItem('overrideFlag', val + '');
@@ -67,23 +68,27 @@ export class EditPropertiesModal extends Modal {
 
             addModalActions(contentEl, [
                 {
-                    text: 'Apply properties',
+                    text: '应用属性',
                     cta: true,
                     onClick: async () => {
                         if (isBlank(this.key as string)) {
-                            showValidationNotice('Property key is required.');
+                            showValidationNotice('属性键不能为空。');
                             return;
                         }
                         if (isBlank(this.val as string)) {
-                            showValidationNotice('Property value is required.');
+                            showValidationNotice('属性值不能为空。');
                             return;
                         }
                         this.close();
+                        // 属性编辑为内容写：操作前逐文件快照，成功提交、异常丢弃
+                        const recorder = getBackup().begin('properties', '编辑属性');
+                        try {
                         for (let i = 0; i < this.resultArr.length; i++) {
                             const info = this.resultArr[i] as TFile;
+                            await recorder.snapshotContentBefore(info);
                             const self = this;
                             // todo : 支持添加、删除单个标签值，alias值
-                            this.app.fileManager.processFrontMatter(info, (props) => {
+                            await this.app.fileManager.processFrontMatter(info, (props) => {
                                 const k = self.key.trim();
                                 const v = self.val.trim();
                                 if (k === 'tags' || k === 'alias' || k === 'cssclasses') {
@@ -116,14 +121,19 @@ export class EditPropertiesModal extends Modal {
                                 }
                             });
                         }
-                        new Notice('Properties updated.');
+                        await recorder.finish();
+                        new Notice('属性已更新。');
+                        } catch (e) {
+                            recorder.abort();
+                            new Notice('操作失败：' + (e as Error).message);
+                        }
                     },
                 },
                 {
-                    text: 'Cancel',
+                    text: '取消',
                     onClick: () => {
                         this.close();
-                        new Notice('Operation canceled.');
+                        new Notice('操作已取消。');
                     },
                 },
             ]);

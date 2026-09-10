@@ -12,6 +12,7 @@ export class MockElement {
 	classList: {
 		add: (...tokens: string[]) => void;
 	};
+	listeners: Record<string, Array<(event?: { target?: MockElement }) => void>> = {};
 
 	constructor(tag: string, options?: ElementOptions) {
 		this.tag = tag;
@@ -25,6 +26,18 @@ export class MockElement {
 			},
 		};
 	}
+
+	addEventListener(type: string, fn: (event?: { target?: MockElement }) => void): void {
+		(this.listeners[type] ??= []).push(fn);
+	}
+
+	/** 测试辅助：模拟触发事件（如 click），target 指向当前元素。 */
+	trigger(type: string): void {
+		for (const fn of this.listeners[type] ?? []) {
+			fn({ target: this });
+		}
+	}
+
 
 	createEl(tag: string, options?: ElementOptions): MockElement {
 		const child = new MockElement(tag, options);
@@ -97,10 +110,15 @@ export class Modal {
 	constructor(app: any) {
 		this.app = app;
 		this.contentEl = new MockElement('div', { cls: 'modal-content' });
+		// 模拟 Obsidian Modal 基类内部字段：open() 时会把 this.selection 设为 DOM Selection 对象
+		// （用于关闭时恢复文本选区）。子类若把字段命名为 selection 会被覆盖，测试应能暴露该冲突。
+		(this as any).selection = null;
 	}
 
 	open(): void {
 		this.isOpen = true;
+		// 模拟 Obsidian Modal.open()：shouldRestoreSelection 为 true 时 this.selection 被替换为 DOM Selection 对象
+		(this as any).selection = { removeAllRanges: () => {} };
 		if (typeof (this as any).onOpen === 'function') {
 			(this as any).onOpen();
 		}
@@ -148,6 +166,7 @@ export class ButtonComponent {
 export class ToggleComponent {
 	value = false;
 	tooltip = '';
+	disabled = false;
 	onChangeHandler?: (val: boolean) => void;
 
 	setTooltip(text: string): this {
@@ -157,6 +176,11 @@ export class ToggleComponent {
 
 	setValue(value: boolean): this {
 		this.value = value;
+		return this;
+	}
+
+	setDisabled(disabled: boolean): this {
+		this.disabled = disabled;
 		return this;
 	}
 
