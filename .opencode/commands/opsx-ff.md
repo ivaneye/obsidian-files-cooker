@@ -1,34 +1,16 @@
 ---
-name: openspec-propose
-description: Propose a new change with all artifacts generated in one step. Use when the user wants to quickly describe what they want to build and get a complete proposal with design, specs, and tasks ready for implementation.
-allowed-tools: Bash(openspec:*)
-license: MIT
-compatibility: Requires openspec CLI.
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.7.0"
+description: "Create a change and generate all artifacts needed for implementation in one go"
 ---
 
-Propose a new change - create the change and generate all artifacts in one step.
-
-I'll create a change with the artifacts your schema defines. With the default spec-driven schema that is:
-- proposal.md (what & why)
-- `specs/<capability>/spec.md` (what the system must do - a delta, not the main spec)
-- design.md (how)
-- tasks.md (implementation steps)
-
-When ready to implement, run /opsx-apply
-
----
+Fast-forward through artifact creation - generate everything needed to start implementation.
 
 **Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `view`). Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
-**Input**: The user's request should include a change name (kebab-case) OR a description of what they want to build.
+**Input**: The argument after `/opsx-ff` is the change name (kebab-case), OR a description of what the user wants to build.
 
 **Steps**
 
-1. **If no clear input provided, ask what they want to build**
+1. **If no input provided, ask what they want to build**
 
    Ask the user (open-ended, no preset options):
    > "What change do you want to work on? Describe what you want to build or fix."
@@ -41,7 +23,7 @@ When ready to implement, run /opsx-apply
    ```bash
    openspec new change "<name>"
    ```
-   This creates a scaffolded change in the planning home resolved by the CLI with `.openspec.yaml`.
+   This creates a scaffolded change in the planning home resolved by the CLI.
 
 3. **Get the artifact build order**
    ```bash
@@ -75,7 +57,7 @@ When ready to implement, run /opsx-apply
       - If the `instruction` field delegates creation to a specific skill or command, invoke it to produce the artifact instead of writing the file yourself, then verify the artifact file exists at `resolvedOutputPath`
       - Otherwise create the artifact file using `template` as the structure and write it to `resolvedOutputPath`. If `resolvedOutputPath` is a glob, follow `instruction` to choose the concrete file path
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
-      - Show brief progress: "Created <artifact-id>"
+      - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until every artifact in the required set exists (not just `apply.requires`)**
       - After creating each artifact, re-run `openspec status --change "<name>" --json`
@@ -102,7 +84,7 @@ After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions, plus any conditional artifact you skipped and why
 - What's ready: "All artifacts needed for implementation are ready."
-- Prompt: "Run `/opsx-apply` or ask me to implement to start working on the tasks."
+- Prompt: "Run `/opsx-apply` to start implementing."
 
 **Artifact Creation Guidelines**
 
