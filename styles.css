@@ -101,6 +101,11 @@
 
 .file-cooker-modal .setting-item-control {
 	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.file-cooker-modal .setting-item-control button {
+	flex: 0 0 auto;
 }
 
 /* Input modal rows: label + control like form */
@@ -203,3 +208,338 @@
 .file-cooker-modal__footer .setting-item-control {
 	justify-content: flex-end;
 }
+
+/* AI proposal modal: toolbar + card list + editable prop rows */
+.fc-ai-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0 0 8px;
+}
+
+.fc-ai-toolbar__stats {
+	color: var(--text-muted);
+	font-size: 13px;
+}
+
+.fc-ai-toolbar__btn {
+	color: var(--text-accent);
+	cursor: pointer;
+	font-size: 13px;
+	user-select: none;
+}
+
+.fc-ai-toolbar__btn:hover {
+	text-decoration: underline;
+}
+
+.fc-ai-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.fc-ai-card {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 8px 10px;
+	background-color: var(--background-primary);
+	transition: opacity 120ms ease;
+}
+
+.fc-ai-card--off {
+	opacity: 0.5;
+}
+
+.fc-ai-card__head {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	cursor: pointer;
+}
+
+.fc-ai-card__check {
+	margin: 3px 0 0;
+	width: 15px;
+	height: 15px;
+	flex-shrink: 0;
+	accent-color: var(--interactive-accent);
+	cursor: pointer;
+}
+
+.fc-ai-card__meta {
+	min-width: 0;
+}
+
+.fc-ai-card__name {
+	font-weight: 600;
+	font-size: 0.95em;
+	line-height: 1.35;
+	word-break: break-all;
+}
+
+.fc-ai-card__folder {
+	color: var(--text-muted);
+	font-size: 12px;
+	line-height: 1.4;
+	word-break: break-all;
+}
+
+.fc-ai-card__props {
+	display: grid;
+	grid-template-columns: 70px minmax(0, 1fr);
+	gap: 6px 8px;
+	align-items: center;
+	margin: 8px 0 0 23px;
+}
+
+.fc-ai-card__key {
+	color: var(--text-muted);
+	font-size: 12px;
+}
+
+.fc-ai-card__input {
+	width: 100%;
+	font-size: 13px;
+}
+
+/* AI selector modal: target switcher, query editor, warnings */
+.fc-ai-targets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0 0 10px;
+}
+
+.fc-ai-targets__btn {
+	padding: 4px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 14px;
+	font-size: 13px;
+	cursor: pointer;
+	user-select: none;
+	color: var(--text-muted);
+}
+
+.fc-ai-targets__btn--active {
+	border-color: var(--interactive-accent);
+	color: var(--text-normal);
+	background: color-mix(in srgb, var(--interactive-accent) 12%, transparent);
+}
+
+.fc-ai-input {
+	width: 100%;
+	margin-bottom: 10px;
+	font-size: 14px;
+}
+
+.fc-ai-warn {
+	margin: 4px 0 8px;
+	padding: 6px 10px;
+	border-left: 3px solid var(--color-orange);
+	background: color-mix(in srgb, var(--color-orange) 10%, transparent);
+	border-radius: 4px;
+	font-size: 12.5px;
+	color: var(--text-muted);
+}
+
+/* Workbench: 3-step wizard indicator */
+.fc-wb-steps {
+	display: flex;
+	gap: 16px;
+	margin: 0 0 10px;
+}
+
+.fc-wb-steps__item {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-faint);
+}
+
+.fc-wb-steps__item--active {
+	color: var(--interactive-accent);
+}
+
+/* Workbench shell: desktop-level canvas (简约四策略落地) */
+.fc-wb-shell {
+	width: min(960px, 94vw) !important;
+	height: auto;
+	max-height: 90vh;
+}
+
+.fc-wb-shell .modal-content {
+	display: flex;
+	flex-direction: column;
+	max-height: calc(90vh - 60px);
+	overflow-y: auto;
+}
+
+.fc-wb-shell .fc-ai-input {
+	min-height: 26vh;
+	resize: vertical;
+	font-family: var(--font-monospace);
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.fc-wb-shell .fc-wb-list {
+	max-height: 46vh;
+}
+
+/* 步骤条:可点击直达 */
+.fc-wb-steps__item--link {
+	cursor: pointer;
+}
+
+.fc-wb-steps__item--link:hover {
+	color: var(--text-normal);
+	text-decoration: underline;
+}
+
+/* 来源分组分隔线 */
+.fc-ai-targets__sep {
+	width: 1px;
+	height: 20px;
+	background: var(--background-modifier-border);
+	margin: 0 6px;
+	align-self: center;
+}
+
+/* 页脚:左侧次级链接 + 右侧唯一主 CTA */
+.fc-wb-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-top: 8px;
+}
+
+.fc-wb-footer__links {
+	display: flex;
+	gap: 14px;
+	flex-wrap: wrap;
+}
+
+.fc-wb-footer__link {
+	color: var(--text-muted);
+	font-size: 13px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.fc-wb-footer__link:hover {
+	color: var(--text-accent);
+	text-decoration: underline;
+}
+
+/* lint 问题内联区 */
+.fc-wb-issues:not(:empty) {
+	margin-bottom: 10px;
+}
+
+/* 执行步骤:操作目录卡片(修改属性/整理文件) */
+.fc-wb-catalog {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+	gap: 8px;
+	margin: 4px 0 16px;
+}
+
+.fc-wb-catalog__btn {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	box-sizing: border-box;
+	min-width: 0;
+	max-width: 100%;
+	width: 100%;
+	height: auto !important; /* Obsidian 给所有 button 设了 --input-height 固定高度，必须解除 */
+	padding: 10px 12px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background: var(--background-primary);
+	cursor: pointer;
+	text-align: left;
+	transition: border-color 100ms ease, background 100ms ease;
+	white-space: normal !important;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	overflow: hidden;
+}
+
+.fc-wb-catalog__btn:hover {
+	border-color: var(--interactive-accent);
+	background: color-mix(in srgb, var(--interactive-accent) 8%, transparent);
+}
+
+.fc-wb-catalog__btn--accent {
+	border-color: color-mix(in srgb, var(--interactive-accent) 45%, var(--background-modifier-border));
+	background: color-mix(in srgb, var(--interactive-accent) 10%, transparent);
+}
+
+.fc-wb-catalog__label {
+	flex-shrink: 0;
+	font-weight: 600;
+	font-size: 13.5px;
+	color: var(--text-normal);
+	box-sizing: border-box;
+	max-width: 100%;
+	white-space: normal !important;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+.fc-wb-catalog__desc {
+	display: block;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	max-width: 100%;
+	margin-top: 4px;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--text-muted);
+	white-space: normal !important;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+.fc-wb-catalog__btn--warning {
+	border-left: 3px solid var(--color-red);
+}
+
+/* AI 生成 tab:填充主色(与三种手写脚本 tab 区分,示意其前置关系) */
+.fc-ai-targets__btn--gen {
+	border-color: var(--interactive-accent);
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.fc-ai-targets__btn--gen.fc-ai-targets__btn--active {
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 35%, transparent);
+}
+
+/* 确认清单文件链接 */
+.fc-wb-filelink {
+	text-decoration: none;
+	font-weight: 600;
+	word-break: break-all;
+}
+
+.fc-wb-filelink:hover {
+	text-decoration: underline;
+	color: var(--interactive-accent);
+}
+
+/* lint 错误变体 */
+.fc-ai-warn--error {
+	border-left-color: var(--color-red);
+	background: color-mix(in srgb, var(--color-red) 10%, transparent);
+}
+
+/* 工作台打开期间:悬停预览浮窗抬到弹窗之上 */
+body.fc-wb-open .hover-popover {
+	z-index: 100 !important;
+}
+
+

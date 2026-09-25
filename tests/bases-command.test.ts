@@ -121,6 +121,7 @@ describe('BasesCommand', () => {
 			'delete-bases-results',
 			'copy-bases-result-links',
 			'edit-front-matter-in-bases-results',
+			'ai-complete-properties-in-bases-results',
 			'rename-in-bases-results',
 			'add-bases-results-to-canvas',
 			'add-bases-task-to-canvas',

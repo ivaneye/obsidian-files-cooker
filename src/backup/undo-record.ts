@@ -30,7 +30,7 @@ export interface FileChange {
 export type UndoStatus = 'active' | 'partial' | 'reverted';
 
 /** 批量写操作的类型（与各确认模态框一一对应）。 */
-export type OpType = 'properties' | 'move' | 'rename' | 'delete' | 'merge' | 'create';
+export type OpType = 'properties' | 'ai-properties' | 'move' | 'rename' | 'delete' | 'merge' | 'create';
 
 /** 一条可回滚的历史记录。 */
 export interface UndoRecord {
@@ -48,7 +48,7 @@ export interface UndoRecord {
 	files: FileChange[];
 }
 
-const OP_TYPES: OpType[] = ['properties', 'move', 'rename', 'delete', 'merge', 'create'];
+const OP_TYPES: OpType[] = ['properties', 'ai-properties', 'move', 'rename', 'delete', 'merge', 'create'];
 const STATUSES: UndoStatus[] = ['active', 'partial', 'reverted'];
 
 /** 序列化记录列表为 manifest 文本。 */

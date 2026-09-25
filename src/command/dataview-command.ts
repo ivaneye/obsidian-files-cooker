@@ -5,6 +5,7 @@ import { Action } from 'src/action/action';
 import { CopyAction } from 'src/action/copy-action';
 import { DeleteAction } from 'src/action/delete-action';
 import { EditPropertiesAction } from 'src/action/edit-properties-action';
+import { AiPropertiesAction } from 'src/action/ai-properties-action';
 import { MoveAction } from 'src/action/move-action';
 import { RenameAction } from 'src/action/rename-action';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
@@ -31,6 +32,7 @@ export class DataviewCommand implements Command {
         this.registDeleteFile(dataviewApi);
         this.registCopyLinks(dataviewApi);
         this.registEditProp(dataviewApi);
+        this.registAiCompleteProps(dataviewApi);
 
         // Rename Files
         this.registRenameFile(dataviewApi);
@@ -64,6 +66,22 @@ export class DataviewCommand implements Command {
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
                     new DataviewReader(this.plugin, editor.getSelection()).read(new EditPropertiesAction(this.plugin.app));
+                }
+                return dataviewApi != null;
+            }
+        });
+    }
+
+    /**
+     * AI 属性补全：推断提案 → 人工审核 → 应用
+     */
+    private registAiCompleteProps(dataviewApi: DataviewApi) {
+        this.plugin.addCommand({
+            id: "ai-complete-properties-in-dataview-results",
+            name: "AI complete properties in dataview results ...",
+            editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+                if (!checking) {
+                    new DataviewReader(this.plugin, editor.getSelection()).read(new AiPropertiesAction(this.plugin));
                 }
                 return dataviewApi != null;
             }

@@ -278,12 +278,32 @@ export class BackupService {
 		return records;
 	}
 
-	/** 原子写 manifest：先写临时文件，再 rename 覆盖。 */
+	/** 原子写 manifest：先写临时文件，再 rename 覆盖。
+	 * 注意：Obsidian 的 adapter.rename 在目标已存在时抛「Destination file already exists」
+	 * （与 Node fs.rename 静默覆盖不同），因此 rename 前需先移除旧 manifest。
+	 * 若 rename 仍失败则兜底直接覆盖写，保证备份记录不丢。
+	 */
 	private async saveManifest(records: UndoRecord[]): Promise<void> {
 		const manifestPath = `${this.settings.backupFolder}/manifest.json`;
 		const tmpPath = `${manifestPath}.tmp`;
-		await this.app.vault.adapter.write(tmpPath, serializeRecords(records));
-		await this.app.vault.adapter.rename(tmpPath, manifestPath);
+		const content = serializeRecords(records);
+		await this.app.vault.adapter.write(tmpPath, content);
+		try {
+			if (await this.app.vault.adapter.exists(manifestPath)) {
+				await this.app.vault.adapter.remove(manifestPath);
+			}
+			await this.app.vault.adapter.rename(tmpPath, manifestPath);
+		} catch (e) {
+			// 兑底：放弃原子性直接覆盖写（记录不丢），并清理临时文件
+			await this.app.vault.adapter.write(manifestPath, content);
+			try {
+				if (await this.app.vault.adapter.exists(tmpPath)) {
+					await this.app.vault.adapter.remove(tmpPath);
+				}
+			} catch {
+				// 清理失败不影响记录落盘
+			}
+		}
 	}
 
 	/** 保留清理：超过 retention 时删除最旧记录（先删 blob 目录再更新 manifest）。 */

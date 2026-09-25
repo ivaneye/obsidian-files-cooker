@@ -3,6 +3,7 @@ import { Action } from 'src/action/action';
 import { CopyAction } from 'src/action/copy-action';
 import { DeleteAction } from 'src/action/delete-action';
 import { EditPropertiesAction } from 'src/action/edit-properties-action';
+import { AiPropertiesAction } from 'src/action/ai-properties-action';
 import { MoveAction } from 'src/action/move-action';
 import { RenameAction } from 'src/action/rename-action';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
@@ -27,6 +28,7 @@ export class BasesCommand implements Command {
         this.registDeleteFile();
         this.registCopyLinks();
         this.registEditProp();
+        this.registAiCompleteProps();
         this.registRenameFile();
         this.registAddFile2Canvas();
         this.registAddTask2Canvas();
@@ -48,6 +50,19 @@ export class BasesCommand implements Command {
             name: 'Edit Properties in bases results ...',
             callback: () => {
                 new BasesReader(this.plugin).read(new EditPropertiesAction(this.plugin.app));
+            }
+        });
+    }
+
+    /**
+     * AI 属性补全：推断提案 → 人工审核 → 应用
+     */
+    private registAiCompleteProps() {
+        this.plugin.addCommand({
+            id: 'ai-complete-properties-in-bases-results',
+            name: 'AI complete properties in bases results ...',
+            callback: () => {
+                new BasesReader(this.plugin).read(new AiPropertiesAction(this.plugin));
             }
         });
     }

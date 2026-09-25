@@ -96,6 +96,41 @@ Every batch write operation — **edit properties / move / rename / delete / mer
 > **Backup folder**: backups are stored inside your vault (default `.file-cooker/backups`). The dot prefix hides it from the file explorer by default; you can also add it to **Settings → Files and links → Excluded files** (e.g. `.file-cooker`) to keep it out of search and graph.
 > **Out of scope**: **Canvas** operations and **flomo** sync are not backed up (they write through internal APIs / the network and don't touch vault files).
 
+## 🤖 AI (experimental, new)
+
+AI can infer frontmatter properties (tags / aliases / custom scalar properties) from note content, propose values for your review, and apply them in batch after your confirmation.
+
+- **Any source**: trigger from clipboard / current file links / search results / Dataview / Bases results, or right-click a single file
+- **Proposal first**: nothing is written before you review; edit or uncheck any proposal
+- **Multi-value merge**: tags / aliases are merged into existing values (no overwrite); scalar properties are only written when absent (override toggle available)
+- **Undoable**: applied AI writes create backup records, revertable from backup history like any other batch operation
+- **Opt-in & private**: AI is disabled by default; the confirmation dialog always states exactly what will be sent (file name + first N characters, configurable)
+- **OpenAI-compatible providers**: works with DeepSeek / Kimi / GLM / OpenRouter / Ollama (local) — anything speaking the OpenAI Chat API
+
+> Setup: Settings → File Cooker → AI (experimental) → enable, fill in base URL / model / API key.
+> AI commands are blocked with a notice until configured.
+
+### 🍳 Workbench: one entry for query → confirm → execute (new)
+
+The command **Open File Cooker workbench ...** (also on the sidebar ribbon) opens a 3-step wizard:
+
+1. **Query** — pick any source: AI-generated queries (one sentence → DQL / search / Bases), handwritten DQL / search / Bases (**with syntax check**), or the classic sources (search panel results / clipboard / current file links)
+2. **Confirm** — review the matched file list (batch limit truncation is shown)
+3. **Execute** — pick an operation from the grouped catalog (edit properties / AI completion / move / merge / canvas / rename / delete); every write still goes through its confirmation dialog with backup & undo
+
+Step navigation preserves everything you typed. Existing commands keep working as shortcuts.
+
+Scripts you already have can be imported: **从笔记导入…** fills the DQL / search / Bases editor from a picked note's ` ```dataview ` / ` ```query ` code block or a saved `.base` file, then runs a syntax check automatically.
+
+### 🗣️ Find files with natural language (new)
+
+Type a sentence like *"last year's unfinished reading notes"* — the AI compiles it into **DQL, Obsidian search syntax, and Bases filters** (all three, locally & deterministically), previews them side by side, and after your approval runs the one you pick. Matching files go straight into File Cooker's batch pipeline (edit properties / move / rename / delete / canvas / flomo) with full backup & undo.
+
+- One input, **three query languages** (DQL requires the Dataview plugin)
+- Query text is editable before running; Bases can be saved as a `.base` file
+- Read-only until you dispatch results to a batch operation
+- Sends only your sentence + vault metadata (tag/property/folder lists), never note bodies
+
 ## ⚙️ Settings
 
 | Setting | Purpose | Default |
@@ -105,6 +140,7 @@ Every batch write operation — **edit properties / move / rename / delete / mer
 | Enable backup | Create a snapshot for every batch write so it can be reverted | on |
 | Backup folder | Vault folder where backups are stored (dot-prefix hides it) | `.file-cooker/backups` |
 | Retention | Number of recent backup records to keep | `20` |
+| AI (experimental) | Enable AI property completion; base URL / model / API key / batch params / inference options | off |
 
 > flomo sync commands will notify "Please config flomoAPI first!" when the API is not configured.
 

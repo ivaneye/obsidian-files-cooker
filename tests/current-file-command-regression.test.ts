@@ -20,6 +20,7 @@ vi.mock('src/reader/current-file-reader', () => ({
 vi.mock('src/action/create-action', () => ({ CreateAction: class {} }));
 vi.mock('src/action/delete-action', () => ({ DeleteAction: class {} }));
 vi.mock('src/action/edit-properties-action', () => ({ EditPropertiesAction: class {} }));
+vi.mock('src/action/ai-properties-action', () => ({ AiPropertiesAction: class {} }));
 vi.mock('src/action/move-action', () => ({ MoveAction: class {} }));
 vi.mock('src/action/rename-action', () => ({ RenameAction: class {} }));
 vi.mock('src/action/sync-flomo-action', () => ({ SyncFlomoAction: class {} }));

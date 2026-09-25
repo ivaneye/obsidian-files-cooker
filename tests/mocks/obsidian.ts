@@ -49,6 +49,10 @@ export class MockElement {
 		return this.createEl('div', options);
 	}
 
+	createSpan(options?: ElementOptions): MockElement {
+		return this.createEl('span', options);
+	}
+
 	empty(): void {
 		this.children = [];
 		this.innerHTML = '';
@@ -220,6 +224,8 @@ export class TextComponent {
 export class Setting {
 	static instances: Setting[] = [];
 	el: MockElement;
+	name = '';
+	desc = '';
 	buttons: ButtonComponent[] = [];
 	toggles: ToggleComponent[] = [];
 	texts: TextComponent[] = [];
@@ -227,6 +233,16 @@ export class Setting {
 	constructor(el: MockElement) {
 		this.el = el;
 		Setting.instances.push(this);
+	}
+
+	setName(text: string | DocumentFragment): this {
+		this.name = String(text);
+		return this;
+	}
+
+	setDesc(text: string | DocumentFragment): this {
+		this.desc = String(text);
+		return this;
 	}
 
 	addButton(cb: (btn: ButtonComponent) => void): this {
@@ -254,6 +270,25 @@ export class Setting {
 		Setting.instances = [];
 	}
 }
+
+export class SuggestModal {
+	app: any;
+	contentEl: MockElement;
+
+	constructor(app: any) {
+		this.app = app;
+		this.contentEl = new MockElement('div', { cls: 'modal-content' });
+	}
+
+	open(): void {}
+	close(): void {}
+}
+
+/** 平台信息（工作台分发用：移动端弹窗不支持叠层时回退为"先关再开"）。 */
+export const Platform = {
+	isMobile: false,
+	isDesktop: true,
+};
 
 export class Menu {
 	addItem(): this {

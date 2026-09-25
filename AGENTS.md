@@ -12,6 +12,8 @@
 - `src/action/`: action implementations such as move, rename, delete, merge, sync, and canvas operations.
 - `src/modal/`: confirmation and picker modals used by actions and commands.
 - `src/backup/`: backup & undo module — `backup-service.ts` (snapshot/commit/revert/drift/retention + singleton), `undo-record.ts` (data model + manifest serialization), `backup-settings.ts` (defaults + deep merge + settings UI).
+- `src/ai/`: AI module — `ai-provider.ts` (OpenAI-compatible chat client), `ai-settings.ts` (AiSettings defaults + resolve + settings UI + SecretStorage key handling), `prop-infer.ts` (prompt/parse/normalize pure functions), `batch.ts` (generic batched-concurrency scheduler with retry + cancel), `query-ir.ts` (query IR v1 contract + validation), `compile-dql.ts` / `compile-search.ts` / `compile-bases.ts` (deterministic IR→query-language compilers returning `{text, unsupported}`), `query-planner.ts` (NL + vault context → IR), `query-executor.ts` (available-targets source of truth + CaptureAction + DQL/search execution).
+- `src/validation/`: query script lint — `query-lint.ts` (structural checks for search/Bases + Dataview tryQuery dry-run for DQL; errors block execution, warnings allow with notice). Workbench orchestration lives in `src/modal/workbench-modal.ts` (3-step wizard: query → confirm → execute).
 - `src/utils/`: small utility helpers.
 - `tests/`: vitest tests; `tests/mocks/obsidian.ts` (Obsidian API mocks) and `tests/mocks/vault-mock.ts` (in-memory vault/fileManager for backup tests).
 - `manifest.json`, `versions.json`: Obsidian plugin metadata.
@@ -92,7 +94,7 @@ npx vitest run <path> -t "<test name"       # filter by test name
 - New selection sources should usually be added as a new `Readable` implementation.
 
 ## Backup & undo conventions
-- All batch write operations (properties / move / rename / delete / merge / create) go through the backup channel: `getBackup().begin(opType, opLabel)` in the modal apply branch, per-file `snapshot*` calls, then `finish()` on success / `abort()` on failure.
+- All batch write operations (properties / ai-properties / move / rename / delete / merge / create) go through the backup channel: `getBackup().begin(opType, opLabel)` in the modal apply branch, per-file `snapshot*` calls, then `finish()` on success / `abort()` on failure.
 - `src/backup/backup-service.ts` exposes a module-level singleton via `initBackup(app, settings)` (called from `main.ts onload`) and `getBackup()`; `__resetBackupForTest()` resets it in tests.
 - Blob files and `manifest.json` are written through `vault.adapter` (no vault events); manifest commit is atomic (temp file + rename).
 - Revert supports per-file selection and drift detection; drift entries are never silently overwritten (force flag required).

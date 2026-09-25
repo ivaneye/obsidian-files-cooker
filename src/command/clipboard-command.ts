@@ -3,6 +3,7 @@ import { Action } from 'src/action/action';
 import { AddToCanvasAction } from 'src/action/add-to-canvas-action';
 import { DeleteAction } from 'src/action/delete-action';
 import { EditPropertiesAction } from 'src/action/edit-properties-action';
+import { AiPropertiesAction } from 'src/action/ai-properties-action';
 import { MoveAction } from 'src/action/move-action';
 import { RenameAction } from 'src/action/rename-action';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
@@ -27,6 +28,7 @@ export class ClipboardCommand implements Command {
         this.registMergeFile();
         this.registDeleteFile();
         this.registEditProp();
+        this.registAiCompleteProps();
         this.registRenameFile();
         // Canvas
         this.registAddFile2Canvas();
@@ -53,6 +55,19 @@ export class ClipboardCommand implements Command {
             name: 'Edit Properties in clipboard files ...',
             callback: () => {
                 new ClipboardReader(this.plugin).read(new EditPropertiesAction(this.plugin.app));
+            }
+        });
+    }
+
+    /**
+     * AI 属性补全：推断提案 → 人工审核 → 应用
+     */
+    private registAiCompleteProps() {
+        this.plugin.addCommand({
+            id: 'ai-complete-properties-in-clipboard',
+            name: 'AI complete properties in clipboard files ...',
+            callback: () => {
+                new ClipboardReader(this.plugin).read(new AiPropertiesAction(this.plugin));
             }
         });
     }

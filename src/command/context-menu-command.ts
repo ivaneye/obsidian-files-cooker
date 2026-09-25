@@ -2,6 +2,7 @@ import FileCookerPlugin from 'main';
 import { ActionModel } from 'src/action/action';
 import { DeleteAction } from 'src/action/delete-action';
 import { EditPropertiesAction } from 'src/action/edit-properties-action';
+import { AiPropertiesAction } from 'src/action/ai-properties-action';
 import { RenameAction } from 'src/action/rename-action';
 import { ChooseCanvasModal } from 'src/modal/choose-canvas-modal';
 import { CurrentFileReader, ReadType } from 'src/reader/current-file-reader';
@@ -73,6 +74,15 @@ export class ContextMenuCommand implements Command {
 				.setTitle('Edit target file properties ...')
 				.onClick(() => {
 					this.runTargetFileAction(targetActionModel, () => new EditPropertiesAction(this.plugin.app));
+				});
+		});
+
+		// AI 属性补全（单文件快速路径）：推断提案 → 人工审核 → 应用
+		menu.addItem((item) => {
+			item
+				.setTitle('AI complete properties ...')
+				.onClick(() => {
+					this.runTargetFileAction(targetActionModel, () => new AiPropertiesAction(this.plugin));
 				});
 		});
 

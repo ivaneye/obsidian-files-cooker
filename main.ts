@@ -2,6 +2,8 @@ import { Plugin, App, PluginSettingTab, Setting } from 'obsidian';
 import { initBackup } from 'src/backup/backup-service';
 import { DEFAULT_BACKUP_SETTINGS, deepMerge, renderBackupSettings } from 'src/backup/backup-settings';
 import type { BackupSettings } from 'src/backup/backup-settings';
+import { DEFAULT_AI_SETTINGS, renderAiSettings } from 'src/ai/ai-settings';
+import type { AiSettings } from 'src/ai/ai-settings';
 import { ClipboardCommand } from 'src/command/clipboard-command';
 import { CurrentFileCommand } from 'src/command/current-file-command';
 import { DataviewCommand } from 'src/command/dataview-command';
@@ -10,6 +12,8 @@ import { SearchCommand } from 'src/command/search-command';
 import { ContextMenuCommand } from 'src/command/context-menu-command';
 import { BasesCommand } from 'src/command/bases-command';
 import { UndoCommand } from 'src/command/undo-command';
+import { AiSelectorCommand } from 'src/command/ai-selector-command';
+import { WorkbenchCommand } from 'src/command/workbench-command';
 
 export default class FileCookerPlugin extends Plugin {
 	settings: FileCookerPluginSettings;
@@ -29,6 +33,8 @@ export default class FileCookerPlugin extends Plugin {
 		new PresentationCommand(this).regist();
 		new ContextMenuCommand(this).regist();
 		new UndoCommand(this).regist();
+		new AiSelectorCommand(this).regist();
+		new WorkbenchCommand(this).regist();
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new FileCookerSettingTab(this.app, this));
@@ -51,12 +57,14 @@ const DEFAULT_SETTINGS: FileCookerPluginSettings = {
 	flomoAPI: '',
 	limit: '300',
 	backup: DEFAULT_BACKUP_SETTINGS,
+	ai: DEFAULT_AI_SETTINGS,
 }
 
 interface FileCookerPluginSettings {
 	flomoAPI: string;
 	limit: string;
 	backup: BackupSettings;
+	ai: AiSettings;
 }
 
 class FileCookerSettingTab extends PluginSettingTab {
@@ -98,5 +106,8 @@ class FileCookerSettingTab extends PluginSettingTab {
 
 		// 备份与撤销设置分区（独立渲染函数，避免 main.ts 膨胀）
 		renderBackupSettings(containerEl, this.plugin);
+
+		// AI 设置分区（实验性，默认关闭）
+		renderAiSettings(containerEl, this.plugin);
 	}
 }

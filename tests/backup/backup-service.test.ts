@@ -133,6 +133,38 @@ describe('BackupService 快照与提交', () => {
 		expect(await getBackup().getHistory()).toHaveLength(0);
 		expect(await app.vault.adapter.exists(`${BACKUP_DIR}/manifest.json`)).toBe(false);
 	});
+
+	it('manifest 已存在时再次提交仍成功（真实 adapter.rename 目标已存在会抛错）', async () => {
+		// 模拟真实 Obsidian 行为：adapter.rename 在目标存在时抛错（mock 默认静默覆盖，与真实不一致）
+		const app = createAppMock({ 'a.md': 'before-content' });
+		const strictRename = async (from: string, to: string): Promise<void> => {
+			if (await app.vault.adapter.exists(to)) {
+				throw new Error('Destination file already exists!');
+			}
+			await app.vault.adapter.remove(from);
+			app.vault.files.set(to, app.vault.files.get(from) ?? '');
+		};
+		(app.vault.adapter as unknown as { rename: typeof strictRename }).rename = strictRename;
+		initBackup(app as never, { ...DEFAULT_BACKUP_SETTINGS });
+
+		// 第一次提交：创建 manifest
+		const recorder1 = getBackup().begin('properties', '第一次');
+		await recorder1.snapshotContentBefore({ path: 'a.md' } as never);
+		await recorder1.finish();
+		expect(await getBackup().getHistory()).toHaveLength(1);
+
+		// 第二次提交：manifest 已存在，旧实现在此抛「Destination file already exists」
+		const recorder2 = getBackup().begin('properties', '第二次');
+		await recorder2.snapshotContentBefore({ path: 'a.md' } as never);
+		await recorder2.finish();
+
+		const history = await getBackup().getHistory();
+		expect(history).toHaveLength(2);
+		// 同毫秒创建时时间排序不稳定，只断言两条记录都存在
+		expect(history.map((r) => r.opLabel).sort()).toEqual(['第一次', '第二次'].sort());
+		// 临时文件已清理，不会残留
+		expect(await app.vault.adapter.exists(`${BACKUP_DIR}/manifest.json.tmp`)).toBe(false);
+	});
 });
 
 describe('BackupService 回滚', () => {

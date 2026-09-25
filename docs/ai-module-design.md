@@ -3,6 +3,7 @@
 > 状态：设计稿（待评审）
 > 目标版本：v2.1.0 起，分阶段交付
 > 关联：本设计遵循 `AGENTS.md` 架构约定，建议通过 openspec change 流程实施（见 §9）
+> 修订：§6 已重写为 P3 实施基线（IR + 编译器 / 三语法通译 / 无持久会话 / 复用 P1 配置）
 
 ---
 
@@ -37,7 +38,7 @@ AI 模块的定位一句话：
 |---|---|---|---|
 | **P1** | AI 属性补全 | 按内容批量推断 tags / aliases / 自定义属性 | 价值最高（社区公认痛点）、风险最低（frontmatter 可逆、易审核） |
 | **P2** | AI 重命名 | 按内容批量生成新文件名，确认窗并排展示旧→新 | 高价值；改名影响链接，需走 Obsidian `fileManager.renameFile` 自动更新链接 |
-| **P3** | AI 自然语言选择器 | "把去年没写完的读书笔记找出来" → 文件清单进入现有管线 | 插件变成 agent 入口；只读不写，零风险；是大入口级功能 |
+| **P3** | AI 自然语言选择器（三语法通译） | "把去年没写完的读书笔记找出来" → 编译成 DQL / 搜索 / Bases 三语法 → 命中文件进入现有管线 | 独占位：查询通译 + 批量执行 + 回滚；只读不写，零风险；实施基线见 §6 |
 | **P4** | AI 合并建议 | 识别同主题重复笔记 → 喂给现有 MergeAction | 依赖 P3 的选择能力，顺理成章 |
 | **P5** | 智能归档路由 | 按内容判断每个文件的目标目录，逐文件给出去向提案 | "查询+判断"的完全体；para/中转用户刚需 |
 
@@ -264,19 +265,203 @@ repo 已有 vitest + `tests/mocks/obsidian.ts`（AGENTS.md 中"无测试框架"�
 - 约束：仅改文件名部分，不移动目录；非法字符过滤（`\ / : * ? " < > |`）；重名冲突追加序号
 - 命令名：`AI rename in xxx ...`，挂接方式同 P1
 
-## 6. Phase 3 概要：AI 自然语言选择器
+## 6. Phase 3：AI 自然语言选择器（三语法通译）
 
-新增 `AiSelectorCommand` + `AiQueryModal`（输入自然语言描述）→ **新 Reader**：`AiReader implements Readable`，产出 `ReadInfo` 后接任意现有 Action——用户可以用一句话选文件，然后直接跑移动/属性/删除全流程。
+> 本节为实施基线（评审修订版）。核心决策：LLM 只产 IR，三种查询语言由本地编译器生成；执行复用现有 Reader；无持久会话。
 
-两段式生成（控制 token 与幻觉）：
-1. 先让 LLM 输出**筛选计划**：Dataview DQL 或结构化过滤条件（folder/タグ/日期/关键词）
-2. 本地执行得到候选清单（或 DQL 借道 Dataview 插件执行）；候选过多时再让 LLM 精筛
-- 全库文件路径清单按需注入（仅路径，无正文，5000 篇约 15 万字符，可分片）
-- 纯只读，输出进 ConfirmModal 的既有"确认预览"再执行，与现有安全模型一致
+### 6.1 定位与与旧稿差异
+
+把自然语言编译成 **DQL / 搜索语法 / Bases YAML** 三种查询语言，命中文件直接送入现有 Action 管线。定位一句话：
+
+> 唯一能把自然语言编译成全部三种 Obsidian 查询语言、并把结果送进批量操作 + 备份回滚管线的插件。竞品只会"回答"，File Cooker 能"编译 + 执行 + 回滚"。
+
+与旧稿（v1）的差异：
+
+- **不再新增 `AiReader implements Readable`**；改为 `AiSelectorModal` 编排，经 CaptureAction 复用三个现有 Reader（见 6.3）
+- **放弃"LLM 直接挑文件 / 全库路径清单注入"路线**：IR → 查询执行更确定、零幻觉、可解释，大库无需分片
+- 命令入口不变：独立 `AiSelectorCommand`（选择器本身即来源，不挂在既有五类来源命令下）
+
+### 6.2 架构：IR + 确定性编译器
+
+不让 LLM 直接写三种语法（幻觉率 ×3、不可测试）。LLM 一次调用产出 IR（JSON）+ 一句人类可读解释；本地纯函数编译器产出三份查询文本：
+
+- 编译器是纯函数 → vitest 全覆盖（吃仓库现有测试文化）
+- 用户改 IR 字段或查询文本 → 本地重编译，零 token 成本迭代
+- 三份产物可复制 / 另存为 `.base` / 填入搜索面板——**即使不执行也有独立价值**（竞品没有的"查询通译器"定位）
+
+IR 草案（带 `irVersion` 留演进位）：
+
+```json
+{
+  "irVersion": 1,
+  "intent": "去年标记 #读书 但没读完的笔记",
+  "conditions": {
+    "and": [
+      { "tag": "读书" },
+      { "property": { "field": "status", "op": "notEquals", "value": "done" } },
+      { "fileModified": { "op": "gte", "date": "2025-01-01" } }
+    ]
+  }
+}
+```
+
+IR 节点类型（MVP 集）：`tag` / `folder` / `filename`（文件名包含）/ `property`（op: eq / notEquals / contains / isEmpty / gt / gte / lt / lte）/ `fileModified` / `fileCreated` / `content`（正文关键词）/ `task`（todo / done）/ 布尔组合 `and` / `or` / `not`。
+
+### 6.3 三通道执行（已对照现有代码核实）
+
+| 通道 | 生成 | 程序化执行 |
+|---|---|---|
+| DQL | 容易，语料丰富 | **零改造**：`DataviewReader` 构造函数直接吃 `queryStr`，`api.query()` 已处理 LIST / TABLE / TASK 三种返回 |
+| 搜索语法 | 语法稳定：`tag:` `path:` `file:` `line:` `content:` `task-todo:`、`[属性:值]`（1.4.4+）、`-` 取反、`OR`/`()` 组合 | 需补注入器：`searchView.setQuery(q)`（内部 API，运行时验证）+ 轮询 `resultDomLookup` 稳定（超时上限 ~5s）；兜底 = 打开搜索面板填入查询，Notice 请用户回车 |
+| Bases | 官方函数文档齐全：`file.hasTag()` / `file.inFolder()` / `属性.contains()` 等，YAML 可靠生成 | **P3a**：生成 + 另存为真 `.base` 文件 + 一键打开（产物模式，零执行风险）；**P3b**：写临时 `.file-cooker/tmp/*.base` → setViewState 打开 → 复用现有行探测读取 → 清理 |
+
+**CaptureAction：执行通道 100% 复用现有 Reader，零重构零重复**——
+
+```ts
+/** 捕获 Reader 产出的 ActionModel[] 而不落盘，供选择器编排使用 */
+class CaptureAction implements Action {
+    private resolve!: (models: ActionModel[]) => void;
+    readonly promise: Promise<ActionModel[]>;
+
+    constructor() {
+        this.promise = new Promise((resolve) => { this.resolve = resolve; });
+    }
+
+    act(models: ActionModel[]): void {
+        this.resolve(models);
+    }
+}
+```
+
+三通道统一为：`注入/构造查询 → reader.read(capture) → await capture.promise → TFile[]`。
+流程终点：用户在命中清单上点操作按钮 → `new MoveAction(plugin).act(models)` 等 → 现有确认窗 + 备份回滚全接管。
+
+### 6.4 表达力互补与执行器推荐
+
+三种语言各有一块别人填不了的地（这是"必须三语法"的技术合理性）：
+
+| IR 条件 | DQL | 搜索语法 | Bases |
+|---|---|---|---|
+| 标签 | `FROM #t` | `tag:#t` | `file.hasTag("t")` |
+| 目录 | `FROM "f"` | `path:"f"` | `file.inFolder("f")` |
+| 文件名 | `contains(file.name, x)` | `file:x` | `file.name.contains("x")` |
+| 属性比较 | ✅ | ✅（仅精确 `[f:v]`，取反用 `-(...)`） | ✅ |
+| 日期/数值比较 | ✅ `file.mday >= date(x)` | ❌ | ✅ 公式比较（需手工验证） |
+| 正文关键词 | ❌ | ✅ 唯一强项 | ❌ |
+| 任务状态 | ✅ TASK | ✅ `task-todo:()` | ❌ |
+
+- 每个编译器返回 `{ text, unsupported: IRNode[] }`；编译期完成能力检查
+- **推荐执行器** = 可用集合内 `unsupported` 为空且优先级最高者（`dql > search > bases`）
+- 无任何执行器完整支持 → 不自动执行，展示各目标支持度，用户改 IR / 改查询文本
+
+### 6.5 Tab 可见性（单一事实来源）
+
+`query-executor.ts` 导出唯一能力函数，tab 渲染与推荐共用，避免"显示了不能跑 / 能跑没显示"分裂：
+
+```ts
+export function getAvailableTargets(): QueryTarget[] {
+    const targets: QueryTarget[] = [];
+    if (getAPI() != null) targets.push('dql');  // 已安装且已启用 Dataview（未启用时 getAPI() 返回 null，天然覆盖）
+    targets.push('search');                      // 核心功能恒可用（含移动端）
+    targets.push('bases');                       // minAppVersion 1.12.3，Bases 必在
+    return targets;
+}
+```
+
+边界处理：
+
+1. **IR 含仅 DQL 可表达的条件（如日期比较）但 Dataview 未装**：按规则隐藏 DQL tab；搜索 tab 预览区标注 `N 个条件此语法不支持（已忽略）`；模态框底部一行静态提示「安装 Dataview 插件可启用更强的条件执行」——tab 不出现，但退化不静默
+2. **无执行器完整表达**：见 6.4，不自动执行
+
+### 6.6 用户流程
+
+```
+「AI: find files with natural language ...」（AiSelectorCommand）
+  ↓
+AiSelectorModal：自然语言输入框（+ 可选追问输入）
+  ↓ 一次 LLM 调用（复用 P1 provider 地基）
+query-planner 产出 IR + 人类可读解释
+  ↓ 本地编译（纯函数，零成本）
+提案页：解释 + [DQL | 搜索 | Bases] tab（按 getAvailableTargets 渲染）
+       + 推荐执行器徽标 + IR 字段可编辑 / 查询文本可编辑
+  ↓ 选执行器执行（只读，复用现有 Reader + limit 护栏）
+命中文件清单（数量、截断提示）
+  ↓ 用户点操作按钮
+Move / Rename / Properties / Canvas / flomo / Delete → 现有 Action + 备份回滚
+```
+
+全程只读；取消（任意一步）零写入。
+
+### 6.7 配置（复用 P1 地基，不另起炉灶）
+
+| 项 | 决策 |
+|---|---|
+| `enabled` / `baseUrl` / `model` / `apiKey` | 与 P1 共用一套 AiSettings 与 provider |
+| `batchSize` / `concurrency` / `contextChars` | P1 专属（批量推断），P3 不用（规划器单次调用） |
+| `vaultContext: boolean` | **P3 唯一新增**，默认 true；MVP 恒开、不进设置 UI，留字段为大库用户预留关闭位 |
+
+`vaultContext` 注入内容（**P3 命中率的命门**，不是模型参数）：
+
+| 内容 | 来源 | 上限 |
+|---|---|---|
+| 全库标签词表 | `metadataCache.getTags()` | 200 |
+| 属性键清单 | `metadataCache.getAllPropertyInfos()`（1.9+） | 100 |
+| 顶层/二级目录名 | vault 遍历 | 100 |
+| 今天日期 | `new Date()` | ——（"去年 / 最近三个月"的解析基准） |
+
+未配置 AI 时：Notice + `app.setting.openTabById('obsidian-file-cooker')` 直接跳设置页（P1/P2 可沿用同一增强）。
+
+### 6.8 会话策略：无持久会话
+
+- **产品形态决定**：查询对话是手段不是目的，文件处理完对话价值归零；持久会话属于 Copilot 型聊天产品，照搬只带来状态清理、隐私存储、UI 复杂度三个负担
+- **IR 天然替代会话状态**：状态浓缩在一个 JSON 里，改需求 = 改字段，本地重编译零成本、确定性、可测试
+- **MVP 一次生成**；追问作为可选增强位（按真实反馈决定是否做）：`{previousIR, instruction}` → 新 IR，约 30 行，模态框内存即焚，比喂聊天记录更省 token 更准（模型做 patch 而非重推导）；**不为它加设置项**
+- 明确拒绝：持久会话 / 跨模态会话 / 聊天 UI 范式
+
+### 6.9 新增文件
+
+```
+src/ai/query-ir.ts                 # IR 类型 + 校验 + 规范化
+src/ai/compile-dql.ts              # IR → DQL（纯函数）
+src/ai/compile-search.ts           # IR → 搜索语法（纯函数）
+src/ai/compile-bases.ts            # IR → .base YAML（纯函数）
+src/ai/query-planner.ts            # NL → IR（prompt 构建 + vaultContext 注入 + 响应校验）
+src/ai/query-executor.ts           # getAvailableTargets + CaptureAction + 搜索注入器 + 执行编排
+src/command/ai-selector-command.ts
+src/modal/ai-selector-modal.ts
+tests/ai/query-ir.test.ts
+tests/ai/compile-dql.test.ts
+tests/ai/compile-search.test.ts
+tests/ai/compile-bases.test.ts
+```
+
+### 6.10 测试与验收（P3a DoD）
+
+| 层 | 用例 |
+|---|---|
+| 编译器 | 每种 IR 节点 → 三语法 golden 断言；嵌套 and/or/not；unsupported 标注；引号/路径转义 |
+| query-ir | 非法 JSON / 未知 irVersion / 未知节点 / 值规范化 |
+| 推荐链 | 可用集合过滤（mock getAPI）；优先级；无完整支持时不自动执行 |
+| planner | 合法 IR 抽取、解释字段缺失兜底（网络与真实 LLM 不进单测，手工验收） |
+
+DoD：
+
+1. 未配置 AI → Notice + 跳设置页；未装 Dataview → 无 DQL tab，搜索兜底可执行
+2. 全程只读，直到用户点操作按钮；取消零写入
+3. 三产物可复制；Bases 可另存为 `.base` 并打开
+4. 命中超 `limit` 截断并有 Notice
+5. 移动端可用；`npm run build` 通过，新增单测全绿
+
+### 6.11 分期
+
+| 期 | 范围 |
+|---|---|
+| **P3a** | IR + 三编译器 + DQL/搜索执行 + Bases 生成导出（6.2~6.10） |
+| **P3b** | Bases 临时 `.base` 注入执行 + 执行前命中数预览（依 P3a 反馈立项） |
 
 ## 7. Phase 4/5 概要
 
-- **P4 合并建议**：`AiReader` 选出"同主题簇"→ 直接喂 `ChooseFileModal + MergeAction` 现有链路；插件只新增"发现重复"的入口
+- **P4 合并建议**：选择器（§6）选出"同主题簇"→ 直接喂 `ChooseFileModal + MergeAction` 现有链路；插件只新增"发现重复"的入口
 - **P5 智能归档路由**：目标目录清单（vault 顶层文件夹+每个目录的样本文件名）注入 prompt，LLM 为每篇文件给出 `{path, targetFolder, reason}`；提案 UI 展示去向+理由，应用复用 `MoveAction`。目录清单用少量样本即可，不送正文以外的数据
 
 ## 8. 风险与对策
@@ -296,8 +481,9 @@ repo 已有 vitest + `tests/mocks/obsidian.ts`（AGENTS.md 中"无测试框架"�
 
 1. `add-ai-properties-completion`（P1，含 provider/settings/batch 地基）
 2. `add-ai-rename`（P2）
-3. `add-ai-nl-selector`（P3）
-4. P4/P5 待 P3 验证后另行立项
+3. `add-ai-nl-selector`（P3a，实施基线见 §6）
+4. `add-ai-bases-executor`（P3b，Bases 程序化执行，依 P3a 反馈立项）
+5. P4/P5 待 P3 验证后另行立项
 
 每期独立发版（2.1.0 / 2.2.0 / 2.3.0…），README 中以 "🤖 AI（实验性）" 单独章节说明，设置默认关闭。
 

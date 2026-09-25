@@ -54,6 +54,12 @@ vi.mock('src/action/edit-properties-action', () => ({
 	},
 }));
 
+vi.mock('src/action/ai-properties-action', () => ({
+	AiPropertiesAction: class {
+		act = editPropertiesAct;
+	},
+}));
+
 vi.mock('src/action/sync-flomo-action', () => ({
 	SyncFlomoAction: class {
 		act = syncFlomoAct;
