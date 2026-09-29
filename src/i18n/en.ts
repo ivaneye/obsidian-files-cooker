@@ -355,4 +355,18 @@ export const EN: Record<string, string> = {
 	'每行创建一个画布文本节点': 'Create one canvas text node per line',
 	'将以下文件全部添加到画布 → {path}！': 'Add all of the following files to canvas → {path}!',
 	'包含解析的链接': 'Include resolved links',
+
+	// ── 补充：重命名属性（issue #15）──
+	'重命名属性': 'Rename property',
+	'将选中文件中的属性键重命名，属性值保持不变。': 'Rename a property key across the selected files. Values are preserved.',
+	'旧属性键': 'Old property key',
+	'新属性键': 'New property key',
+	'输入旧属性键': 'Enter old property key',
+	'输入新属性键': 'Enter new property key',
+	'旧属性键不能为空。': 'Old property key must not be empty.',
+	'新属性键不能为空。': 'New property key must not be empty.',
+	'新旧属性键不能相同。': 'Old and new property keys must be different.',
+	'新属性已存在时覆盖！': 'Overwrites if the new property already exists!',
+	'重命名': 'Rename',
+	'属性已重命名。': 'Properties renamed.',
 };

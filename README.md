@@ -56,6 +56,7 @@ File Cooker is an Obsidian plugin for **batch file operations**. Treat a batch o
 | 📁 Move | Move ... to folder | Batch move to a target folder |
 | ✏️ Rename | Rename ... | Batch rename |
 | 🏷️ Edit properties | Edit Properties ... | Add / modify / delete frontmatter, multi-value supported |
+| 🔑 Rename property | Rename property in folder ... | Batch rename a property key, values preserved (new in v3.2.0) |
 | 🗑️ Delete | Delete ... ! | Destructive — highlighted red in the confirmation modal |
 | 🔗 Merge | Merge ... to ... | Merge into a target file |
 | 🆕 Create | Create links ... | Create files from unresolved links |
@@ -80,6 +81,7 @@ Behavior boundaries:
   - `File Cooker > Current file links`: run link-based batch operations from the current file
 - **File explorer context menu**:
   - `File Cooker > Target file`: rename / edit properties / delete the right-clicked file
+  - `File Cooker > Target folder` (new in v3.2.0): batch edit properties / rename a property key across **all notes in the right-clicked folder** (including subfolders)
 
 > Notes: destructive actions (like delete) still require confirmation. If no active file exists, current-file-link operations are safely blocked with a notice.
 

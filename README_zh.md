@@ -56,6 +56,7 @@ File Cooker 是一款 Obsidian **批量文件处理插件**：把一批文件（
 | 📁 移动 | Move ... to folder | 批量移到目标文件夹 |
 | ✏️ 重命名 | Rename ... | 批量重命名 |
 | 🏷️ 编辑属性 | Edit Properties ... | 新增 / 修改 / 删除 frontmatter，支持多值 |
+| 🔑 重命名属性 | Rename property in folder ... | 批量重命名属性键，属性值保持不变（v3.2.0 新增） |
 | 🗑️ 删除 | Delete ... ! | 危险操作，执行前标红确认 |
 | 🔗 合并 | Merge ... to ... | 合并到目标文件 |
 | 🆕 创建 | Create links ... | 从未解析链接创建文件 |
@@ -80,6 +81,7 @@ File Cooker 是一款 Obsidian **批量文件处理插件**：把一批文件（
   - `File Cooker > Current file links`：对当前文件中的链接执行批量操作
 - **文件管理器右键**：
   - `File Cooker > Target file`：对「被右键的文件」执行重命名 / 编辑属性 / 删除
+  - `File Cooker > Target folder`（v3.2.0 新增）：对「被右键的文件夹」内**全部笔记（含子文件夹）**批量编辑属性 / 重命名属性键
 
 > 说明：删除等危险操作仍会弹出确认窗口；不存在活动文件时，当前文件链接相关操作会被安全阻断并提示。
 

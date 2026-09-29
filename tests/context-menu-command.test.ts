@@ -7,6 +7,8 @@ const deleteAct = vi.fn();
 const editPropertiesAct = vi.fn();
 const syncFlomoAct = vi.fn();
 const chooseCanvasOpen = vi.fn();
+const folderReaderRead = vi.fn();
+const renamePropertyAct = vi.fn();
 
 vi.mock('obsidian', () => {
 	class Notice {
@@ -63,6 +65,18 @@ vi.mock('src/action/ai-properties-action', () => ({
 vi.mock('src/action/sync-flomo-action', () => ({
 	SyncFlomoAction: class {
 		act = syncFlomoAct;
+	},
+}));
+
+vi.mock('src/reader/folder-reader', () => ({
+	FolderReader: class {
+		read = folderReaderRead;
+	},
+}));
+
+vi.mock('src/action/rename-property-action', () => ({
+	RenamePropertyAction: class {
+		act = renamePropertyAct;
 	},
 }));
 
@@ -193,6 +207,8 @@ describe('ContextMenuCommand', () => {
 		editPropertiesAct.mockReset();
 		syncFlomoAct.mockReset();
 		chooseCanvasOpen.mockReset();
+		folderReaderRead.mockReset();
+		renamePropertyAct.mockReset();
 	});
 
 	it('2.1 无选区时不展示 Selection 一级标题和子菜单', () => {
@@ -296,5 +312,40 @@ describe('ContextMenuCommand', () => {
 		expect(targetGroup).toBeUndefined();
 		expect(renameTarget).toBeUndefined();
 		expect(renameAct).not.toHaveBeenCalled();
+	});
+
+	it('3.4 文件夹右键展示批量属性操作并转入 FolderReader（issue #15）', () => {
+		const plugin = createPlugin(null);
+		const command = new ContextMenuCommand(plugin as never);
+		const menu = createFakeMenu();
+		const folderTarget = { path: 'notes', children: [] as unknown[] };
+
+		registFileMenu(command, menu, folderTarget);
+
+		const folderGroup = findItem(menu, 'File Cooker -> Target folder');
+		expect(folderGroup.disabled).toBe(true);
+
+		const editProps = findItem(menu, 'Edit properties in folder ...');
+		editProps.onClickHandler?.();
+		expect(folderReaderRead).toHaveBeenCalledTimes(1);
+		// FolderReader 收到的是 EditPropertiesAction
+		expect(folderReaderRead.mock.calls[0][0].act).toBe(editPropertiesAct);
+
+		const renameProp = findItem(menu, 'Rename property in folder ...');
+		renameProp.onClickHandler?.();
+		expect(folderReaderRead).toHaveBeenCalledTimes(2);
+		// FolderReader 收到的是 RenamePropertyAction
+		expect(folderReaderRead.mock.calls[1][0].act).toBe(renamePropertyAct);
+	});
+
+	it('3.5 非文件非文件夹目标不展示任何 File Cooker 菜单', () => {
+		const plugin = createPlugin(null);
+		const command = new ContextMenuCommand(plugin as never);
+		const menu = createFakeMenu();
+
+		registFileMenu(command, menu, { path: 'unknown' });
+
+		expect(menu.items).toHaveLength(0);
+		expect(folderReaderRead).not.toHaveBeenCalled();
 	});
 });

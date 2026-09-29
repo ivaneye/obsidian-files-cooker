@@ -4,11 +4,13 @@ import { DeleteAction } from 'src/action/delete-action';
 import { EditPropertiesAction } from 'src/action/edit-properties-action';
 import { AiPropertiesAction } from 'src/action/ai-properties-action';
 import { RenameAction } from 'src/action/rename-action';
+import { RenamePropertyAction } from 'src/action/rename-property-action';
 import { ChooseCanvasModal } from 'src/modal/choose-canvas-modal';
 import { CurrentFileReader, ReadType } from 'src/reader/current-file-reader';
+import { FolderReader } from 'src/reader/folder-reader';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
 import { Command } from './command';
-import { Editor, Menu, Notice, TAbstractFile } from 'obsidian';
+import { Editor, Menu, Notice, TAbstractFile, TFolder } from 'obsidian';
 
 export function hasEditorSelection(editor: Editor): boolean {
 	return editor.getSelection().trim() !== '';
@@ -55,10 +57,15 @@ export class ContextMenuCommand implements Command {
 
 	private registFileMenu(menu: Menu, target: TAbstractFile): void {
 		const targetActionModel = toSingleFileActionModel(target);
-		if (!targetActionModel) {
+		if (targetActionModel) {
+			this.addFileMenu(menu, targetActionModel);
 			return;
 		}
 
+		this.registFolderMenu(menu, target);
+	}
+
+	private addFileMenu(menu: Menu, targetActionModel: ActionModel): void {
 		this.addGroupTitle(menu, 'File Cooker -> Target file');
 
 		menu.addItem((item) => {
@@ -93,6 +100,32 @@ export class ContextMenuCommand implements Command {
 					this.runTargetFileAction(targetActionModel, () => new DeleteAction(this.plugin.app));
 				});
 			this.trySetWarning(item, true);
+		});
+	}
+
+	private registFolderMenu(menu: Menu, target: TAbstractFile): void {
+		const folder = target as { children?: unknown };
+		if (!Array.isArray(folder.children)) {
+			// 既非文件也非文件夹，忽略
+			return;
+		}
+
+		this.addGroupTitle(menu, 'File Cooker -> Target folder');
+
+		menu.addItem((item) => {
+			item
+				.setTitle('Edit properties in folder ...')
+				.onClick(() => {
+					new FolderReader(this.plugin, target as TFolder).read(new EditPropertiesAction(this.plugin.app));
+				});
+		});
+
+		menu.addItem((item) => {
+			item
+				.setTitle('Rename property in folder ...')
+				.onClick(() => {
+					new FolderReader(this.plugin, target as TFolder).read(new RenamePropertyAction(this.plugin.app));
+				});
 		});
 	}
 

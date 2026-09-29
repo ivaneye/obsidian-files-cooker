@@ -90,6 +90,11 @@ export class VaultMock {
 		return this.files.has(path) ? new TFile(path) : null;
 	}
 
+	/** 全库 Markdown 文件列表（与真实 vault 语义一致，仅 .md）。 */
+	getMarkdownFiles(): TFile[] {
+		return [...this.files.keys()].filter((path) => path.endsWith('.md')).map((path) => new TFile(path));
+	}
+
 	/** 读取文件内容（同 read，用于缓存场景占位）。 */
 	async read(file: TFile): Promise<string> {
 		const value = this.files.get(file.path);
