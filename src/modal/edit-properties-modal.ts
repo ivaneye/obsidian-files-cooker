@@ -6,6 +6,7 @@ import {
 	addLabeledToggleField,
 	addModalActions,
 	isBlank,
+	parseScalarInput,
 	renderModalLayout,
 	showValidationNotice,
 } from './modal-ui';
@@ -99,26 +100,43 @@ export class EditPropertiesModal extends Modal {
                                     } else if (!(props[k] instanceof Array)) {
                                         props[k] = props[k].split(',');
                                     }
+                                    const list = props[k] as string[];
+                                    // tags 在 Obsidian 中大小写不敏感，去重按小写比较；alias/cssclasses 保持大小写敏感
+                                    const dedupKey = (value: string) => (k === 'tags' ? value.toLowerCase() : value);
                                     vals.forEach((item) => {
                                         const normalized = item.trim();
+                                        if (normalized === '') {
+                                            return;
+                                        }
                                         if (normalized.indexOf('-') === 0) {
                                             const toDelete = normalized.substring(1, normalized.length);
                                             let idx = -1;
-                                            for (let i = 0; i < props[k].length; i++) {
-                                                if (props[k][i] === toDelete) {
+                                            for (let i = 0; i < list.length; i++) {
+                                                if (String(list[i]) === toDelete) {
                                                     idx = i;
                                                     break;
                                                 }
                                             }
-                                            delete props[k][idx];
+                                            // splice 移除而非 delete 留洞，避免 YAML 序列化出空数组项（issue #17）
+                                            if (idx !== -1) {
+                                                list.splice(idx, 1);
+                                            }
                                         } else {
-                                            props[k].push(normalized);
+                                            // 跳过已存在的值，避免重复项（issue #16）
+                                            const exists = list.some((existing) => dedupKey(String(existing)) === dedupKey(normalized));
+                                            if (!exists) {
+                                                list.push(normalized);
+                                            }
                                         }
                                     });
+                                    // 清空后移除空属性，避免残留空条目（issue #17）
+                                    if (list.length === 0) {
+                                        delete props[k];
+                                    }
                                 } else if (v === '-') {
                                     delete props[k];
                                 } else if (self.overrideFlag || !props[k]) {
-                                    props[k] = v;
+                                    props[k] = parseScalarInput(v);
                                 }
                             });
                         }

@@ -78,6 +78,21 @@ export function showValidationNotice(message: string): void {
 	new Notice(message);
 }
 
+/**
+ * 属性值类型解析：true/false（忽略大小写）→ 布尔值，其余保持字符串原样。
+ * 避免 YAML 将字符串 "true" 加引号序列化（key: "true"），破坏 Obsidian 的 Checkbox 属性。
+ */
+export function parseScalarInput(value: string): string | boolean {
+	const normalized = value.trim().toLowerCase();
+	if (normalized === 'true') {
+		return true;
+	}
+	if (normalized === 'false') {
+		return false;
+	}
+	return value;
+}
+
 export function addLabeledTextField(
 	contentEl: HTMLElement,
 	label: string,

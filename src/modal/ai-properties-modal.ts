@@ -11,7 +11,7 @@ import {
 	PropertyProposal,
 } from 'src/ai/prop-infer';
 import { runBatches } from 'src/ai/batch';
-import { addModalActions, renderModalLayout } from './modal-ui';
+import { addModalActions, parseScalarInput, renderModalLayout } from './modal-ui';
 
 /** 进度元素兼容类型：真实 Obsidian 元素有 setText，测试环境元素仅写 text 属性。 */
 type ProgressElement = { setText?(text: string): void; text?: string };
@@ -150,7 +150,7 @@ export class AiPropertiesModal extends Modal {
 			.map((entry) => entry.file.path);
 	}
 
-	/** 编辑提案值：tags/aliases 以逗号分隔，标量直接覆盖。 */
+	/** 编辑提案值：tags/aliases 以逗号分隔，标量覆盖时 true/false 解析为布尔值。 */
 	setPropValue(path: string, key: string, value: string): void {
 		const entry = this.proposals.find((item) => item.file.path === path);
 		if (entry == null) {
@@ -160,7 +160,7 @@ export class AiPropertiesModal extends Modal {
 		if (key === 'tags' || key === 'aliases') {
 			edited[key] = value.split(',').map((item) => item.trim()).filter((item) => item !== '');
 		} else {
-			edited[key] = value;
+			edited[key] = parseScalarInput(value);
 		}
 		this.edited.set(path, edited);
 	}
