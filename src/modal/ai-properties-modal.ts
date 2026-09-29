@@ -1,4 +1,5 @@
 import { App, Modal, Notice, TAbstractFile, TFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { getBackup } from 'src/backup/backup-service';
 import { AiSettings } from 'src/ai/ai-settings';
 import { ChatMessage } from 'src/ai/ai-provider';
@@ -178,7 +179,7 @@ export class AiPropertiesModal extends Modal {
 
 		this.close();
 		const override = this.readOverrideFlag();
-		const recorder = getBackup().begin('ai-properties', 'AI 属性补全');
+		const recorder = getBackup().begin('ai-properties', t('AI 属性补全'));
 		try {
 			for (const entry of targets) {
 				const props = this.edited.get(entry.file.path) ?? entry.props;
@@ -202,34 +203,34 @@ export class AiPropertiesModal extends Modal {
 				} catch (e) {
 					// 单文件失败不拖垮整批，路径在完成通知中可见
 					summary.failed.push(entry.file.path);
-					new Notice(`写入失败 ${entry.file.path}：` + (e as Error).message);
+					new Notice(t('写入失败 {path}：{msg}', { path: entry.file.path, msg: (e as Error).message }));
 				}
 			}
 			await recorder.finish();
 		} catch (e) {
 			recorder.abort();
-			new Notice('AI 属性应用失败：' + (e as Error).message);
+			new Notice(t('AI 属性应用失败：{msg}', { msg: (e as Error).message }));
 			return summary;
 		}
 
-		const parts = [`成功 ${summary.applied}`];
+		const parts = [t('成功 {n}', { n: summary.applied })];
 		if (summary.skipped > 0) {
-			parts.push(`跳过 ${summary.skipped}`);
+			parts.push(t('跳过 {n}', { n: summary.skipped }));
 		}
 		if (summary.failed.length > 0) {
-			parts.push(`失败 ${summary.failed.length}（${summary.failed.join(', ')}）`);
+			parts.push(t('失败 {n}（{detail}）', { n: summary.failed.length, detail: summary.failed.join(', ') }));
 		}
-		new Notice('AI 属性已更新：' + parts.join('，') + '。可在备份历史中回滚。');
+		new Notice(t('AI 属性已更新：{detail}。可在备份历史中回滚。', { detail: parts.join(', ') }));
 		return summary;
 	}
 
 	/** 进度态渲染：说明 + 进度文本 + 取消按钮。 */
 	private renderAnalyzing(): void {
 		renderModalLayout(this.contentEl, {
-			title: 'AI 补全属性',
-			description: '正在按内容推断属性，完成后进入审核。',
+			title: t('AI 补全属性'),
+			description: t('正在按内容推断属性，完成后进入审核。'),
 			summaryLines: [
-				`将发送给 AI：每篇笔记的文件名 + 前 ${this.deps.settings.contextChars} 字符。`,
+				t('将发送给 AI：每篇笔记的文件名 + 前 {n} 字符。', { n: this.deps.settings.contextChars }),
 			],
 			variant: 'confirm',
 		});
@@ -237,11 +238,11 @@ export class AiPropertiesModal extends Modal {
 
 		addModalActions(this.contentEl, [
 			{
-				text: '取消',
+				text: t('取消'),
 				onClick: () => {
 					this.cancelRequested = true;
 					this.close();
-					new Notice('已取消，未写入任何文件。');
+					new Notice(t('已取消，未写入任何文件。'));
 				},
 			},
 		]);
@@ -252,7 +253,7 @@ export class AiPropertiesModal extends Modal {
 		try {
 			await this.runInferenceFlow();
 		} catch (e) {
-			this.renderErrorState([e instanceof Error ? e.message : String(e)], [], '推断失败');
+			this.renderErrorState([e instanceof Error ? e.message : String(e)], [], t('推断失败'));
 		}
 	}
 
@@ -283,7 +284,7 @@ export class AiPropertiesModal extends Modal {
 		// 取消（按钮或程序化）：丢弃全部结果，零写入
 		if (this.cancelRequested) {
 			this.close();
-			new Notice('已取消，未写入任何文件。');
+			new Notice(t('已取消，未写入任何文件。'));
 			return;
 		}
 
@@ -320,19 +321,19 @@ export class AiPropertiesModal extends Modal {
 					? result.errors
 					: [
 						noOpCount > 0
-							? `没有产生有效提案：${noOpCount} 篇笔记的提案与现有属性完全相同，已跳过（这些笔记可能已经应用过提案，重复运行不会重复写入）。`
-							: '没有产生有效提案：模型未给出任何建议。可尝试更换模型或调整笔记内容后重试。',
+							? t('没有产生有效提案：{n} 篇笔记的提案与现有属性完全相同，已跳过（这些笔记可能已经应用过提案，重复运行不会重复写入）。', { n: noOpCount })
+							: t('没有产生有效提案：模型未给出任何建议。可尝试更换模型或调整笔记内容后重试。'),
 					],
 				failedPaths,
-				'无可应用的提案',
+				t('无可应用的提案'),
 			);
 			return;
 		}
 		if (failedPaths.length > 0) {
-			new Notice(`部分批次推断失败：${failedPaths.length} 个文件未参与提案`);
+			new Notice(t('部分批次推断失败：{n} 个文件未参与提案', { n: failedPaths.length }));
 		}
 		if (noOpCount > 0) {
-			new Notice(`${noOpCount} 篇笔记的提案与现有属性相同，已跳过`);
+			new Notice(t('{n} 篇笔记的提案与现有属性相同，已跳过', { n: noOpCount }));
 		}
 
 		this.phase = 'proposing';
@@ -399,29 +400,29 @@ export class AiPropertiesModal extends Modal {
 	}
 
 	/** 失败/空结果态：停在弹窗内展示真实错误，不自动关闭，用户可阅读后手动关闭。 */
-	private renderErrorState(errors: string[], failedPaths: string[], title = 'AI 推断失败'): void {
+	private renderErrorState(errors: string[], failedPaths: string[], title = t('AI 推断失败')): void {
 		this.phase = 'error';
 		this.contentEl.empty();
 
 		const uniqueErrors = [...new Set(errors)];
 		const errorLines = uniqueErrors.slice(0, 3).map((message) => `· ${message}`);
 		if (uniqueErrors.length > 3) {
-			errorLines.push(`· ...等 ${uniqueErrors.length} 种错误`);
+			errorLines.push(t('· ...等 {n} 种错误', { n: uniqueErrors.length }));
 		}
 		if (failedPaths.length > 0) {
-			errorLines.push(`受影响文件 ${failedPaths.length} 个：${failedPaths.slice(0, 3).join(', ')}${failedPaths.length > 3 ? ' ...' : ''}`);
+			errorLines.push(t('受影响文件 {n} 个：{paths}', { n: failedPaths.length, paths: failedPaths.slice(0, 3).join(', ') }) + (failedPaths.length > 3 ? ' ...' : ''));
 		}
 
 		renderModalLayout(this.contentEl, {
 			title,
-			description: '未写入任何文件。以下为具体原因，可据此检查后重试。',
+			description: t('未写入任何文件。以下为具体原因，可据此检查后重试。'),
 			summaryLines: errorLines,
 			variant: 'danger',
 		});
 
 		addModalActions(this.contentEl, [
 			{
-				text: '关闭',
+				text: t('关闭'),
 				onClick: () => this.close(),
 			},
 		]);
@@ -431,11 +432,11 @@ export class AiPropertiesModal extends Modal {
 	private renderProposing(): void {
 		this.contentEl.empty();
 		renderModalLayout(this.contentEl, {
-			title: 'AI 补全属性',
-			description: '点击卡片头部勾选/取消；属性值可直接编辑，多值属性用逗号分隔。',
+			title: t('AI 补全属性'),
+			description: t('点击卡片头部勾选/取消；属性值可直接编辑，多值属性用逗号分隔。'),
 			summaryLines: [
 				`${this.files.length} files selected. ${this.proposals.length} proposals after inference.`,
-				`已发送给 AI：每篇笔记的文件名 + 前 ${this.deps.settings.contextChars} 字符。`,
+				t('已发送给 AI：每篇笔记的文件名 + 前 {n} 字符。', { n: this.deps.settings.contextChars }),
 			],
 			variant: 'confirm',
 		});
@@ -444,15 +445,15 @@ export class AiPropertiesModal extends Modal {
 		const toolbar = this.contentEl.createDiv({ cls: 'fc-ai-toolbar' });
 		const statsEl = toolbar.createSpan({ cls: 'fc-ai-toolbar__stats' });
 		const syncStats = () => {
-			setElText(statsEl, `已选 ${this.getSelectedPaths().length} / ${this.proposals.length}`);
+			setElText(statsEl, t('已选 {n} / {total}', { n: this.getSelectedPaths().length, total: this.proposals.length }));
 		};
-		const selectAllBtn = toolbar.createSpan({ text: '全选', cls: 'fc-ai-toolbar__btn' });
+		const selectAllBtn = toolbar.createSpan({ text: t('全选'), cls: 'fc-ai-toolbar__btn' });
 		selectAllBtn.addEventListener('click', () => {
 			this.selectAll(true);
 			syncStats();
 			this.refreshCardStates();
 		});
-		const clearBtn = toolbar.createSpan({ text: '清空', cls: 'fc-ai-toolbar__btn' });
+		const clearBtn = toolbar.createSpan({ text: t('清空'), cls: 'fc-ai-toolbar__btn' });
 		clearBtn.addEventListener('click', () => {
 			this.selectAll(false);
 			syncStats();
@@ -468,17 +469,17 @@ export class AiPropertiesModal extends Modal {
 
 		addModalActions(this.contentEl, [
 			{
-				text: '应用选中的提案',
+				text: t('应用选中的提案'),
 				cta: true,
 				onClick: () => {
 					void this.applySelected();
 				},
 			},
 			{
-				text: '取消',
+				text: t('取消'),
 				onClick: () => {
 					this.close();
-					new Notice('已取消，未写入任何文件。');
+					new Notice(t('已取消，未写入任何文件。'));
 				},
 			},
 		]);

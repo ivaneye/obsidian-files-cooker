@@ -1,4 +1,5 @@
 import { App, Notice, SuggestModal, TFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 
 /**
  * 脚本导入弹窗：从 vault 文件中提取查询脚本填入工作台。
@@ -44,7 +45,7 @@ export class ScriptImportModal extends SuggestModal<TFile> {
 		try {
 			content = await this.app.vault.cachedRead(file);
 		} catch (e) {
-			new Notice('读取文件失败：' + (e as Error).message);
+			new Notice(t('读取文件失败：{msg}', { msg: (e as Error).message }));
 			return;
 		}
 		const scripts = this.options.extract(content);

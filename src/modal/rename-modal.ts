@@ -1,4 +1,5 @@
 import { App, Modal, Notice, TAbstractFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { RenameConfirmModal } from './rename-confirm-modal';
 import {
 	addLabeledTextField,
@@ -25,38 +26,38 @@ export class RenameModal extends Modal {
         const { contentEl } = this;
 
         renderModalLayout(contentEl, {
-            title: '重命名文件',
-            description: '先设置前缀或后缀，再继续预览变更。',
-            summaryLines: [`已选中 ${this.resultArr.length} 个文件。`],
+            title: t('重命名文件'),
+            description: t('先设置前缀或后缀，再继续预览变更。'),
+            summaryLines: [t('已选中 {n} 个文件。', { n: this.resultArr.length })],
             listItems: this.resultArr.map((info) => info.path),
-            listLabel: '受影响的文件',
-            emptyMessage: '没有可重命名的文件。',
+            listLabel: t('受影响的文件'),
+            emptyMessage: t('没有可重命名的文件。'),
             variant: 'input',
         });
 
         if (this.resultArr.length === 0) {
             addModalActions(contentEl, [
                 {
-                    text: '关闭',
+                    text: t('关闭'),
                     onClick: () => this.close(),
                 },
             ]);
         } else {
 
-            addLabeledTextField(contentEl, '前缀', '输入前缀', (val) => {
+            addLabeledTextField(contentEl, t('前缀'), t('输入前缀'), (val) => {
 				this.prefix = val;
 			});
-            addLabeledTextField(contentEl, '后缀', '输入后缀', (val) => {
+            addLabeledTextField(contentEl, t('后缀'), t('输入后缀'), (val) => {
 				this.suffix = val;
 			});
 
             addModalActions(contentEl, [
                 {
-                    text: '继续',
+                    text: t('继续'),
                     cta: true,
                     onClick: async () => {
                         if (isBlank(this.prefix as string) && isBlank(this.suffix as string)) {
-                            showValidationNotice('前缀或后缀不能同时为空。');
+                            showValidationNotice(t('前缀或后缀不能同时为空。'));
                             return;
                         }
                         this.close();
@@ -64,10 +65,10 @@ export class RenameModal extends Modal {
                     },
                 },
                 {
-                    text: '取消',
+                    text: t('取消'),
                     onClick: () => {
                         this.close();
-                        new Notice('操作已取消。');
+                        new Notice(t('操作已取消。'));
                     },
                 },
             ]);

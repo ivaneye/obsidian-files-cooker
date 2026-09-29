@@ -1,4 +1,5 @@
 import { getAPI } from 'obsidian-dataview';
+import { t } from 'src/i18n/index';
 
 /**
  * 查询脚本语法检查：DQL / 搜索语法 / Bases 三种脚本的 lint。
@@ -52,7 +53,7 @@ function hasUnbalancedQuotes(text: string, quote: string): boolean {
 export function lintSearch(text: string): LintIssue[] {
 	const issues: LintIssue[] = [];
 	if (hasUnbalancedQuotes(text, '"')) {
-		issues.push({ level: 'error', message: '引号不配平：存在未闭合的 " 。' });
+		issues.push({ level: 'error', message: t('引号不配平：存在未闭合的 " 。') });
 	}
 
 	const structural = stripQuoted(text, '"');
@@ -69,7 +70,7 @@ export function lintSearch(text: string): LintIssue[] {
 		}
 	}
 	if (negative || paren !== 0) {
-		issues.push({ level: 'error', message: '括号不配平：请检查 ( ) [ ] 是否成对。' });
+		issues.push({ level: 'error', message: t('括号不配平：请检查 ( ) [ ] 是否成对。') });
 	}
 
 	// 操作符白名单：在无引号、方括号段整体移除后扫描 `词:` 前缀
@@ -78,7 +79,7 @@ export function lintSearch(text: string): LintIssue[] {
 	let match: RegExpExecArray | null;
 	while ((match = operatorPattern.exec(noBrackets)) !== null) {
 		if (!SEARCH_OPERATORS.has(match[1])) {
-			issues.push({ level: 'warning', message: `未知操作符「${match[1]}:」，将按普通文本匹配（若为属性搜索请使用 [属性:值] 形式）。` });
+			issues.push({ level: 'warning', message: t('未知操作符「{op}:」，将按普通文本匹配（若为属性搜索请使用 [属性:值] 形式）。', { op: match[1] }) });
 		}
 	}
 
@@ -97,16 +98,16 @@ const BASES_TOP_KEYS: ReadonlySet<string> = new Set(['filters', 'views']);
 export function lintBases(text: string): LintIssue[] {
 	const issues: LintIssue[] = [];
 	if (!/^filters:/m.test(text)) {
-		issues.push({ level: 'error', message: '缺少顶层 filters: 配置，Bases 无法筛选。' });
+		issues.push({ level: 'error', message: t('缺少顶层 filters: 配置，Bases 无法筛选。') });
 	}
 	if (hasUnbalancedQuotes(text, "'")) {
-		issues.push({ level: 'error', message: "引号不配平：存在未闭合的 '（注意 YAML 单引号转义写作两个连续单引号）。" });
+		issues.push({ level: 'error', message: t("引号不配平：存在未闭合的 '（注意 YAML 单引号转义写作两个连续单引号）。") });
 	}
 	const lines = text.split('\n');
 	for (const line of lines) {
 		const keyMatch = /^([A-Za-z_-]+):/.exec(line);
 		if (keyMatch != null && !BASES_TOP_KEYS.has(keyMatch[1])) {
-			issues.push({ level: 'warning', message: `未知顶层键「${keyMatch[1]}:」（白名单：filters / views）。` });
+			issues.push({ level: 'warning', message: t('未知顶层键「{key}:」（白名单：filters / views）。', { key: keyMatch[1] }) });
 		}
 	}
 	return issues;
@@ -124,7 +125,7 @@ export async function lintDql(text: string): Promise<LintIssue[]> {
 		api = null;
 	}
 	if (api == null || typeof api.tryQuery !== 'function') {
-		return [{ level: 'warning', message: 'Dataview 未启用，无法检查 DQL 语法；将直接尝试执行。' }];
+		return [{ level: 'warning', message: t('Dataview 未启用，无法检查 DQL 语法；将直接尝试执行。') }];
 	}
 	try {
 		await api.tryQuery(text);

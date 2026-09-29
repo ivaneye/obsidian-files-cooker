@@ -1,4 +1,5 @@
 import { AiSettings } from './ai-settings';
+import { t } from 'src/i18n/index';
 import { ChatMessage } from './ai-provider';
 
 /**
@@ -161,16 +162,16 @@ export function parseInferResponse(
 		try {
 			shape = JSON.parse(raw) as InferResponseShape;
 		} catch (e) {
-			throw new Error('AI 响应不是合法 JSON：' + raw.slice(0, 100));
+			throw new Error(t('AI 响应不是合法 JSON：{snippet}', { snippet: raw.slice(0, 100) }));
 		}
 	} else if (raw != null && typeof raw === 'object') {
 		shape = raw as InferResponseShape;
 	} else {
-		throw new Error('AI 响应结构缺失');
+		throw new Error(t('AI 响应结构缺失'));
 	}
 
 	if (!Array.isArray(shape.results)) {
-		throw new Error('AI 响应缺少 results 数组');
+		throw new Error(t('AI 响应缺少 results 数组'));
 	}
 
 	const byPath = new Map(files.map((file) => [file.path, file]));

@@ -1,4 +1,5 @@
 import { App, Modal, Notice, Setting, ToggleComponent } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { getBackup } from 'src/backup/backup-service';
 import type { BackupService, DriftStatus } from 'src/backup/backup-service';
 import type { FileChange, UndoRecord } from 'src/backup/undo-record';
@@ -22,15 +23,15 @@ function formatTime(timestamp: number): string {
 	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-/** 记录回滚状态的中文徽标。 */
+/** 记录回滚状态徽标。 */
 function statusLabel(status: UndoRecord['status']): string {
 	switch (status) {
 		case 'reverted':
-			return '已回滚';
+			return t('已回滚');
 		case 'partial':
-			return '部分回滚';
+			return t('部分回滚');
 		default:
-			return '可回滚';
+			return t('可回滚');
 	}
 }
 
@@ -40,9 +41,9 @@ function fileSummary(change: FileChange): string {
 		case 'path':
 			return `${change.path} → ${change.newPath ?? ''}`;
 		case 'create':
-			return `${change.path}（新建）`;
+			return t('{path}（新建）', { path: change.path });
 		case 'delete':
-			return `${change.path}（删除）`;
+			return t('{path}（删除）', { path: change.path });
 		default:
 			return change.path;
 	}
@@ -78,7 +79,7 @@ export class UndoHistoryModal extends Modal {
 		} catch (e) {
 			// 加载/渲染历史失败时明确反馈，避免静默空面板（用户无从得知原因）
 			console.error('[File Cooker][Undo] Failed to load history:', e);
-			new Notice('加载备份历史失败：' + (e as Error).message);
+			new Notice(t('加载备份历史失败：{msg}', { msg: (e as Error).message }));
 		}
 	}
 
@@ -127,15 +128,15 @@ export class UndoHistoryModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		contentEl.createEl('h1', { text: '备份与撤销历史', cls: 'file-cooker-modal__title' });
+		contentEl.createEl('h1', { text: t('备份与撤销历史'), cls: 'file-cooker-modal__title' });
 		contentEl.createDiv({
-			text: '点击记录可展开文件列表；勾选要回滚的文件后，点击底部「回滚选中的文件」。',
+			text: t('点击记录可展开文件列表；勾选要回滚的文件后，点击底部「回滚选中的文件」。'),
 			cls: 'file-cooker-modal__description',
 		});
 
 		if (this.records.length === 0) {
 			contentEl.createDiv({
-				text: '暂无备份历史。执行批量操作（属性编辑、移动、重命名、删除、合并、创建）后会自动生成记录，可在此回滚。',
+				text: t('暂无备份历史。执行批量操作（属性编辑、移动、重命名、删除、合并、创建）后会自动生成记录，可在此回滚。'),
 				cls: 'file-cooker-modal__empty',
 			});
 		} else {
@@ -149,11 +150,11 @@ export class UndoHistoryModal extends Modal {
 
 		// 覆盖被修改的文件：开启后允许回滚被中途修改（drift）的条目
 		const forceRow = footer.createDiv({ cls: 'file-cooker-modal__field-row' });
-		forceRow.createDiv({ text: '覆盖被修改的文件', cls: 'file-cooker-modal__field-label' });
+		forceRow.createDiv({ text: t('覆盖被修改的文件'), cls: 'file-cooker-modal__field-label' });
 		new Setting(forceRow).addToggle((toggle) => {
 			toggle
 				.setValue(this.forceOverride)
-				.setTooltip('回滚时强制覆盖操作后被再次修改的文件（可能丢失其后的编辑）')
+				.setTooltip(t('回滚时强制覆盖操作后被再次修改的文件（可能丢失其后的编辑）'))
 				.onChange((value) => {
 					this.forceOverride = value;
 					if (value) {
@@ -167,12 +168,12 @@ export class UndoHistoryModal extends Modal {
 
 		addModalActions(footer, [
 			{
-				text: '回滚选中的文件',
+				text: t('回滚选中的文件'),
 				cta: true,
 				onClick: () => this.revertSelected(),
 			},
 			{
-				text: '关闭',
+				text: t('关闭'),
 				onClick: () => this.close(),
 			},
 		]);
@@ -193,7 +194,13 @@ export class UndoHistoryModal extends Modal {
 		const arrow = expanded ? '▼' : '▶';
 		const title = recordEl.createDiv({
 			cls: 'file-cooker-modal__record-title is-clickable',
-			text: `${arrow} ${formatTime(record.time)} · ${record.opLabel} · ${record.files.length} 个文件 · ${statusLabel(record.status)}`,
+			text: t('{arrow} {time} · {op} · {n} 个文件 · {status}', {
+				arrow,
+				time: formatTime(record.time),
+				op: record.opLabel,
+				n: record.files.length,
+				status: statusLabel(record.status),
+			}),
 		});
 		title.addEventListener('click', () => {
 			if (expanded) {
@@ -217,7 +224,7 @@ export class UndoHistoryModal extends Modal {
 		const drifted = !alreadyReverted && this.driftByFile.get(record.id)?.get(change.path)?.drifted === true;
 		const disabled = (drifted && !this.forceOverride) || alreadyReverted;
 
-		const marker = alreadyReverted ? '（已回滚）' : drifted ? '（已修改）' : '';
+		const marker = alreadyReverted ? t('（已回滚）') : drifted ? t('（已修改）') : '';
 		const row = container.createDiv({ cls: 'file-cooker-modal__field-row' });
 		row.createDiv({ text: fileSummary(change) + marker, cls: 'file-cooker-modal__field-label' });
 
@@ -276,10 +283,10 @@ export class UndoHistoryModal extends Modal {
 			total += paths.size;
 		}
 		if (total === 0) {
-			new Notice('未勾选任何文件。点击记录展开后勾选要回滚的文件。');
+			new Notice(t('未勾选任何文件。点击记录展开后勾选要回滚的文件。'));
 			return;
 		}
-		if (!window.confirm(`确定回滚选中的 ${total} 个文件吗？此操作不可撤销。`)) {
+		if (!window.confirm(t('确定回滚选中的 {n} 个文件吗？此操作不可撤销。', { n: total }))) {
 			return;
 		}
 
@@ -301,7 +308,11 @@ export class UndoHistoryModal extends Modal {
 				}
 			}
 		}
-		new Notice(`回滚完成：成功 ${revertedCount}，跳过 ${skippedCount}，失败 ${failedCount}。`);
+		new Notice(t('回滚完成：成功 {ok}，跳过 {skip}，失败 {fail}。', {
+			ok: revertedCount,
+			skip: skippedCount,
+			fail: failedCount,
+		}));
 		await this.refresh();
 	}
 }

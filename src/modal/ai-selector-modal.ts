@@ -1,4 +1,5 @@
 import { App, Modal, Notice, Platform, TAbstractFile, TFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { CompiledQuery, IrCondition, QueryIR, QueryTarget } from 'src/ai/query-ir';
 import { compileDql } from 'src/ai/compile-dql';
 import { compileSearch } from 'src/ai/compile-search';
@@ -91,14 +92,14 @@ export class AiSelectorModal extends Modal {
 	async submitInput(text: string): Promise<void> {
 		const input = text.trim();
 		if (input === '') {
-			new Notice('请输入要查找的内容描述。');
+			new Notice(t('请输入要查找的内容描述。'));
 			return;
 		}
 		this.lastInput = input;
 		try {
 			this.ir = await this.deps.planner.generate(input);
 		} catch (e) {
-			new Notice(`规划失败：${(e as Error).message}`);
+			new Notice(t('规划失败：{msg}', { msg: (e as Error).message }));
 			return;
 		}
 		this.compiled = {
@@ -139,7 +140,7 @@ export class AiSelectorModal extends Modal {
 	async runQuery(): Promise<void> {
 		const text = this.effectiveQueryText();
 		if (text.trim() === '') {
-			new Notice('查询文本为空，无法执行。');
+			new Notice(t('查询文本为空，无法执行。'));
 			return;
 		}
 		let files: TAbstractFile[];
@@ -162,7 +163,7 @@ export class AiSelectorModal extends Modal {
 	dispatch(kind: DispatchKind): void {
 		const models = this.results.map((file) => new ActionModel(file));
 		if (models.length === 0) {
-			new Notice('没有命中文件可分发。');
+			new Notice(t('没有命中文件可分发。'));
 			return;
 		}
 		// 叠层弹窗（方案 A）：不关闭选择器；移动端回退为"先关再开"。
@@ -186,7 +187,7 @@ export class AiSelectorModal extends Modal {
 				if (this.host != null) {
 					new AiPropertiesAction(this.host as never).act(models);
 				} else {
-					new Notice('请通过命令面板的「AI complete properties」使用该操作。');
+					new Notice(t('请通过命令面板的「AI complete properties」使用该操作。'));
 				}
 				break;
 			case 'move':
@@ -205,7 +206,7 @@ export class AiSelectorModal extends Modal {
 				new DeleteAction(app).act(models);
 				break;
 			case 'flomo':
-				new Notice('flomo 同步请使用对应来源命令（本阶段分发复用既有确认窗）。');
+				new Notice(t('flomo 同步请使用对应来源命令（本阶段分发复用既有确认窗）。'));
 				break;
 		}
 	}
@@ -214,8 +215,8 @@ export class AiSelectorModal extends Modal {
 	private renderInput(): void {
 		this.contentEl.empty();
 		renderModalLayout(this.contentEl, {
-			title: 'AI 找文件',
-			description: '用一句自然语言描述要找的笔记，AI 会编译成 DQL / 搜索 / Bases 查询供你审核执行。',
+			title: t('AI 找文件'),
+			description: t('用一句自然语言描述要找的笔记，AI 会编译成 DQL / 搜索 / Bases 查询供你审核执行。'),
 			variant: 'confirm',
 		});
 
@@ -225,14 +226,14 @@ export class AiSelectorModal extends Modal {
 
 		addModalActions(this.contentEl, [
 			{
-				text: '生成查询',
+				text: t('生成查询'),
 				cta: true,
 				onClick: () => {
 					void this.submitInput((inputEl as HTMLTextAreaElement).value);
 				},
 			},
 			{
-				text: '取消',
+				text: t('取消'),
 				onClick: () => this.close(),
 			},
 		]);
@@ -243,13 +244,13 @@ export class AiSelectorModal extends Modal {
 		this.contentEl.empty();
 		const unsupportedCount = this.compiled[this.selectedTarget]?.unsupported.length ?? 0;
 		renderModalLayout(this.contentEl, {
-			title: 'AI 找文件',
+			title: t('AI 找文件'),
 			description: this.ir?.intent ?? '',
 			summaryLines: [
-				`可用目标：${this.availableTargets.map((t) => TARGET_LABELS[t]).join(' / ')}`,
+				t('可用目标：{targets}', { targets: this.availableTargets.map((target) => t(TARGET_LABELS[target])).join(' / ') }),
 				...(this.recommendedTarget != null
-					? [`推荐执行器：${TARGET_LABELS[this.recommendedTarget]}`]
-					: ['⚠ 没有目标能完整表达该查询，请编辑查询文本或切换目标']),
+					? [t('推荐执行器：{target}', { target: t(TARGET_LABELS[this.recommendedTarget]) })]
+					: [t('⚠ 没有目标能完整表达该查询，请编辑查询文本或切换目标')]),
 			],
 			variant: 'confirm',
 		});
@@ -260,7 +261,7 @@ export class AiSelectorModal extends Modal {
 			const compiledTarget = this.compiled[target];
 			const count = compiledTarget?.unsupported.length ?? 0;
 			const btn = targetsEl.createEl('span', {
-				text: `${this.selectedTarget === target ? '▶ ' : ''}${TARGET_LABELS[target]}${count > 0 ? `（${count} 条不支持）` : ''}${this.recommendedTarget === target ? ' ✓推荐' : ''}`,
+				text: `${this.selectedTarget === target ? '▶ ' : ''}${t(TARGET_LABELS[target])}${count > 0 ? t('（{n} 条不支持）', { n: count }) : ''}${this.recommendedTarget === target ? t(' ✓推荐') : ''}`,
 				cls: `fc-ai-targets__btn${this.selectedTarget === target ? ' fc-ai-targets__btn--active' : ''}`,
 			});
 			btn.addEventListener('click', () => {
@@ -281,12 +282,12 @@ export class AiSelectorModal extends Modal {
 		const unsupportedList = this.compiled[this.selectedTarget]?.unsupported ?? [];
 		if (unsupportedList.length > 0) {
 			this.contentEl.createDiv({
-				text: `⚠ ${unsupportedList.length} 个条件此语法不支持（已忽略）：${describeNodes(unsupportedList).slice(0, 3).join('、')}`,
+				text: t('⚠ {n} 个条件此语法不支持（已忽略）：{nodes}', { n: unsupportedList.length, nodes: describeNodes(unsupportedList).slice(0, 3).join(t('、')) }),
 				cls: 'fc-ai-warn',
 			});
 			if (!this.availableTargets.includes('dql')) {
 				this.contentEl.createDiv({
-					text: '提示：安装并启用 Dataview 插件可启用 DQL 目标（支持日期等更强条件）。',
+					text: t('提示：安装并启用 Dataview 插件可启用 DQL 目标（支持日期等更强条件）。'),
 					cls: 'fc-ai-warn',
 				});
 			}
@@ -294,29 +295,29 @@ export class AiSelectorModal extends Modal {
 
 		const actions: Array<{ text: string; cta?: boolean; onClick: () => void }> = [
 			{
-				text: '执行查询',
+				text: t('执行查询'),
 				cta: true,
 				onClick: () => {
 					void this.runQuery();
 				},
 			},
 			{
-				text: '复制查询',
+				text: t('复制查询'),
 				onClick: () => {
 					void navigator.clipboard?.writeText(this.effectiveQueryText());
-					new Notice('查询文本已复制。');
+					new Notice(t('查询文本已复制。'));
 				},
 			},
 		];
 		if (this.selectedTarget === 'bases') {
 			actions.push({
-				text: '另存为 .base',
+				text: t('另存为 .base'),
 				onClick: () => {
 					void this.saveBasesArtifact();
 				},
 			});
 		}
-		actions.push({ text: '重新输入', onClick: () => this.backToInput() });
+		actions.push({ text: t('重新输入'), onClick: () => this.backToInput() });
 		addModalActions(this.contentEl, actions);
 	}
 
@@ -324,8 +325,8 @@ export class AiSelectorModal extends Modal {
 	private renderResults(): void {
 		this.contentEl.empty();
 		renderModalLayout(this.contentEl, {
-			title: `命中 ${this.results.length} 个文件`,
-			description: '选择要执行的批量操作（将进入对应确认窗，写入前仍需确认）。',
+			title: t('命中 {n} 个文件', { n: this.results.length }),
+			description: t('选择要执行的批量操作（将进入对应确认窗，写入前仍需确认）。'),
 			variant: 'confirm',
 		});
 
@@ -337,26 +338,26 @@ export class AiSelectorModal extends Modal {
 		});
 
 		// 分组展示：同类操作聚在一起，避免一排按钮混杂难辨识
-		this.contentEl.createDiv({ text: '修改属性', cls: 'file-cooker-modal__section-label' });
+		this.contentEl.createDiv({ text: t('修改属性'), cls: 'file-cooker-modal__section-label' });
 		addModalActions(this.contentEl, [
-			{ text: '编辑属性', onClick: () => this.dispatch('properties') },
-			{ text: 'AI 属性补全', onClick: () => this.dispatch('aiProperties') },
+			{ text: t('编辑属性'), onClick: () => this.dispatch('properties') },
+			{ text: t('AI 属性补全'), onClick: () => this.dispatch('aiProperties') },
 		]);
 
-		this.contentEl.createDiv({ text: '整理文件', cls: 'file-cooker-modal__section-label' });
+		this.contentEl.createDiv({ text: t('整理文件'), cls: 'file-cooker-modal__section-label' });
 		addModalActions(this.contentEl, [
-			{ text: '移动到 ...', onClick: () => this.dispatch('move') },
-			{ text: '合并到 ...', onClick: () => this.dispatch('merge') },
-			{ text: '加入 Canvas ...', onClick: () => this.dispatch('canvas') },
-			{ text: '重命名 ...', onClick: () => this.dispatch('rename') },
-			{ text: '删除 !', warning: true, onClick: () => this.dispatch('delete') },
+			{ text: t('移动到 ...'), onClick: () => this.dispatch('move') },
+			{ text: t('合并到 ...'), onClick: () => this.dispatch('merge') },
+			{ text: t('加入 Canvas ...'), onClick: () => this.dispatch('canvas') },
+			{ text: t('重命名 ...'), onClick: () => this.dispatch('rename') },
+			{ text: t('删除 !'), warning: true, onClick: () => this.dispatch('delete') },
 		]);
 
-		this.contentEl.createDiv({ text: '其他', cls: 'file-cooker-modal__section-label' });
+		this.contentEl.createDiv({ text: t('其他'), cls: 'file-cooker-modal__section-label' });
 		addModalActions(this.contentEl, [
-			{ text: '返回查询', onClick: () => this.backToQuery() },
-			{ text: '重新输入', onClick: () => this.backToInput() },
-			{ text: '关闭', onClick: () => this.close() },
+			{ text: t('返回查询'), onClick: () => this.backToQuery() },
+			{ text: t('重新输入'), onClick: () => this.backToInput() },
+			{ text: t('关闭'), onClick: () => this.close() },
 		]);
 	}
 
@@ -373,14 +374,14 @@ export class AiSelectorModal extends Modal {
 	private renderError(lines: string[]): void {
 		this.contentEl.empty();
 		renderModalLayout(this.contentEl, {
-			title: '执行失败',
-			description: '未写入任何文件。',
+			title: t('执行失败'),
+			description: t('未写入任何文件。'),
 			summaryLines: lines.map((line) => `· ${line}`),
 			variant: 'danger',
 		});
 		addModalActions(this.contentEl, [
-			{ text: '重新输入', onClick: () => this.backToInput() },
-			{ text: '关闭', onClick: () => this.close() },
+			{ text: t('重新输入'), onClick: () => this.backToInput() },
+			{ text: t('关闭'), onClick: () => this.close() },
 		]);
 	}
 
@@ -406,9 +407,9 @@ export class AiSelectorModal extends Modal {
 			const file = await this.app.vault.create(name, text);
 			const leaf = this.app.workspace.getLeaf(true);
 			await leaf.openFile(file as TFile);
-			new Notice(`已保存并打开：${name}`);
+			new Notice(t('已保存并打开：{name}', { name }));
 		} catch (e) {
-			new Notice('另存失败：' + (e as Error).message);
+			new Notice(t('另存失败：{msg}', { msg: (e as Error).message }));
 		}
 	}
 }
@@ -416,15 +417,15 @@ export class AiSelectorModal extends Modal {
 /** 把不支持条件翻译为人类可读短语。 */
 function describeNodes(nodes: IrCondition[]): string[] {
 	return nodes.map((node) => {
-		if ('content' in node) return `正文"${node.content}"`;
-		if ('task' in node) return `任务${node.task === 'todo' ? '未完成' : '已完成'}`;
-		if ('fileModified' in node) return `修改时间`;
-		if ('fileCreated' in node) return `创建时间`;
-		if ('property' in node) return `属性 ${node.property.field}`;
-		if ('tag' in node) return `标签 #${node.tag}`;
-		if ('folder' in node) return `目录 ${node.folder}`;
-		if ('filename' in node) return `文件名 ${node.filename}`;
-		return '条件';
+		if ('content' in node) return t('正文"{content}"', { content: node.content });
+		if ('task' in node) return t('任务{status}', { status: node.task === 'todo' ? t('未完成') : t('已完成') });
+		if ('fileModified' in node) return t('修改时间');
+		if ('fileCreated' in node) return t('创建时间');
+		if ('property' in node) return t('属性 {field}', { field: node.property.field });
+		if ('tag' in node) return t('标签 #{tag}', { tag: node.tag });
+		if ('folder' in node) return t('目录 {dir}', { dir: node.folder });
+		if ('filename' in node) return t('文件名 {name}', { name: node.filename });
+		return t('条件');
 	});
 }
 

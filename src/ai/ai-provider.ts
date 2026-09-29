@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { t } from 'src/i18n/index';
 import { AiSettings } from './ai-settings';
 
 /**
@@ -68,7 +69,7 @@ export class AiProvider {
 		const content = data.choices?.[0]?.message?.content ?? '';
 		const parsed = extractJsonObject(content);
 		if (parsed == null) {
-			throw new Error('AI 响应不是合法 JSON：' + content.slice(0, 100));
+			throw new Error(t('AI 响应不是合法 JSON：{snippet}', { snippet: content.slice(0, 100) }));
 		}
 		return parsed;
 	}

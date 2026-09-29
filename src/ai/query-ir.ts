@@ -7,6 +7,7 @@
  * - walkConditions：深度优先遍历助手，供三编译器共享。
  * IR 是纯数据，语言编译由 compile-dql / compile-search / compile-bases 承担。
  */
+import { t } from 'src/i18n/index';
 
 /** 比较类操作（用于日期/数值比较）。 */
 export type CompareOp = 'gt' | 'gte' | 'lt' | 'lte';
@@ -69,77 +70,77 @@ function norm(value: unknown): string {
 /** 校验并规范化单个条件节点（递归布尔子树）。 */
 function validateCondition(node: unknown): IrCondition {
 	if (!isPlainObject(node)) {
-		throw new Error('IR 条件必须是对象');
+		throw new Error(t('IR 条件必须是对象'));
 	}
 	const key = nodeKey(node);
 	if (key == null) {
-		throw new Error('IR 条件节点必须恰好包含一个键');
+		throw new Error(t('IR 条件节点必须恰好包含一个键'));
 	}
 	if (!(IR_NODE_KEYS as readonly string[]).includes(key)) {
-		throw new Error(`IR 未知条件节点：${key}`);
+		throw new Error(t('IR 未知条件节点：{key}', { key }));
 	}
 	const value = node[key];
 
 	switch (key) {
 		case 'tag': {
 			const tag = norm(value).replace(/^#+/, '');
-			if (tag === '') throw new Error('tag 节点值不能为空');
+			if (tag === '') throw new Error(t('tag 节点值不能为空'));
 			return { tag };
 		}
 		case 'folder': {
 			const folder = norm(value).replace(/^\/+|\/+$/g, '');
-			if (folder === '') throw new Error('folder 节点值不能为空');
+			if (folder === '') throw new Error(t('folder 节点值不能为空'));
 			return { folder };
 		}
 		case 'filename': {
 			const filename = norm(value);
-			if (filename === '') throw new Error('filename 节点值不能为空');
+			if (filename === '') throw new Error(t('filename 节点值不能为空'));
 			return { filename };
 		}
 		case 'content': {
 			const content = norm(value);
-			if (content === '') throw new Error('content 节点值不能为空');
+			if (content === '') throw new Error(t('content 节点值不能为空'));
 			return { content };
 		}
 		case 'task': {
 			const task = norm(value);
 			if (task !== 'todo' && task !== 'done') {
-				throw new Error('task 节点值必须是 todo 或 done');
+				throw new Error(t('task 节点值必须是 todo 或 done'));
 			}
 			return { task };
 		}
 		case 'property': {
 			if (!isPlainObject(value)) {
-				throw new Error('property 节点值必须是对象');
+				throw new Error(t('property 节点值必须是对象'));
 			}
 			const field = norm(value['field']);
 			const op = norm(value['op']);
-			if (field === '') throw new Error('property 缺少 field');
-			if (!PROPERTY_OPS.has(op)) throw new Error(`property op 非法：${op}`);
+			if (field === '') throw new Error(t('property 缺少 field'));
+			if (!PROPERTY_OPS.has(op)) throw new Error(t('property op 非法：{op}', { op }));
 			if (op === 'isEmpty') {
 				return { property: { field, op: 'isEmpty', value: '' } };
 			}
 			const raw = value['value'];
 			if (typeof raw !== 'string' && typeof raw !== 'number' && typeof raw !== 'boolean') {
-				throw new Error('property 缺少合法 value');
+				throw new Error(t('property 缺少合法 value'));
 			}
 			return { property: { field, op: op as PropertyOp, value: raw } };
 		}
 		case 'fileModified':
 		case 'fileCreated': {
 			if (!isPlainObject(value)) {
-				throw new Error(`${key} 节点值必须是对象`);
+				throw new Error(t('{key} 节点值必须是对象', { key }));
 			}
 			const op = norm(value['op']);
 			const date = norm(value['date']);
-			if (!COMPARE_OPS.has(op)) throw new Error(`${key} op 非法：${op}`);
-			if (!/^\d{4}-\d{2}-\d{2}/.test(date)) throw new Error(`${key} date 必须是 YYYY-MM-DD`);
+			if (!COMPARE_OPS.has(op)) throw new Error(t('{key} op 非法：{op}', { key, op }));
+			if (!/^\d{4}-\d{2}-\d{2}/.test(date)) throw new Error(t('{key} date 必须是 YYYY-MM-DD', { key }));
 			return { [key]: { op: op as CompareOp, date } } as IrCondition;
 		}
 		case 'and':
 		case 'or': {
 			if (!Array.isArray(value) || value.length < 1) {
-				throw new Error(`${key} 子项必须是非空数组`);
+				throw new Error(t('{key} 子项必须是非空数组', { key }));
 			}
 			return { [key]: value.map(validateCondition) } as IrCondition;
 		}
@@ -147,7 +148,7 @@ function validateCondition(node: unknown): IrCondition {
 			return { not: validateCondition(value) };
 		}
 		default:
-			throw new Error(`IR 未知条件节点：${key}`);
+			throw new Error(t('IR 未知条件节点：{key}', { key }));
 	}
 }
 
@@ -157,17 +158,17 @@ function validateCondition(node: unknown): IrCondition {
  */
 export function validateQueryIR(raw: unknown): QueryIR {
 	if (!isPlainObject(raw)) {
-		throw new Error('IR 必须是 JSON 对象');
+		throw new Error(t('IR 必须是 JSON 对象'));
 	}
 	if (raw['irVersion'] !== 1) {
-		throw new Error('IR 缺少 irVersion 或版本不受支持');
+		throw new Error(t('IR 缺少 irVersion 或版本不受支持'));
 	}
 	const intent = norm(raw['intent']);
 	if (intent === '') {
-		throw new Error('IR 缺少 intent（人类可读解释）');
+		throw new Error(t('IR 缺少 intent（人类可读解释）'));
 	}
 	if (!('conditions' in raw)) {
-		throw new Error('IR 缺少 conditions');
+		throw new Error(t('IR 缺少 conditions'));
 	}
 	return {
 		irVersion: 1,

@@ -1,4 +1,5 @@
 import { App, TAbstractFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { getAPI } from 'obsidian-dataview';
 import FileCookerPlugin from 'main';
 import { Action, ActionModel } from 'src/action/action';
@@ -102,7 +103,7 @@ export async function executeQuery(
 	const timeoutMs = opts?.timeoutMs ?? 20000;
 
 	if (target === 'bases') {
-		throw new Error('Bases 查询在本阶段仅支持生成：请点击「另存为 .base」后在 Bases 视图中使用。');
+		throw new Error(t('Bases 查询在本阶段仅支持生成：请点击「另存为 .base」后在 Bases 视图中使用。'));
 	}
 
 	const capture = new CaptureAction();
@@ -117,7 +118,7 @@ export async function executeQuery(
 		new SearchResultsReader(plugin).read(capture);
 	}
 
-	const models = await withTimeout(capture.promise, timeoutMs, '查询执行超时');
+	const models = await withTimeout(capture.promise, timeoutMs, t('查询执行超时'));
 	return extractFiles(models, limit);
 }
 
@@ -132,7 +133,7 @@ async function injectSearchQuery(app: App, query: string): Promise<void> {
 	}
 	const view = leaf?.view as unknown as { setQuery?: (q: string) => void };
 	if (view == null || typeof view.setQuery !== 'function') {
-		throw new Error('当前环境不支持自动填充搜索：请将查询文本粘贴到搜索面板并回车，然后使用「搜索结果」相关命令。');
+		throw new Error(t('当前环境不支持自动填充搜索：请将查询文本粘贴到搜索面板并回车，然后使用「搜索结果」相关命令。'));
 	}
 	view.setQuery(query);
 }

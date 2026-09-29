@@ -1,4 +1,5 @@
 import { Notice } from 'obsidian';
+import { t } from 'src/i18n/index';
 import FileCookerPlugin from 'main';
 import { Command } from './command';
 import { AiProvider } from 'src/ai/ai-provider';
@@ -28,7 +29,7 @@ export class AiSelectorCommand implements Command {
 			callback: () => {
 				const ai = this.plugin.settings.ai;
 				if (!isAiConfigured(this.plugin.app, ai)) {
-					new Notice('请先在设置中启用并配置 AI（服务地址 / 模型 / API Key）。');
+					new Notice(t('请先在设置中启用并配置 AI（服务地址 / 模型 / API Key）。'));
 					this.openSettings();
 					return;
 				}

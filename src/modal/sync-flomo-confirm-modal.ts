@@ -1,6 +1,7 @@
 import FileCookerPlugin from 'main';
 import { Modal, Notice, Setting, TFile } from 'obsidian';
 import fetch from 'node-fetch';
+import { t } from 'src/i18n/index';
 import { ActionModel } from 'src/action/action';
 import { addModalActions, renderModalLayout } from './modal-ui';
 
@@ -20,21 +21,21 @@ export class SyncFlomoConfirmModal extends Modal {
     async onOpen() {
         const { contentEl } = this;
 
-        const listItems = this.actionModels.map((info) => (info.file ? info.file.path : '同步选区'));
+        const listItems = this.actionModels.map((info) => (info.file ? info.file.path : t('同步选区')));
         renderModalLayout(contentEl, {
-            title: '同步到 flomo',
-            description: '同步到 flomo 前请确认内容。',
-            summaryLines: [`${this.actionModels.length} 条内容将被同步。`],
+            title: t('同步到 flomo'),
+            description: t('同步到 flomo 前请确认内容。'),
+            summaryLines: [t('{n} 条内容将被同步。', { n: this.actionModels.length })],
             listItems,
-            listLabel: '受影响的文件',
-            emptyMessage: '没有可同步的内容。',
+            listLabel: t('受影响的文件'),
+            emptyMessage: t('没有可同步的内容。'),
             variant: 'confirm',
         });
 
         if (this.actionModels.length === 0) {
             addModalActions(contentEl, [
                 {
-                    text: '关闭',
+                    text: t('关闭'),
                     onClick: () => this.close(),
                 },
             ]);
@@ -43,7 +44,7 @@ export class SyncFlomoConfirmModal extends Modal {
 
         addModalActions(contentEl, [
             {
-                text: '立即同步',
+                text: t('立即同步'),
                 cta: true,
                 onClick: async () => {
                     this.close();
@@ -60,18 +61,18 @@ export class SyncFlomoConfirmModal extends Modal {
                         });
 
                         if (!response.ok) {
-                            new Notice(`同步失败 [${response.status}]。`);
+                            new Notice(t('同步失败 [{code}]。', { code: response.status }));
                             return;
                         }
                     }
-                    new Notice('同步完成。');
+                    new Notice(t('同步完成。'));
                 },
             },
             {
-                text: '取消',
+                text: t('取消'),
                 onClick: () => {
                     this.close();
-                    new Notice('操作已取消。');
+                    new Notice(t('操作已取消。'));
                 },
             },
         ]);

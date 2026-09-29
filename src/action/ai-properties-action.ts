@@ -1,4 +1,5 @@
 import { Notice } from 'obsidian';
+import { t } from 'src/i18n/index';
 import FileCookerPlugin from 'main';
 import { Action, ActionModel } from './action';
 import { AiPropertiesModal } from 'src/modal/ai-properties-modal';
@@ -29,7 +30,7 @@ export class AiPropertiesAction implements Action {
 
 		const ai = this.plugin.settings.ai;
 		if (!isAiConfigured(this.plugin.app, ai)) {
-			new Notice('请先在设置中启用并配置 AI（服务地址 / 模型 / API Key）。');
+			new Notice(t('请先在设置中启用并配置 AI（服务地址 / 模型 / API Key）。'));
 			return;
 		}
 

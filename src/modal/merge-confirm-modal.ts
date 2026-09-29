@@ -1,4 +1,5 @@
 import { App, Modal, Notice, Setting, TAbstractFile, TFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { getBackup } from 'src/backup/backup-service';
 import hasMarkdownSuffix from 'src/utils/file-type-util';
 import { getLinebreak } from 'src/utils/line-break-util';
@@ -23,23 +24,23 @@ export class MergeConfirmModal extends Modal {
         const { contentEl } = this;
 
         renderModalLayout(contentEl, {
-            title: '合并文件',
-            description: '合并前请确认源文件。',
-            summaryLines: [`${this.resultArr.length} 个文件将被合并。`, `目标：${this.targetFilePath}`],
+            title: t('合并文件'),
+            description: t('合并前请确认源文件。'),
+            summaryLines: [t('{n} 个文件将被合并。', { n: this.resultArr.length }), t('目标：{dir}', { dir: this.targetFilePath })],
             listItems: this.resultArr.map((info) => info.path),
-            listLabel: '受影响的文件',
-            emptyMessage: '没有可合并的文件。',
+            listLabel: t('受影响的文件'),
+            emptyMessage: t('没有可合并的文件。'),
             variant: 'confirm',
         });
 
         addModalActions(contentEl, [
             {
-                text: '合并文件',
+                text: t('合并文件'),
                 cta: true,
                 onClick: async () => {
                     this.close();
                     // 合并仅记录目标文件（源文件只读不记录），回滚还原目标内容
-                    const recorder = getBackup().begin('merge', '合并文件');
+                    const recorder = getBackup().begin('merge', t('合并文件'));
                     try {
                     let targetFile = this.app.vault.getAbstractFileByPath(this.targetFilePath);
                     if (targetFile == null) {
@@ -59,18 +60,18 @@ export class MergeConfirmModal extends Modal {
                         }
                     }
                     await recorder.finish();
-                    new Notice('文件合并完成。');
+                    new Notice(t('文件合并完成。'));
                     } catch (e) {
                         recorder.abort();
-                        new Notice('操作失败：' + (e as Error).message);
+                        new Notice(t('操作失败：{msg}', { msg: (e as Error).message }));
                     }
                 },
             },
             {
-                text: '取消',
+                text: t('取消'),
                 onClick: () => {
                     this.close();
-                    new Notice('操作已取消。');
+                    new Notice(t('操作已取消。'));
                 },
             },
         ]);

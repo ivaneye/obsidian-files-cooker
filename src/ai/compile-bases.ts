@@ -1,4 +1,5 @@
 import { CompiledQuery, IrCondition, PropertyPrimitive, QueryIR } from './query-ir';
+import { t } from 'src/i18n/index';
 
 /**
  * IR → Bases YAML 确定性编译（P3a 为产物模式：生成 + 另存 .base，不程序化执行）。
@@ -108,7 +109,7 @@ export function compileBases(ir: QueryIR): CompiledQuery {
 	}
 	lines.push('views:');
 	lines.push('  - type: table');
-	lines.push('    name: 全部');
+	lines.push('    name: ' + t('全部'));
 
 	return { text: lines.join('\n'), unsupported };
 }

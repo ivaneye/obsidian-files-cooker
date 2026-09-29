@@ -1,4 +1,5 @@
 import { App, Modal, Notice, Platform, TAbstractFile, TFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { CompiledQuery, IrCondition, QueryIR, QueryTarget } from 'src/ai/query-ir';
 import { compileDql } from 'src/ai/compile-dql';
 import { compileSearch } from 'src/ai/compile-search';
@@ -41,7 +42,7 @@ export type WorkbenchSource =
 
 type WorkbenchStep = 'query' | 'confirm' | 'execute';
 
-/** 来源中文标签。 */
+/** 来源标签（经 t() 按当前语言渲染）。 */
 const SOURCE_LABELS: Record<WorkbenchSource, string> = {
 	ai: 'AI 生成',
 	dql: 'DQL',
@@ -59,7 +60,7 @@ const SOURCE_GROUPS: Array<{ label: string; items: WorkbenchSource[] }> = [
 	{ label: '已有集合', items: ['searchPanel', 'clipboard', 'currentFile'] },
 ];
 
-/** 目标中文标签。 */
+/** 目标标签（经 t() 按当前语言渲染）。 */
 const TARGET_LABELS: Record<QueryTarget, string> = {
 	dql: 'DQL（Dataview）',
 	search: '搜索语法',
@@ -170,18 +171,18 @@ export class WorkbenchModal extends Modal {
 
 	async submitAiInput(text: string): Promise<void> {
 		if (this.deps.planner == null) {
-			new Notice('请先在设置中启用并配置 AI（服务地址 / 模型 / API Key）后再使用 AI 生成。');
+			new Notice(t('请先在设置中启用并配置 AI（服务地址 / 模型 / API Key）后再使用 AI 生成。'));
 			return;
 		}
 		const input = text.trim();
 		if (input === '') {
-			new Notice('请输入要查找的内容描述。');
+			new Notice(t('请输入要查找的内容描述。'));
 			return;
 		}
 		try {
 			this.ir = await this.deps.planner.generate(input);
 		} catch (e) {
-			new Notice(`规划失败：${(e as Error).message}`);
+			new Notice(t('规划失败：{msg}', { msg: (e as Error).message }));
 			return;
 		}
 		this.aiCompiled = {
@@ -209,7 +210,7 @@ export class WorkbenchModal extends Modal {
 	async runAiQuery(): Promise<void> {
 		const text = this.aiEffectiveText();
 		if (text.trim() === '') {
-			new Notice('查询文本为空，无法执行。');
+			new Notice(t('查询文本为空，无法执行。'));
 			return;
 		}
 		// Bases 走临时 .base 文件通道（与手写 Bases 来源一致，统一执行器不支持程序化 Bases）
@@ -218,7 +219,7 @@ export class WorkbenchModal extends Modal {
 				const files = await this.executeBasesScript(text);
 				this.gotoConfirm(files);
 			} catch (e) {
-				new Notice(`Bases 执行失败：${(e as Error).message}（可改用「另存为 .base」手动打开）`);
+				new Notice(t('Bases 执行失败：{msg}（可改用「另存为 .base」手动打开）', { msg: (e as Error).message }));
 			}
 			return;
 		}
@@ -226,7 +227,7 @@ export class WorkbenchModal extends Modal {
 			const files = await this.deps.executor.execute(this.aiSelectedTarget, text);
 			this.gotoConfirm(files);
 		} catch (e) {
-			new Notice(`执行失败：${(e as Error).message}`);
+			new Notice(t('执行失败：{msg}', { msg: (e as Error).message }));
 		}
 	}
 
@@ -274,7 +275,7 @@ export class WorkbenchModal extends Modal {
 				const files = await this.executeBasesScript(draft);
 				this.gotoConfirm(files);
 			} catch (e) {
-				new Notice(`Bases 执行失败：${(e as Error).message}（可改用「另存为 .base」手动打开）`);
+				new Notice(t('Bases 执行失败：{msg}（可改用「另存为 .base」手动打开）', { msg: (e as Error).message }));
 				this.renderIssuesInline();
 			}
 			return;
@@ -283,7 +284,7 @@ export class WorkbenchModal extends Modal {
 		if (this.source === 'dql' || this.source === 'search') {
 			const draft = this.getDraft(this.source);
 			if (draft.trim() === '') {
-				new Notice('请先输入查询脚本。');
+				new Notice(t('请先输入查询脚本。'));
 				return;
 			}
 			const issues = this.source === 'dql' ? await lintDql(draft) : lintSearch(draft);
@@ -294,13 +295,13 @@ export class WorkbenchModal extends Modal {
 			}
 			const warnings = issues.filter((issue) => issue.level === 'warning');
 			if (warnings.length > 0) {
-				new Notice(`语法检查警告：${warnings[0].message}${warnings.length > 1 ? `（等 ${warnings.length} 条）` : ''}`);
+				new Notice(t('语法检查警告：{msg}', { msg: warnings[0].message + (warnings.length > 1 ? t('（等 {n} 条）', { n: warnings.length }) : '') }));
 			}
 			try {
 				const files = await this.deps.executor.execute(this.source, draft);
 				this.gotoConfirm(files);
 			} catch (e) {
-				new Notice(`执行失败：${(e as Error).message}`);
+				new Notice(t('执行失败：{msg}', { msg: (e as Error).message }));
 			}
 			return;
 		}
@@ -308,7 +309,7 @@ export class WorkbenchModal extends Modal {
 		// 既有三来源
 		const factory = this.deps.readers?.[this.source] ?? this.defaultReaderFactory(this.source);
 		if (factory == null) {
-			new Notice('当前环境不支持该来源。');
+			new Notice(t('当前环境不支持该来源。'));
 			return;
 		}
 		const capture = new CaptureAction();
@@ -318,7 +319,7 @@ export class WorkbenchModal extends Modal {
 			this.gotoConfirm(models.map((model) => model.file).filter((file): file is TAbstractFile => file != null));
 		} catch (e) {
 			// 既有 reader 可能抛出（如 limit 非法/超限），保持 UI 触发流程的优雅失败约定
-			new Notice(`读取失败：${(e as Error).message}`);
+			new Notice(t('读取失败：{msg}', { msg: (e as Error).message }));
 		}
 	}
 
@@ -379,7 +380,7 @@ export class WorkbenchModal extends Modal {
 	dispatch(kind: DispatchKind): void {
 		const models = this.files.map((file) => new ActionModel(file));
 		if (models.length === 0) {
-			new Notice('没有命中文件可分发。');
+			new Notice(t('没有命中文件可分发。'));
 			return;
 		}
 		// 叠层弹窗（方案 A）：不关闭工作台，操作确认窗叠开；子窗关闭后工作台原样保留，
@@ -402,7 +403,7 @@ export class WorkbenchModal extends Modal {
 				if (this.host != null) {
 					new AiPropertiesAction(this.host as never).act(models);
 				} else {
-					new Notice('请通过命令面板的「AI complete properties」使用该操作。');
+					new Notice(t('请通过命令面板的「AI complete properties」使用该操作。'));
 				}
 				break;
 			case 'move':
@@ -434,18 +435,18 @@ export class WorkbenchModal extends Modal {
 		if (this.source === 'bases') {
 			files = this.app.vault.getFiles().filter((file) => file.extension === 'base');
 			extract = (content) => [content];
-			emptyNotice = '该文件不含可导入的脚本。';
+			emptyNotice = t('该文件不含可导入的脚本。');
 		} else if (this.source === 'dql') {
 			files = this.app.vault.getMarkdownFiles();
 			extract = extractDataviewBlocks;
-			emptyNotice = '未在该笔记中找到 ```dataview 代码块。';
+			emptyNotice = t('未在该笔记中找到 ```dataview 代码块。');
 		} else {
 			files = this.app.vault.getMarkdownFiles();
 			extract = extractQueryBlocks;
-			emptyNotice = '未在该笔记中找到 ```query / ```search 代码块。';
+			emptyNotice = t('未在该笔记中找到 ```query / ```search 代码块。');
 		}
 		if (files.length === 0) {
-			new Notice('库中没有可选文件。');
+			new Notice(t('库中没有可选文件。'));
 			return;
 		}
 
@@ -466,9 +467,9 @@ export class WorkbenchModal extends Modal {
 	applyImportedScript(script: string, total = 1): void {
 		this.setDraft(script);
 		if (total > 1) {
-			new Notice(`已导入第 1 个脚本（该文件共 ${total} 个，可再次导入或手动复制其余）。`);
+			new Notice(t('已导入第 1 个脚本（该文件共 {n} 个，可再次导入或手动复制其余）。', { n: total }));
 		} else {
-			new Notice('已导入脚本。');
+			new Notice(t('已导入脚本。'));
 		}
 		void this.lintCurrent();
 	}
@@ -498,13 +499,13 @@ export class WorkbenchModal extends Modal {
 			} catch (cleanupError) {
 				// 清理失败忽略
 			}
-			throw new Error('无法打开 Bases 视图（当前 Obsidian 版本可能不支持）');
+			throw new Error(t('无法打开 Bases 视图（当前 Obsidian 版本可能不支持）'));
 		}
 
 		try {
 			const files = await this.pollBasesFiles(leaf);
 			if (files.length === 0) {
-				throw new Error('未读取到结果（视图可能尚未渲染完成）');
+				throw new Error(t('未读取到结果（视图可能尚未渲染完成）'));
 			}
 			return files;
 		} finally {
@@ -571,7 +572,7 @@ export class WorkbenchModal extends Modal {
 	async saveBasesArtifact(text?: string): Promise<void> {
 		const draft = (text ?? this.getDraft('bases')).trim();
 		if (draft === '') {
-			new Notice('Bases 草稿为空。');
+			new Notice(t('Bases 草稿为空。'));
 			return;
 		}
 		const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+$/, '');
@@ -584,9 +585,9 @@ export class WorkbenchModal extends Modal {
 			const file = await this.app.vault.create(name, draft);
 			const leaf = this.app.workspace.getLeaf(true);
 			await leaf.openFile(file as TFile);
-			new Notice(`已保存并打开：${name}`);
+			new Notice(t('已保存并打开：{name}', { name }));
 		} catch (e) {
-			new Notice('另存失败：' + (e as Error).message);
+			new Notice(t('另存失败：{msg}', { msg: (e as Error).message }));
 		}
 	}
 
@@ -603,9 +604,9 @@ export class WorkbenchModal extends Modal {
 	private renderStepBar(): void {
 		const bar = this.contentEl.createDiv({ cls: 'fc-wb-steps' });
 		const items: Array<{ key: WorkbenchStep; text: string; reachable: boolean }> = [
-			{ key: 'query', text: '① 查询', reachable: true },
-			{ key: 'confirm', text: '② 确认', reachable: this.files.length > 0 },
-			{ key: 'execute', text: '③ 执行', reachable: this.files.length > 0 },
+			{ key: 'query', text: t('① 查询'), reachable: true },
+			{ key: 'confirm', text: t('② 确认'), reachable: this.files.length > 0 },
+			{ key: 'execute', text: t('③ 执行'), reachable: this.files.length > 0 },
 		];
 		items.forEach((item) => {
 			const active = this.phase === item.key;
@@ -679,7 +680,7 @@ export class WorkbenchModal extends Modal {
 		this.applyShell();
 		this.renderStepBar();
 		renderModalLayout(this.contentEl, {
-			title: 'File Cooker 工作台',
+			title: t('File Cooker 工作台'),
 			variant: 'confirm',
 		});
 
@@ -692,10 +693,10 @@ export class WorkbenchModal extends Modal {
 			group.items.forEach((source) => {
 				const gen = source === 'ai' ? ' fc-ai-targets__btn--gen' : '';
 				const btn = sourcesEl.createEl('span', {
-					text: SOURCE_LABELS[source],
+					text: t(SOURCE_LABELS[source]),
 					cls: `fc-ai-targets__btn${gen}${this.source === source ? ' fc-ai-targets__btn--active' : ''}`,
 				});
-				(btn as unknown as { title: string }).title = group.label;
+				(btn as unknown as { title: string }).title = t(group.label);
 				btn.addEventListener('click', () => this.setSource(source));
 			});
 		});
@@ -707,28 +708,28 @@ export class WorkbenchModal extends Modal {
 
 		if (this.source === 'searchPanel' || this.source === 'clipboard' || this.source === 'currentFile') {
 			const hints: Record<string, string> = {
-				searchPanel: '将读取当前搜索面板中的结果文件。',
-				clipboard: '将读取剪贴板中的文件链接。',
-				currentFile: '将读取当前文件中的链接。',
+				searchPanel: t('将读取当前搜索面板中的结果文件。'),
+				clipboard: t('将读取剪贴板中的文件链接。'),
+				currentFile: t('将读取当前文件中的链接。'),
 			};
 			this.contentEl.createDiv({ text: hints[this.source], cls: 'file-cooker-modal__description' });
-			this.renderFooter({ text: '读取文件', onClick: () => void this.runSource() }, []);
+			this.renderFooter({ text: t('读取文件'), onClick: () => void this.runSource() }, []);
 			return;
 		}
 
 		// 手写脚本三来源
 		const placeholders: Record<string, string> = {
-			dql: '例：\nLIST\nFROM #读书\nWHERE status != "done"',
-			search: '例：tag:#读书 path:"Books" -[status:done]',
-			bases: '例：\nfilters:\n  and:\n    - \'file.hasTag("读书")\'',
+			dql: t('例：\nLIST\nFROM #读书\nWHERE status != "done"'),
+			search: t('例：tag:#读书 path:"Books" -[status:done]'),
+			bases: t('例：\nfilters:\n  and:\n    - \'file.hasTag("读书")\''),
 		};
 		const secondary: Array<{ text: string; onClick: () => void }> = [
-			{ text: '从笔记导入…', onClick: () => this.openScriptImport() },
+			{ text: t('从笔记导入…'), onClick: () => this.openScriptImport() },
 		];
 		if (this.source === 'bases') {
-			secondary.push({ text: '另存为 .base', onClick: () => void this.saveBasesArtifact() });
+			secondary.push({ text: t('另存为 .base'), onClick: () => void this.saveBasesArtifact() });
 		}
-		const primary: FooterPrimary = { text: '执行查询', onClick: () => void this.runSource() };
+		const primary: FooterPrimary = { text: t('执行查询'), onClick: () => void this.runSource() };
 		this.renderScriptEditor(primary, secondary, placeholders[this.source] ?? '');
 	}
 
@@ -739,13 +740,13 @@ export class WorkbenchModal extends Modal {
 		const inputEl = this.contentEl.createEl('textarea');
 		(inputEl as HTMLTextAreaElement).rows = 2;
 		inputEl.classList.add('fc-ai-input');
-		(inputEl as HTMLTextAreaElement).placeholder = '例：去年标记了读书但没读完的笔记';
+		(inputEl as HTMLTextAreaElement).placeholder = t('例：去年标记了读书但没读完的笔记');
 		(inputEl as HTMLTextAreaElement).value = this.getDraft('ai');
 		inputEl.addEventListener('input', () => this.setDraft((inputEl as HTMLTextAreaElement).value));
 
 		addModalActions(this.contentEl, [
 			{
-				text: '生成查询',
+				text: t('生成查询'),
 				cta: true,
 				onClick: () => void this.submitAiInput((inputEl as HTMLTextAreaElement).value),
 			},
@@ -759,7 +760,7 @@ export class WorkbenchModal extends Modal {
 		this.availableTargets.forEach((target) => {
 			const count = this.aiCompiled[target]?.unsupported.length ?? 0;
 			const btn = targetsEl.createEl('span', {
-				text: `${TARGET_LABELS[target]}${count > 0 ? `（${count} 条不支持）` : ''}${this.recommendedTarget === target ? ' ✓推荐' : ''}`,
+				text: `${t(TARGET_LABELS[target])}${count > 0 ? t('（{n} 条不支持）', { n: count }) : ''}${this.recommendedTarget === target ? t(' ✓推荐') : ''}`,
 				cls: `fc-ai-targets__btn${this.aiSelectedTarget === target ? ' fc-ai-targets__btn--active' : ''}`,
 			});
 			btn.addEventListener('click', () => this.selectAiTarget(target));
@@ -783,14 +784,14 @@ export class WorkbenchModal extends Modal {
 		const unsupportedList = this.aiCompiled[this.aiSelectedTarget]?.unsupported ?? [];
 		if (unsupportedList.length > 0) {
 			this.contentEl.createDiv({
-				text: `⚠ ${unsupportedList.length} 个条件此语法不支持（已忽略）：${describeNodes(unsupportedList).slice(0, 3).join('、')}`,
+				text: t('⚠ {n} 个条件此语法不支持（已忽略）：{nodes}', { n: unsupportedList.length, nodes: describeNodes(unsupportedList).slice(0, 3).join(t('、')) }),
 				cls: 'fc-ai-warn',
 			});
 		}
 
 		addModalActions(this.contentEl, [
 			{
-				text: '执行查询（进入确认）',
+				text: t('执行查询（进入确认）'),
 				cta: true,
 				onClick: () => void this.runAiQuery(),
 			},
@@ -802,8 +803,8 @@ export class WorkbenchModal extends Modal {
 		this.applyShell();
 		this.renderStepBar();
 		renderModalLayout(this.contentEl, {
-			title: `命中 ${this.files.length} 个文件`,
-			description: this.truncatedCount > 0 ? `已达批量上限，已截断 ${this.truncatedCount} 个。` : undefined,
+			title: t('命中 {n} 个文件', { n: this.files.length }),
+			description: this.truncatedCount > 0 ? t('已达批量上限，已截断 {n} 个。', { n: this.truncatedCount }) : undefined,
 			variant: 'confirm',
 		});
 
@@ -853,8 +854,8 @@ export class WorkbenchModal extends Modal {
 		});
 
 		addModalActions(this.contentEl, [
-			{ text: '选择操作 →', cta: true, onClick: () => this.gotoExecute() },
-			{ text: '← 返回查询', onClick: () => this.backToQuery() },
+			{ text: t('选择操作 →'), cta: true, onClick: () => this.gotoExecute() },
+			{ text: t('← 返回查询'), onClick: () => this.backToQuery() },
 		]);
 	}
 
@@ -863,27 +864,27 @@ export class WorkbenchModal extends Modal {
 		this.applyShell();
 		this.renderStepBar();
 		renderModalLayout(this.contentEl, {
-			title: '选择操作',
-			description: `对命中的 ${this.files.length} 个文件执行操作（写入前仍需在确认窗中确认）。`,
+			title: t('选择操作'),
+			description: t('对命中的 {n} 个文件执行操作（写入前仍需在确认窗中确认）。', { n: this.files.length }),
 			variant: 'confirm',
 		});
 
 		// 操作目录：卡片网格（组织策略），删除按钮用主色调（不用刺眼红色）
-		this.contentEl.createDiv({ text: '修改属性', cls: 'file-cooker-modal__section-label' });
+		this.contentEl.createDiv({ text: t('修改属性'), cls: 'file-cooker-modal__section-label' });
 		const propGrid = this.contentEl.createDiv({ cls: 'fc-wb-catalog' });
-		this.addCatalogButton(propGrid, '编辑属性', '批量增删改 frontmatter', () => this.dispatch('properties'));
-		this.addCatalogButton(propGrid, 'AI 属性补全', 'AI 推断提案 · 人工审核', () => this.dispatch('aiProperties'));
+		this.addCatalogButton(propGrid, t('编辑属性'), t('批量增删改 frontmatter'), () => this.dispatch('properties'));
+		this.addCatalogButton(propGrid, t('AI 属性补全'), t('AI 推断提案 · 人工审核'), () => this.dispatch('aiProperties'));
 
-		this.contentEl.createDiv({ text: '整理文件', cls: 'file-cooker-modal__section-label' });
+		this.contentEl.createDiv({ text: t('整理文件'), cls: 'file-cooker-modal__section-label' });
 		const fileGrid = this.contentEl.createDiv({ cls: 'fc-wb-catalog' });
-		this.addCatalogButton(fileGrid, '移动到 ...', '整理到目标文件夹', () => this.dispatch('move'));
-		this.addCatalogButton(fileGrid, '合并到 ...', '并入一个目标文件', () => this.dispatch('merge'));
-		this.addCatalogButton(fileGrid, '加入 Canvas ...', '作为卡片加入画布', () => this.dispatch('canvas'));
-		this.addCatalogButton(fileGrid, '重命名 ...', '批量规范命名', () => this.dispatch('rename'));
-		this.addCatalogButton(fileGrid, '删除', '移入回收站（可从备份恢复）', () => this.dispatch('delete'), 'warning');
+		this.addCatalogButton(fileGrid, t('移动到 ...'), t('整理到目标文件夹'), () => this.dispatch('move'));
+		this.addCatalogButton(fileGrid, t('合并到 ...'), t('并入一个目标文件'), () => this.dispatch('merge'));
+		this.addCatalogButton(fileGrid, t('加入 Canvas ...'), t('作为卡片加入画布'), () => this.dispatch('canvas'));
+		this.addCatalogButton(fileGrid, t('重命名 ...'), t('批量规范命名'), () => this.dispatch('rename'));
+		this.addCatalogButton(fileGrid, t('删除'), t('移入回收站（可从备份恢复）'), () => this.dispatch('delete'), 'warning');
 
 		// 导航收敛:只保留「返回上一步」(执行的上一步即确认),右对齐
-		this.renderFooter({ text: '← 返回上一步', onClick: () => this.backToConfirm() }, []);
+		this.renderFooter({ text: t('← 返回上一步'), onClick: () => this.backToConfirm() }, []);
 	}
 
 	/**
@@ -935,14 +936,14 @@ function resolveHrefToFile(app: App, href: string): TAbstractFile | null {
 /** 把不支持条件翻译为人类可读短语（与选择器一致）。 */
 function describeNodes(nodes: IrCondition[]): string[] {
 	return nodes.map((node) => {
-		if ('content' in node) return `正文"${node.content}"`;
-		if ('task' in node) return `任务${node.task === 'todo' ? '未完成' : '已完成'}`;
-		if ('fileModified' in node) return `修改时间`;
-		if ('fileCreated' in node) return `创建时间`;
-		if ('property' in node) return `属性 ${node.property.field}`;
-		if ('tag' in node) return `标签 #${node.tag}`;
-		if ('folder' in node) return `目录 ${node.folder}`;
-		if ('filename' in node) return `文件名 ${node.filename}`;
-		return '条件';
+		if ('content' in node) return t('正文"{content}"', { content: node.content });
+		if ('task' in node) return t('任务{status}', { status: node.task === 'todo' ? t('未完成') : t('已完成') });
+		if ('fileModified' in node) return t('修改时间');
+		if ('fileCreated' in node) return t('创建时间');
+		if ('property' in node) return t('属性 {field}', { field: node.property.field });
+		if ('tag' in node) return t('标签 #{tag}', { tag: node.tag });
+		if ('folder' in node) return t('目录 {dir}', { dir: node.folder });
+		if ('filename' in node) return t('文件名 {name}', { name: node.filename });
+		return t('条件');
 	});
 }

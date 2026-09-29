@@ -1,4 +1,5 @@
 import { App, Modal, Notice, TAbstractFile, TFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { getBackup } from 'src/backup/backup-service';
 import {
 	addLabeledTextField,
@@ -31,34 +32,34 @@ export class EditPropertiesModal extends Modal {
         const { contentEl } = this;
 
         renderModalLayout(contentEl, {
-            title: '编辑属性',
-            description: '为选中的文件配置属性键/值和覆盖选项。',
-            summaryLines: [`已选中 ${this.resultArr.length} 个文件。`],
+            title: t('编辑属性'),
+            description: t('为选中的文件配置属性键/值和覆盖选项。'),
+            summaryLines: [t('已选中 {n} 个文件。', { n: this.resultArr.length })],
             listItems: this.resultArr.map((info) => info.path),
-            listLabel: '受影响的文件',
-            emptyMessage: '没有可编辑的文件。',
+            listLabel: t('受影响的文件'),
+            emptyMessage: t('没有可编辑的文件。'),
             variant: 'input',
         });
 
         if (this.resultArr.length === 0) {
             addModalActions(contentEl, [
                 {
-                    text: '关闭',
+                    text: t('关闭'),
                     onClick: () => this.close(),
                 },
             ]);
         } else {
 
-            addLabeledTextField(contentEl, '属性键', '输入属性键', (val) => {
+            addLabeledTextField(contentEl, t('属性键'), t('输入属性键'), (val) => {
 				this.key = val;
 			});
-            addLabeledTextField(contentEl, '属性值', '输入属性值', (val) => {
+            addLabeledTextField(contentEl, t('属性值'), t('输入属性值'), (val) => {
 				this.val = val;
 			});
             addLabeledToggleField(
 				contentEl,
-				'覆盖已有属性',
-				'属性已存在时覆盖！',
+				t('覆盖已有属性'),
+				t('属性已存在时覆盖！'),
 				Boolean(this.overrideFlag),
 				(val) => {
 					localStorage.setItem('overrideFlag', val + '');
@@ -68,20 +69,20 @@ export class EditPropertiesModal extends Modal {
 
             addModalActions(contentEl, [
                 {
-                    text: '应用属性',
+                    text: t('应用属性'),
                     cta: true,
                     onClick: async () => {
                         if (isBlank(this.key as string)) {
-                            showValidationNotice('属性键不能为空。');
+                            showValidationNotice(t('属性键不能为空。'));
                             return;
                         }
                         if (isBlank(this.val as string)) {
-                            showValidationNotice('属性值不能为空。');
+                            showValidationNotice(t('属性值不能为空。'));
                             return;
                         }
                         this.close();
                         // 属性编辑为内容写：操作前逐文件快照，成功提交、异常丢弃
-                        const recorder = getBackup().begin('properties', '编辑属性');
+                        const recorder = getBackup().begin('properties', t('编辑属性'));
                         try {
                         for (let i = 0; i < this.resultArr.length; i++) {
                             const info = this.resultArr[i] as TFile;
@@ -122,18 +123,18 @@ export class EditPropertiesModal extends Modal {
                             });
                         }
                         await recorder.finish();
-                        new Notice('属性已更新。');
+                        new Notice(t('属性已更新。'));
                         } catch (e) {
                             recorder.abort();
-                            new Notice('操作失败：' + (e as Error).message);
+                            new Notice(t('操作失败：{msg}', { msg: (e as Error).message }));
                         }
                     },
                 },
                 {
-                    text: '取消',
+                    text: t('取消'),
                     onClick: () => {
                         this.close();
-                        new Notice('操作已取消。');
+                        new Notice(t('操作已取消。'));
                     },
                 },
             ]);

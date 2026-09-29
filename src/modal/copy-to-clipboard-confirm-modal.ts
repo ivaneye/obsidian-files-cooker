@@ -1,4 +1,5 @@
 import { App, Modal, Notice, Setting, TAbstractFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import hasMarkdownSuffix from 'src/utils/file-type-util';
 import { getLinebreak } from 'src/utils/line-break-util';
 import { addLabeledToggleField } from './modal-ui';
@@ -21,33 +22,33 @@ export class CopyToClipboardConfirmModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "确认复制到剪贴板？" });
+        contentEl.createEl("h1", { text: t("确认复制到剪贴板？") });
 
         this.previewEl = contentEl.createEl("div");
         this.renderPreview();
 
-        addLabeledToggleField(contentEl, '仅复制文件名', '仅使用文件名生成 Wiki 链接', Boolean(this.nameOnlyFlag), (val) => {
+        addLabeledToggleField(contentEl, t('仅复制文件名'), t('仅使用文件名生成 Wiki 链接'), Boolean(this.nameOnlyFlag), (val) => {
             this.nameOnlyFlag = val;
             this.renderPreview();
         });
 
         new Setting(contentEl)
             .addButton((btn) =>
-                btn.setButtonText("复制链接")
+                btn.setButtonText(t("复制链接"))
                     .setCta()
                     .onClick(async () => {
                         this.close();
                         let str = this.prepareStr();
                         navigator.clipboard.writeText(str);
-                        new Notice("链接已复制。")
+                        new Notice(t("链接已复制。"))
                     }))
             .addButton((btn) =>
                 btn
-                    .setButtonText("取消")
+                    .setButtonText(t("取消"))
                     .setCta()
                     .onClick(() => {
                         this.close();
-                        new Notice("操作已取消。");
+                        new Notice(t("操作已取消。"));
                     }));
     }
 

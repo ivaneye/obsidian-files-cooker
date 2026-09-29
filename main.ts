@@ -1,4 +1,6 @@
 import { Plugin, App, PluginSettingTab, Setting } from 'obsidian';
+import { initI18n, t } from 'src/i18n/index';
+import type { LanguageSetting } from 'src/i18n/index';
 import { initBackup } from 'src/backup/backup-service';
 import { DEFAULT_BACKUP_SETTINGS, deepMerge, renderBackupSettings } from 'src/backup/backup-settings';
 import type { BackupSettings } from 'src/backup/backup-settings';
@@ -21,6 +23,7 @@ export default class FileCookerPlugin extends Plugin {
 	async onload() {
 
 		await this.loadSettings();
+		initI18n(this.settings.language);
 
 		// 初始化备份服务单例（批量写操作的回滚能力依赖它）
 		initBackup(this.app, this.settings.backup);
@@ -46,6 +49,7 @@ export default class FileCookerPlugin extends Plugin {
 	async loadSettings() {
 		// 深合并：嵌套 backup 段不会因浅拷贝丢失子字段
 		this.settings = deepMerge<FileCookerPluginSettings>(DEFAULT_SETTINGS, await this.loadData());
+		initI18n(this.settings.language);
 	}
 
 	async saveSettings() {
@@ -56,6 +60,7 @@ export default class FileCookerPlugin extends Plugin {
 const DEFAULT_SETTINGS: FileCookerPluginSettings = {
 	flomoAPI: '',
 	limit: '300',
+	language: 'auto',
 	backup: DEFAULT_BACKUP_SETTINGS,
 	ai: DEFAULT_AI_SETTINGS,
 }
@@ -63,6 +68,7 @@ const DEFAULT_SETTINGS: FileCookerPluginSettings = {
 interface FileCookerPluginSettings {
 	flomoAPI: string;
 	limit: string;
+	language: LanguageSetting;
 	backup: BackupSettings;
 	ai: AiSettings;
 }
@@ -80,13 +86,28 @@ class FileCookerSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', { text: 'File Cooker 设置' });
+		containerEl.createEl('h2', { text: t('File Cooker 设置') });
 
 		new Setting(containerEl)
-			.setName('批量文件上限')
-			.setDesc('配置批处理文件数量上限')
+			.setName(t('界面语言'))
+			.setDesc(t('跟随 Obsidian 界面语言；也可固定为中文或英文。'))
+			.addDropdown(dropdown => dropdown
+				.addOption('auto', t('自动（跟随 Obsidian）'))
+				.addOption('zh', t('中文'))
+				.addOption('en', t('英文'))
+				.setValue(this.plugin.settings.language)
+				.onChange(async (value) => {
+					this.plugin.settings.language = value as LanguageSetting;
+					initI18n(this.plugin.settings.language);
+					await this.plugin.saveSettings();
+					this.display();
+				}));
+
+		new Setting(containerEl)
+			.setName(t('批量文件上限'))
+			.setDesc(t('配置批处理文件数量上限'))
 			.addText(text => text
-				.setPlaceholder('输入数量上限')
+				.setPlaceholder(t('输入数量上限'))
 				.setValue(this.plugin.settings.limit)
 				.onChange(async (value) => {
 					this.plugin.settings.limit = value;
@@ -95,9 +116,9 @@ class FileCookerSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('flomoAPI')
-			.setDesc('配置 flomo API，用于同步笔记')
+			.setDesc(t('配置 flomo API，用于同步笔记'))
 			.addText(text => text
-				.setPlaceholder('输入 flomo API')
+				.setPlaceholder(t('输入 flomo API'))
 				.setValue(this.plugin.settings.flomoAPI)
 				.onChange(async (value) => {
 					this.plugin.settings.flomoAPI = value;

@@ -1,4 +1,5 @@
 import { App, ItemView, Modal, Notice, requireApiVersion, Setting, TAbstractFile, TFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { ActionModel } from 'src/action/action';
 import { addLabeledToggleField } from './modal-ui';
 
@@ -43,9 +44,9 @@ export class AddToCanvasConfirmModal extends Modal {
 
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "确认添加到画布？" });
+        contentEl.createEl("h1", { text: t("确认添加到画布？") });
 
-        contentEl.createEl("div", { text: "将以下内容添加到画布 → " + this.targetFilePath + "！" });
+        contentEl.createEl("div", { text: t('将以下内容添加到画布 → {path}！', { path: this.targetFilePath }) });
 
         let lines = this.cont.split(/\r?\n/);
         for (const key in lines) {
@@ -53,13 +54,13 @@ export class AddToCanvasConfirmModal extends Modal {
             contentEl.createEl("div", { text: line });
         }
 
-        addLabeledToggleField(contentEl, '按行拆分内容', '每行创建一个画布文本节点', Boolean(this.splitByLineFlag), (val) => {
+        addLabeledToggleField(contentEl, t('按行拆分内容'), t('每行创建一个画布文本节点'), Boolean(this.splitByLineFlag), (val) => {
             this.splitByLineFlag = val;
         });
 
         new Setting(contentEl)
             .addButton((btn) =>
-                btn.setButtonText("添加到画布")
+                btn.setButtonText(t("添加到画布"))
                     .setCta()
                     .onClick(async () => {
                         this.close();
@@ -82,18 +83,18 @@ export class AddToCanvasConfirmModal extends Modal {
                             }
                             canvas.requestSave();
 
-                            new Notice("已添加到画布。");
+                            new Notice(t("已添加到画布。"));
                         } else {
-                            new Notice(this.targetFilePath + " 不是画布文件！");
+                            new Notice(t('{path} 不是画布文件！', { path: this.targetFilePath }));
                         }
                     }))
             .addButton((btn) =>
                 btn
-                    .setButtonText("取消")
+                    .setButtonText(t("取消"))
                     .setCta()
                     .onClick(() => {
                         this.close();
-                        new Notice("操作已取消。");
+                        new Notice(t("操作已取消。"));
                     }));
     }
 
@@ -119,20 +120,20 @@ export class AddToCanvasConfirmModal extends Modal {
     private addFile() {
         const { contentEl } = this;
 
-        contentEl.createEl("h1", { text: "确认添加到画布？" });
+        contentEl.createEl("h1", { text: t("确认添加到画布？") });
 
-        contentEl.createEl("div", { text: "将以下文件全部添加到画布 → " + this.targetFilePath + "！" });
+        contentEl.createEl("div", { text: t('将以下文件全部添加到画布 → {path}！', { path: this.targetFilePath }) });
         this.resultArr.forEach(info => {
             contentEl.createEl("div", { text: info.path });
         })
 
-        addLabeledToggleField(contentEl, '包含解析的链接', '同时添加解析到的链接文件并连接关系', Boolean(this.includeReslovedLinksFlag), (val) => {
+        addLabeledToggleField(contentEl, t('包含解析的链接'), t('同时添加解析到的链接文件并连接关系'), Boolean(this.includeReslovedLinksFlag), (val) => {
             this.includeReslovedLinksFlag = val;
         });
 
         new Setting(contentEl)
             .addButton((btn) =>
-                btn.setButtonText("添加到画布")
+                btn.setButtonText(t("添加到画布"))
                     .setCta()
                     .onClick(async () => {
                         this.close();
@@ -173,18 +174,18 @@ export class AddToCanvasConfirmModal extends Modal {
                             }
                             canvas.requestSave();
 
-                            new Notice("已添加到画布。");
+                            new Notice(t("已添加到画布。"));
                         } else {
-                            new Notice(this.targetFilePath + " 不是画布文件！");
+                            new Notice(t('{path} 不是画布文件！', { path: this.targetFilePath }));
                         }
                     }))
             .addButton((btn) =>
                 btn
-                    .setButtonText("取消")
+                    .setButtonText(t("取消"))
                     .setCta()
                     .onClick(() => {
                         this.close();
-                        new Notice("操作已取消。");
+                        new Notice(t("操作已取消。"));
                     }));
     }
 

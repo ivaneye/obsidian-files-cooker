@@ -1,4 +1,5 @@
 import { Setting } from 'obsidian';
+import { t } from 'src/i18n/index';
 
 /**
  * 备份设置：默认值、深合并与设置分区渲染。
@@ -64,11 +65,11 @@ export interface BackupSettingsHost {
  * 说明：设置分区渲染为 UI 行为，不套用 TDD，经构建 + 手工验证。
  */
 export function renderBackupSettings(containerEl: HTMLElement, plugin: BackupSettingsHost): void {
-	containerEl.createEl('h2', { text: '备份与撤销' });
+	containerEl.createEl('h2', { text: t('备份与撤销') });
 
 	new Setting(containerEl)
-		.setName('启用备份')
-		.setDesc('每次批量写操作前创建快照，以便之后回滚。')
+		.setName(t('启用备份'))
+		.setDesc(t('每次批量写操作前创建快照，以便之后回滚。'))
 		.addToggle((toggle) => {
 			toggle.setValue(plugin.settings.backup.enabled).onChange(async (value) => {
 				plugin.settings.backup.enabled = value;
@@ -77,8 +78,8 @@ export function renderBackupSettings(containerEl: HTMLElement, plugin: BackupSet
 		});
 
 	new Setting(containerEl)
-		.setName('备份目录')
-		.setDesc('Vault 内相对路径；点号前缀默认在文件浏览中隐藏。')
+		.setName(t('备份目录'))
+		.setDesc(t('Vault 内相对路径；点号前缀默认在文件浏览中隐藏。'))
 		.addText((text) => {
 			text.setPlaceholder(DEFAULT_BACKUP_SETTINGS.backupFolder)
 				.setValue(plugin.settings.backup.backupFolder)
@@ -89,8 +90,8 @@ export function renderBackupSettings(containerEl: HTMLElement, plugin: BackupSet
 		});
 
 	new Setting(containerEl)
-		.setName('保留次数')
-		.setDesc('保留最近的记录数，超出后自动清理最旧的。')
+		.setName(t('保留次数'))
+		.setDesc(t('保留最近的记录数，超出后自动清理最旧的。'))
 		.addText((text) => {
 			text.setPlaceholder(String(DEFAULT_BACKUP_SETTINGS.retention))
 				.setValue(String(plugin.settings.backup.retention))

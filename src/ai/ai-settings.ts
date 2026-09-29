@@ -1,4 +1,5 @@
 import { App, Setting } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { deepMerge } from 'src/backup/backup-settings';
 
 /**
@@ -144,15 +145,15 @@ export function saveAiApiKey(app: App, ai: AiSettings, value: string): void {
 export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHost): void {
 	const ai = plugin.settings.ai;
 
-	containerEl.createEl('h2', { text: 'AI（实验性）' });
+	containerEl.createEl('h2', { text: t('AI（实验性）') });
 	containerEl.createEl('p', {
-		text: 'AI 能力默认关闭。启用后，AI 仅在你主动触发对应命令时读取笔记内容生成提案，应用前需人工确认。',
+		text: t('AI 能力默认关闭。启用后，AI 仅在你主动触发对应命令时读取笔记内容生成提案，应用前需人工确认。'),
 		cls: 'setting-item-description',
 	});
 
 	new Setting(containerEl)
-		.setName('启用 AI')
-		.setDesc('总开关：关闭时所有 AI 命令直接提示并终止。')
+		.setName(t('启用 AI'))
+		.setDesc(t('总开关：关闭时所有 AI 命令直接提示并终止。'))
 		.addToggle((toggle) => {
 			toggle.setValue(ai.enabled).onChange(async (value) => {
 				ai.enabled = value;
@@ -161,8 +162,8 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('服务地址 (baseUrl)')
-		.setDesc('OpenAI 兼容地址，如 https://api.deepseek.com/v1 或 http://127.0.0.1:11434/v1（Ollama）。')
+		.setName(t('服务地址 (baseUrl)'))
+		.setDesc(t('OpenAI 兼容地址，如 https://api.deepseek.com/v1 或 http://127.0.0.1:11434/v1（Ollama）。'))
 		.addText((text) => {
 			text.setPlaceholder('https://api.deepseek.com/v1')
 				.setValue(ai.baseUrl)
@@ -173,8 +174,8 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('模型')
-		.setDesc('如 deepseek-chat、kimi-k2、gpt-4o-mini 等。')
+		.setName(t('模型'))
+		.setDesc(t('如 deepseek-chat、kimi-k2、gpt-4o-mini 等。'))
 		.addText((text) => {
 			text.setPlaceholder('deepseek-chat')
 				.setValue(ai.model)
@@ -186,7 +187,7 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 
 	new Setting(containerEl)
 		.setName('API Key')
-		.setDesc('优先存入 Obsidian SecretStorage；不可用时降级为明文保存在配置文件中（有泄露风险）。')
+		.setDesc(t('优先存入 Obsidian SecretStorage；不可用时降级为明文保存在配置文件中（有泄露风险）。'))
 		.addText((text) => {
 			const stored = loadAiApiKey(plugin.app, ai);
 			text.inputEl.setAttribute('type', 'password');
@@ -199,8 +200,8 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('每批文件数')
-		.setDesc('单次 AI 请求包含的文件数量，默认 5。')
+		.setName(t('每批文件数'))
+		.setDesc(t('单次 AI 请求包含的文件数量，默认 5。'))
 		.addText((text) => {
 			text.setPlaceholder(String(DEFAULT_AI_SETTINGS.batchSize))
 				.setValue(String(ai.batchSize))
@@ -214,8 +215,8 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('并发请求数')
-		.setDesc('同时进行的 AI 请求上限，默认 3。')
+		.setName(t('并发请求数'))
+		.setDesc(t('同时进行的 AI 请求上限，默认 3。'))
 		.addText((text) => {
 			text.setPlaceholder(String(DEFAULT_AI_SETTINGS.concurrency))
 				.setValue(String(ai.concurrency))
@@ -229,8 +230,8 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('正文截断字符数')
-		.setDesc('每篇笔记发送给 AI 的正文长度上限，调小可降低成本，默认 1500。')
+		.setName(t('正文截断字符数'))
+		.setDesc(t('每篇笔记发送给 AI 的正文长度上限，调小可降低成本，默认 1500。'))
 		.addText((text) => {
 			text.setPlaceholder(String(DEFAULT_AI_SETTINGS.contextChars))
 				.setValue(String(ai.contextChars))
@@ -244,8 +245,8 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('推断 tags')
-		.setDesc('按内容推断标签（优先复用库内已有标签）。')
+		.setName(t('推断 tags'))
+		.setDesc(t('按内容推断标签（优先复用库内已有标签）。'))
 		.addToggle((toggle) => {
 			toggle.setValue(ai.inferTags).onChange(async (value) => {
 				ai.inferTags = value;
@@ -254,8 +255,8 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('推断 aliases')
-		.setDesc('按内容推断别名（仅在明显有价值时给出）。')
+		.setName(t('推断 aliases'))
+		.setDesc(t('按内容推断别名（仅在明显有价值时给出）。'))
 		.addToggle((toggle) => {
 			toggle.setValue(ai.inferAliases).onChange(async (value) => {
 				ai.inferAliases = value;
@@ -264,8 +265,8 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('自定义属性')
-		.setDesc('额外推断的标量属性名，逗号分隔，如 status,domain；留空不推断。')
+		.setName(t('自定义属性'))
+		.setDesc(t('额外推断的标量属性名，逗号分隔，如 status,domain；留空不推断。'))
 		.addText((text) => {
 			text.setPlaceholder('status,domain')
 				.setValue(ai.customProps)
@@ -276,13 +277,13 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('标签语言')
-		.setDesc('生成标签的语言偏好。')
+		.setName(t('标签语言'))
+		.setDesc(t('生成标签的语言偏好。'))
 		.addDropdown((dropdown) => {
 			dropdown
-				.addOption('auto', '跟随笔记语言')
-				.addOption('zh', '中文')
-				.addOption('en', '英文')
+				.addOption('auto', t('跟随笔记语言'))
+				.addOption('zh', t('中文'))
+				.addOption('en', t('英文'))
 				.setValue(ai.tagLanguage)
 				.onChange(async (value) => {
 					ai.tagLanguage = (['auto', 'zh', 'en'] as const).includes(value as TagLanguage)

@@ -135,6 +135,7 @@ Type a sentence like *"last year's unfinished reading notes"* — the AI compile
 
 | Setting | Purpose | Default |
 | :--- | :--- | :--- |
+| Interface language | UI language for dialogs, notices and settings: `Auto` follows the Obsidian interface language (English for non-Chinese, 中文 for zh), or force Chinese/English | `Auto` |
 | Limit | Maximum number of files processed per batch | `300` |
 | flomoAPI | flomo API endpoint, used to sync notes to flomo | empty |
 | Enable backup | Create a snapshot for every batch write so it can be reverted | on |

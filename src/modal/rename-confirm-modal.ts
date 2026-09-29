@@ -1,4 +1,5 @@
 import { App, Modal, Notice, TAbstractFile } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { getBackup } from 'src/backup/backup-service';
 import hasMarkdownSuffix from 'src/utils/file-type-util';
 import { addModalActions, renderModalLayout } from './modal-ui';
@@ -22,28 +23,28 @@ export class RenameConfirmModal extends Modal {
         const { contentEl } = this;
 
         renderModalLayout(contentEl, {
-            title: '重命名预览',
-            description: '应用前请确认新的文件名。',
-            summaryLines: [`${this.resultArr.length} 个文件将被重命名。`],
+            title: t('重命名预览'),
+            description: t('应用前请确认新的文件名。'),
+            summaryLines: [t('{n} 个文件将被重命名。', { n: this.resultArr.length })],
             listItems: this.resultArr.map((info) => `${info.name} -> ${this.newName(info.name)}`),
-            listLabel: '计划变更',
-            emptyMessage: '没有可重命名的文件。',
+            listLabel: t('计划变更'),
+            emptyMessage: t('没有可重命名的文件。'),
             variant: 'confirm',
         });
 
         addModalActions(contentEl, [
             {
-                text: '应用重命名',
+                text: t('应用重命名'),
                 cta: true,
                 onClick: async () => {
                     if ((this.prefix == null || this.prefix.trim() == "")
                         && (this.suffix == null || this.suffix.trim() == "")) {
-                        new Notice("前缀或后缀不能同时为空。");
+                        new Notice(t("前缀或后缀不能同时为空。"));
                         return;
                     }
                     this.close();
                     // 重命名为路径变更：操作前记录旧→新路径，回滚走反向 renameFile
-                    const recorder = getBackup().begin('rename', '重命名文件');
+                    const recorder = getBackup().begin('rename', t('重命名文件'));
                     try {
                     for (let i = 0; i < this.resultArr.length; i++) {
                         let info = this.resultArr[i];
@@ -52,18 +53,18 @@ export class RenameConfirmModal extends Modal {
                         await this.app.fileManager.renameFile(info, info.parent.path + "/" + name);
                     }
                     await recorder.finish();
-                    new Notice("重命名完成。");
+                    new Notice(t("重命名完成。"));
                     } catch (e) {
                         recorder.abort();
-                        new Notice("操作失败：" + (e as Error).message);
+                        new Notice(t('操作失败：{msg}', { msg: (e as Error).message }));
                     }
                 },
             },
             {
-                text: '取消',
+                text: t('取消'),
                 onClick: () => {
                     this.close();
-                    new Notice("操作已取消。");
+                    new Notice(t("操作已取消。"));
                 },
             },
         ]);

@@ -1,4 +1,5 @@
 import { Notice } from 'obsidian';
+import { t } from 'src/i18n/index';
 import FileCookerPlugin from 'main';
 import { Command } from './command';
 import { AiProvider } from 'src/ai/ai-provider';
@@ -29,7 +30,7 @@ export class WorkbenchCommand implements Command {
 		});
 
 		// 侧边栏 ribbon：文件烹饪台主入口
-		this.plugin.addRibbonIcon('cooking-pot', 'File Cooker 工作台', () => this.openWorkbench());
+		this.plugin.addRibbonIcon('cooking-pot', t('File Cooker 工作台'), () => this.openWorkbench());
 	}
 
 	private openWorkbench(): void {
