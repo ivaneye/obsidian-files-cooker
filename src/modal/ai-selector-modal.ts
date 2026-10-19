@@ -187,7 +187,7 @@ export class AiSelectorModal extends Modal {
 				if (this.host != null) {
 					new AiPropertiesAction(this.host as never).act(models);
 				} else {
-					new Notice(t('请通过命令面板的「AI complete properties」使用该操作。'));
+					new Notice(t('请通过命令面板中的 AI 属性补全命令使用该操作。'));
 				}
 				break;
 			case 'move':

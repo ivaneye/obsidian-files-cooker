@@ -1,4 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
+import { t } from 'src/i18n/index';
 import { DeleteConfirmModal } from "src/modal/delete-confirm-modal";
 import { Action, ActionModel } from "./action";
 
@@ -15,7 +16,7 @@ export class DeleteAction implements Action {
             let files = actionModels.map(model => model.file);
             new DeleteConfirmModal(this.app, files).open();
         } else {
-            new Notice("No Files Found!");
+            new Notice(t('未找到文件。'));
         }
     }
 

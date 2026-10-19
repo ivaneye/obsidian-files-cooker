@@ -6,6 +6,7 @@ vi.mock('obsidian', async () => {
 
 import type { TFolder } from 'obsidian';
 import { __getNotices, __resetNotices } from '../mocks/obsidian';
+import { t } from 'src/i18n/index';
 import { createAppMock } from '../mocks/vault-mock';
 import { FolderReader } from 'src/reader/folder-reader';
 
@@ -81,6 +82,6 @@ describe('FolderReader 文件夹读取', () => {
 		new FolderReader({ app, settings } as never, folder('notes')).read({ act });
 
 		expect(act).not.toHaveBeenCalled();
-		expect(__getNotices().join(' ')).toContain('files');
+		expect(__getNotices().join(' ')).toContain(t('加载的文件超过上限 {limit} 个！', { limit: 1 }));
 	});
 });

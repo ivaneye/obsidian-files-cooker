@@ -86,6 +86,7 @@ vi.mock('src/modal/choose-canvas-modal', () => ({
 	},
 }));
 
+import { t } from 'src/i18n/index';
 import { ContextMenuCommand } from 'src/command/context-menu-command';
 
 type FakeMenuItem = {
@@ -220,8 +221,8 @@ describe('ContextMenuCommand', () => {
 			getSelection: () => '',
 		});
 
-		const selectionGroup = findItemOrUndefined(menu, 'File Cooker -> Selection');
-		const syncSelection = findItemOrUndefined(menu, 'Sync selection to flomo ...');
+		const selectionGroup = findItemOrUndefined(menu, t('File Cooker -> 选区'));
+		const syncSelection = findItemOrUndefined(menu, t('同步选区到 flomo ...'));
 		expect(selectionGroup).toBeUndefined();
 		expect(syncSelection).toBeUndefined();
 		expect(currentFileReaderRead).not.toHaveBeenCalled();
@@ -236,10 +237,10 @@ describe('ContextMenuCommand', () => {
 			getSelection: () => 'selected text',
 		});
 
-		const selectionGroup = findItem(menu, 'File Cooker -> Selection');
+		const selectionGroup = findItem(menu, t('File Cooker -> 选区'));
 		expect(selectionGroup.disabled).toBe(true);
 
-		const syncSelection = findItem(menu, 'Sync selection to flomo ...');
+		const syncSelection = findItem(menu, t('同步选区到 flomo ...'));
 
 		syncSelection.onClickHandler?.();
 
@@ -255,8 +256,8 @@ describe('ContextMenuCommand', () => {
 			getSelection: () => 'selected text',
 		});
 
-		const currentFileGroup = findItemOrUndefined(menu, 'File Cooker -> Current file links');
-		const renameCurrentLinks = findItemOrUndefined(menu, 'Rename in current file links ...');
+		const currentFileGroup = findItemOrUndefined(menu, t('File Cooker -> 当前文件链接'));
+		const renameCurrentLinks = findItemOrUndefined(menu, t('重命名当前文件链接中的文件 ...'));
 		expect(currentFileGroup).toBeUndefined();
 		expect(renameCurrentLinks).toBeUndefined();
 		expect(currentFileReaderRead).not.toHaveBeenCalled();
@@ -271,10 +272,10 @@ describe('ContextMenuCommand', () => {
 			getSelection: () => 'selected text',
 		});
 
-		const currentFileGroup = findItem(menu, 'File Cooker -> Current file links');
+		const currentFileGroup = findItem(menu, t('File Cooker -> 当前文件链接'));
 		expect(currentFileGroup.disabled).toBe(true);
 
-		const renameCurrentLinks = findItem(menu, 'Rename in current file links ...');
+		const renameCurrentLinks = findItem(menu, t('重命名当前文件链接中的文件 ...'));
 		renameCurrentLinks.onClickHandler?.();
 
 		expect(currentFileReaderRead).toHaveBeenCalledTimes(1);
@@ -288,10 +289,10 @@ describe('ContextMenuCommand', () => {
 
 		registFileMenu(command, menu, targetFile);
 
-		const targetGroup = findItem(menu, 'File Cooker -> Target file');
+		const targetGroup = findItem(menu, t('File Cooker -> 目标文件'));
 		expect(targetGroup.disabled).toBe(true);
 
-		const renameTarget = findItem(menu, 'Rename target file ...');
+		const renameTarget = findItem(menu, t('重命名目标文件 ...'));
 		renameTarget.onClickHandler?.();
 
 		expect(renameAct).toHaveBeenCalledTimes(1);
@@ -307,8 +308,8 @@ describe('ContextMenuCommand', () => {
 
 		registFileMenu(command, menu, folderTarget);
 
-		const targetGroup = findItemOrUndefined(menu, 'File Cooker -> Target file');
-		const renameTarget = findItemOrUndefined(menu, 'Rename target file ...');
+		const targetGroup = findItemOrUndefined(menu, t('File Cooker -> 目标文件'));
+		const renameTarget = findItemOrUndefined(menu, t('重命名目标文件 ...'));
 		expect(targetGroup).toBeUndefined();
 		expect(renameTarget).toBeUndefined();
 		expect(renameAct).not.toHaveBeenCalled();
@@ -322,16 +323,16 @@ describe('ContextMenuCommand', () => {
 
 		registFileMenu(command, menu, folderTarget);
 
-		const folderGroup = findItem(menu, 'File Cooker -> Target folder');
+		const folderGroup = findItem(menu, t('File Cooker -> 目标文件夹'));
 		expect(folderGroup.disabled).toBe(true);
 
-		const editProps = findItem(menu, 'Edit properties in folder ...');
+		const editProps = findItem(menu, t('编辑文件夹中的属性 ...'));
 		editProps.onClickHandler?.();
 		expect(folderReaderRead).toHaveBeenCalledTimes(1);
 		// FolderReader 收到的是 EditPropertiesAction
 		expect(folderReaderRead.mock.calls[0][0].act).toBe(editPropertiesAct);
 
-		const renameProp = findItem(menu, 'Rename property in folder ...');
+		const renameProp = findItem(menu, t('重命名文件夹中的属性 ...'));
 		renameProp.onClickHandler?.();
 		expect(folderReaderRead).toHaveBeenCalledTimes(2);
 		// FolderReader 收到的是 RenamePropertyAction

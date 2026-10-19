@@ -1,4 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
+import { t } from 'src/i18n/index';
 import { MergeConfirmModal } from "src/modal/merge-confirm-modal";
 import { Action, ActionModel } from "./action";
 
@@ -18,7 +19,7 @@ export class MergeAction implements Action {
             let files = actionModels.map(model => model.file);
             new MergeConfirmModal(this.app, files, this.targetFilePath).open();
         } else {
-            new Notice("No Files Found!");
+            new Notice(t('未找到文件。'));
         }
     }
 

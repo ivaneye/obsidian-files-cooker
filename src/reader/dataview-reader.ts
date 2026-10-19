@@ -1,4 +1,5 @@
 import { App, Notice } from "obsidian";
+import { t } from 'src/i18n/index';
 import { Action, ActionModel } from "src/action/action";
 import { Readable } from "./readable";
 import { getAPI } from "obsidian-dataview";
@@ -116,7 +117,7 @@ export class DataviewReader implements Readable {
                         new Notice(e.message);
                     }
                 } else {
-                    new Notice("Query string error![" + this.queryStr + "]");
+                    new Notice(t('查询语句有误：[{query}]', { query: this.queryStr }));
                 }
             })
         }

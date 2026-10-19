@@ -1,5 +1,6 @@
 import FileCookerPlugin from "main";
 import { App, Notice } from "obsidian";
+import { t } from 'src/i18n/index';
 import { Action, ActionModel } from "src/action/action";
 import { Readable } from "./readable";
 
@@ -28,7 +29,7 @@ export class ClipboardContentReader implements Readable {
                 new Notice(e.message);
             }
         }).catch(e => {
-            new Notice("Clipboard Content Error!" + e);
+            new Notice(t('读取剪贴板内容失败：{msg}', { msg: String(e) }));
         });
     }
 

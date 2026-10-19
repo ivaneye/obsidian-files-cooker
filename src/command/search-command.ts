@@ -1,4 +1,5 @@
 import FileCookerPlugin from 'main';
+import { t } from 'src/i18n/index';
 import { Action } from 'src/action/action';
 import { AddToCanvasAction } from 'src/action/add-to-canvas-action';
 import { DeleteAction } from 'src/action/delete-action';
@@ -36,7 +37,7 @@ export class SearchCommand implements Command {
     private registRenameFile() {
         this.plugin.addCommand({
             id: 'rename-files-in-searchresults',
-            name: 'Rename files in searchresults ...',
+            name: t('重命名搜索结果中的文件 ...'),
             callback: () => {
                 new SearchResultsReader(this.plugin).read(new RenameAction(this.plugin.app));
             }
@@ -50,7 +51,7 @@ export class SearchCommand implements Command {
     private registEditProp() {
         this.plugin.addCommand({
             id: 'edit-front-matter-in-searchresults-files',
-            name: 'Edit Properties in searchresults files ...',
+            name: t('编辑搜索结果文件的属性 ...'),
             callback: () => {
                 new SearchResultsReader(this.plugin).read(new EditPropertiesAction(this.plugin.app));
             }
@@ -63,7 +64,7 @@ export class SearchCommand implements Command {
     private registAiCompleteProps() {
         this.plugin.addCommand({
             id: 'ai-complete-properties-in-searchresults-files',
-            name: 'AI complete properties in searchresults files ...',
+            name: t('AI 补全搜索结果文件的属性 ...'),
             callback: () => {
                 new SearchResultsReader(this.plugin).read(new AiPropertiesAction(this.plugin));
             }
@@ -73,7 +74,7 @@ export class SearchCommand implements Command {
     private registDeleteFile() {
         this.plugin.addCommand({
             id: 'delete-files-in-searchresults',
-            name: 'Delete files in searchresults!',
+            name: t('删除搜索结果中的文件!'),
             callback: () => {
                 new SearchResultsReader(this.plugin).read(new DeleteAction(this.plugin.app));
             }
@@ -83,7 +84,7 @@ export class SearchCommand implements Command {
     private registMergeFile() {
         this.plugin.addCommand({
             id: 'merge-files-in-searchresults-to',
-            name: 'Merge files in searchresults to ...',
+            name: t('合并搜索结果文件到 ...'),
             callback: () => {
                 new ChooseFileModal(this.plugin.app, new SearchResultsReader(this.plugin)).open();
             }
@@ -93,7 +94,7 @@ export class SearchCommand implements Command {
     private registSyncFlomo() {
         this.plugin.addCommand({
             id: 'sync-files-in-searchresults-to-flomo',
-            name: 'Sync files in searchresults to flomo ...',
+            name: t('同步搜索结果文件到 flomo ...'),
             callback: () => {
                 new SearchResultsReader(this.plugin).read(new SyncFlomoAction(this.plugin));
             }
@@ -103,7 +104,7 @@ export class SearchCommand implements Command {
     private registMoveFile() {
         this.plugin.addCommand({
             id: 'move-files-in-searchresults-to',
-            name: 'Move files in searchresults to ...',
+            name: t('移动搜索结果文件到 ...'),
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
                 new ChooseFolderModal(this.plugin.app, new SearchResultsReader(this.plugin), actionFunc).open();
@@ -114,7 +115,7 @@ export class SearchCommand implements Command {
     private registAddFile2Canvas() {
         this.plugin.addCommand({
             id: "add-files-in-searchresults-to-canvas",
-            name: "Add files in searchresults to target canvas ...",
+            name: t('将搜索结果文件添加到目标画布 ...'),
             callback: () => {
                 new ChooseCanvasModal(this.plugin.app, new SearchResultsReader(this.plugin)).open();
             }

@@ -20,6 +20,7 @@ vi.mock('src/modal/ai-properties-modal', async (importOriginal) => {
 });
 
 import { __getNotices, __resetNotices } from '../mocks/obsidian';
+import { t } from 'src/i18n/index';
 import { ActionModel } from 'src/action/action';
 import { AiPropertiesAction } from 'src/action/ai-properties-action';
 import { AiSettings, DEFAULT_AI_SETTINGS } from 'src/ai/ai-settings';
@@ -63,7 +64,7 @@ describe('AiPropertiesAction', () => {
 	it('空集合时阻断并提示', () => {
 		const action = new AiPropertiesAction(makePlugin(configured));
 		action.act([]);
-		expect(__getNotices().some((n) => n.includes('No Files'))).toBe(true);
+		expect(__getNotices().some((n) => n.includes(t('未找到文件。')))).toBe(true);
 		expect(openSpy).not.toHaveBeenCalled();
 	});
 

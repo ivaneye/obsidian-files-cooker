@@ -1,5 +1,6 @@
 import FileCookerPlugin from "main";
 import { App, Notice, TAbstractFile } from "obsidian";
+import { t } from 'src/i18n/index';
 import { Action } from "src/action/action";
 import hasMarkdownSuffix, { hasCanvasSuffix } from "src/utils/file-type-util";
 import { ReadInfo } from "./read-info";
@@ -47,7 +48,7 @@ export class ClipboardReader implements Readable {
                 new Notice(e.message);
             }
         }).catch(e => {
-            new Notice("Clipboard File Content Error!" + e);
+            new Notice(t('读取剪贴板文件失败：{msg}', { msg: String(e) }));
         });
     }
 

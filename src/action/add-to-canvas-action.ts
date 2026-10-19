@@ -1,4 +1,5 @@
 import { App, Notice } from "obsidian";
+import { t } from 'src/i18n/index';
 import { AddToCanvasConfirmModal } from "src/modal/add-to-canvas-confirm-modal";
 import { Action, ActionModel } from "./action";
 
@@ -17,7 +18,7 @@ export class AddToCanvasAction implements Action {
         if (actionModels.length > 0) {
             new AddToCanvasConfirmModal(this.app, actionModels, this.targetFilePath).open();
         } else {
-            new Notice("No Files Found!");
+            new Notice(t('未找到文件。'));
         }
     }
 

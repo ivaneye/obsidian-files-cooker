@@ -25,7 +25,7 @@ export class AiSelectorCommand implements Command {
 	regist(): void {
 		this.plugin.addCommand({
 			id: 'find-files-with-natural-language',
-			name: 'Find files with natural language ...',
+			name: t('用自然语言查找文件 ...'),
 			callback: () => {
 				const ai = this.plugin.settings.ai;
 				if (!isAiConfigured(this.plugin.app, ai)) {

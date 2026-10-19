@@ -1,5 +1,6 @@
 import FileCookerPlugin from "main";
 import { App, Notice, TAbstractFile } from "obsidian";
+import { t } from 'src/i18n/index';
 import { Action } from "src/action/action";
 import hasMarkdownSuffix, { hasCanvasSuffix } from "src/utils/file-type-util";
 import { ReadInfo } from "./read-info";
@@ -23,7 +24,7 @@ export class SearchResultsReader implements Readable {
         let results = (searchLeaf?.view as any)?.dom?.resultDomLookup;
 
         if (results == null || results.size == 0) {
-            new Notice("Has no search results!Please search first!");
+            new Notice(t('没有搜索结果，请先执行搜索！'));
         } else {
             let arr = [...results.keys()];
             arr.forEach(k => {

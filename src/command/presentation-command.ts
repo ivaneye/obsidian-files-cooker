@@ -1,4 +1,5 @@
 import FileCookerPlugin from 'main';
+import { t } from 'src/i18n/index';
 import { Command } from './command';
 
 export class PresentationCommand implements Command {
@@ -17,7 +18,7 @@ export class PresentationCommand implements Command {
     private registStartPresentation() {
         this.plugin.addCommand({
             id: 'start-presentation',
-            name: 'Start Presentation',
+            name: t('开始演示'),
             callback: () => {
                 let fontTextSize = document.body.style.getPropertyValue('--font-text-size');
                 let fileLineWidth = document.body.style.getPropertyValue('--file-line-width');
@@ -36,7 +37,7 @@ export class PresentationCommand implements Command {
     private registStopPresentation() {
         this.plugin.addCommand({
             id: 'stop-presentation',
-            name: 'Stop Presentation',
+            name: t('结束演示'),
             callback: () => {
                 let fontTextSize = localStorage.getItem('--font-text-size');
                 let fileLineWidth = localStorage.getItem('--file-line-width');

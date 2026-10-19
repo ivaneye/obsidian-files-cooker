@@ -24,7 +24,7 @@ export class AiPropertiesAction implements Action {
 
 	act(actionModels: ActionModel[]): void {
 		if (actionModels.length === 0) {
-			new Notice('No Files Found!');
+			new Notice(t('未找到文件。'));
 			return;
 		}
 

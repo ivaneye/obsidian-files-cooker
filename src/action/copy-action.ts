@@ -1,4 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
+import { t } from 'src/i18n/index';
 import { CopyToClipboardConfirmModal } from "src/modal/copy-to-clipboard-confirm-modal";
 import { Action, ActionModel } from "./action";
 
@@ -16,7 +17,7 @@ export class CopyAction implements Action {
             let files = actionModels.map(model => model.file);
             new CopyToClipboardConfirmModal(this.app, files).open();
         } else {
-            new Notice("No Files Found!");
+            new Notice(t('未找到文件。'));
         }
     }
 

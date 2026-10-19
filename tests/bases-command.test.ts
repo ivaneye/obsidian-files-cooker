@@ -45,6 +45,7 @@ vi.mock('src/modal/choose-folder-modal', () => ({
 }));
 
 import { __getNotices, __resetNotices } from './mocks/obsidian';
+import { t } from 'src/i18n/index';
 import { BasesCommand } from 'src/command/bases-command';
 
 function createPlugin(rows: unknown[] | null) {
@@ -137,7 +138,7 @@ describe('BasesCommand', () => {
 		deleteCommand.callback();
 
 		expect(deleteModalOpenSpy).not.toHaveBeenCalled();
-		expect(__getNotices()).toContain('Bases results unavailable! Please open a Bases query view and run a query first!');
+		expect(__getNotices()).toContain(t('Bases 结果不可用！请先打开 Bases 查询视图并执行查询。'));
 	});
 
 	it('3.1 删除命令应走确认链路并可观察 ignoredCount 提示', () => {
@@ -151,7 +152,7 @@ describe('BasesCommand', () => {
 		expect(deleteModalOpenSpy).toHaveBeenCalledTimes(1);
 		expect(deleteModalOpenSpy.mock.calls[0][0]).toHaveLength(1);
 		expect(deleteModalOpenSpy.mock.calls[0][0][0].path).toBe('valid.md');
-		expect(__getNotices()).toContain('Ignored 1 non-file bases results.');
+		expect(__getNotices()).toContain(t('已忽略 {n} 条非文件类型的 Bases 结果。', { n: 1 }));
 		// 在确认弹窗阶段之前，不应直接触发删除副作用。
 		expect(trash).not.toHaveBeenCalled();
 	});

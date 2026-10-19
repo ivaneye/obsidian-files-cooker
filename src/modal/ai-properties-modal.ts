@@ -234,7 +234,7 @@ export class AiPropertiesModal extends Modal {
 			],
 			variant: 'confirm',
 		});
-		this.progressEl = this.contentEl.createDiv({ text: 'Analyzing files ... 0/' + this.files.length, cls: 'file-cooker-modal__summary-line' });
+		this.progressEl = this.contentEl.createDiv({ text: t('正在分析文件 ... {done}/{total}', { done: 0, total: this.files.length }), cls: 'file-cooker-modal__summary-line' });
 
 		addModalActions(this.contentEl, [
 			{
@@ -274,7 +274,7 @@ export class AiPropertiesModal extends Modal {
 				done += batch.length;
 				const progress = this.progressEl;
 				if (progress != null) {
-					setElText(progress, `Analyzing files ... ${done}/${total}`);
+					setElText(progress, t('正在分析文件 ... {done}/{total}', { done, total }));
 				}
 				return parseInferResponse(raw, batch);
 			},
@@ -435,7 +435,7 @@ export class AiPropertiesModal extends Modal {
 			title: t('AI 补全属性'),
 			description: t('点击卡片头部勾选/取消；属性值可直接编辑，多值属性用逗号分隔。'),
 			summaryLines: [
-				`${this.files.length} files selected. ${this.proposals.length} proposals after inference.`,
+				t('已选中 {files} 个文件，推断后生成 {proposals} 条提案。', { files: this.files.length, proposals: this.proposals.length }),
 				t('已发送给 AI：每篇笔记的文件名 + 前 {n} 字符。', { n: this.deps.settings.contextChars }),
 			],
 			variant: 'confirm',

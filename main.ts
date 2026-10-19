@@ -1,4 +1,4 @@
-import { Plugin, App, PluginSettingTab, Setting } from 'obsidian';
+import { Plugin, App, Notice, PluginSettingTab, Setting } from 'obsidian';
 import { initI18n, t } from 'src/i18n/index';
 import type { LanguageSetting } from 'src/i18n/index';
 import { initBackup } from 'src/backup/backup-service';
@@ -101,6 +101,8 @@ class FileCookerSettingTab extends PluginSettingTab {
 					initI18n(this.plugin.settings.language);
 					await this.plugin.saveSettings();
 					this.display();
+					// 设置页 / 弹窗 / 菜单文案即时生效；命令面板命令名在建命令时固化，需重载
+					new Notice(t('界面语言已切换。命令面板中的命令名将在重新加载 Obsidian 后生效。'));
 				}));
 
 		new Setting(containerEl)
@@ -115,7 +117,7 @@ class FileCookerSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('flomoAPI')
+			.setName(t('flomo API 地址'))
 			.setDesc(t('配置 flomo API，用于同步笔记'))
 			.addText(text => text
 				.setPlaceholder(t('输入 flomo API'))

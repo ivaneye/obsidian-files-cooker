@@ -11,6 +11,7 @@ import { FolderReader } from 'src/reader/folder-reader';
 import { SyncFlomoAction } from 'src/action/sync-flomo-action';
 import { Command } from './command';
 import { Editor, Menu, Notice, TAbstractFile, TFolder } from 'obsidian';
+import { t } from 'src/i18n/index';
 
 export function hasEditorSelection(editor: Editor): boolean {
 	return editor.getSelection().trim() !== '';
@@ -66,11 +67,11 @@ export class ContextMenuCommand implements Command {
 	}
 
 	private addFileMenu(menu: Menu, targetActionModel: ActionModel): void {
-		this.addGroupTitle(menu, 'File Cooker -> Target file');
+		this.addGroupTitle(menu, t('File Cooker -> 目标文件'));
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Rename target file ...')
+				.setTitle(t('重命名目标文件 ...'))
 				.onClick(() => {
 					this.runTargetFileAction(targetActionModel, () => new RenameAction(this.plugin.app));
 				});
@@ -78,7 +79,7 @@ export class ContextMenuCommand implements Command {
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Edit target file properties ...')
+				.setTitle(t('编辑目标文件属性 ...'))
 				.onClick(() => {
 					this.runTargetFileAction(targetActionModel, () => new EditPropertiesAction(this.plugin.app));
 				});
@@ -87,7 +88,7 @@ export class ContextMenuCommand implements Command {
 		// AI 属性补全（单文件快速路径）：推断提案 → 人工审核 → 应用
 		menu.addItem((item) => {
 			item
-				.setTitle('AI complete properties ...')
+				.setTitle(t('AI 补全属性 ...'))
 				.onClick(() => {
 					this.runTargetFileAction(targetActionModel, () => new AiPropertiesAction(this.plugin));
 				});
@@ -95,7 +96,7 @@ export class ContextMenuCommand implements Command {
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Delete target file ...')
+				.setTitle(t('删除目标文件 ...'))
 				.onClick(() => {
 					this.runTargetFileAction(targetActionModel, () => new DeleteAction(this.plugin.app));
 				});
@@ -110,11 +111,11 @@ export class ContextMenuCommand implements Command {
 			return;
 		}
 
-		this.addGroupTitle(menu, 'File Cooker -> Target folder');
+		this.addGroupTitle(menu, t('File Cooker -> 目标文件夹'));
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Edit properties in folder ...')
+				.setTitle(t('编辑文件夹中的属性 ...'))
 				.onClick(() => {
 					new FolderReader(this.plugin, target as TFolder).read(new EditPropertiesAction(this.plugin.app));
 				});
@@ -122,7 +123,7 @@ export class ContextMenuCommand implements Command {
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Rename property in folder ...')
+				.setTitle(t('重命名文件夹中的属性 ...'))
 				.onClick(() => {
 					new FolderReader(this.plugin, target as TFolder).read(new RenamePropertyAction(this.plugin.app));
 				});
@@ -135,11 +136,11 @@ export class ContextMenuCommand implements Command {
 			return false;
 		}
 
-		this.addGroupTitle(menu, 'File Cooker -> Selection');
+		this.addGroupTitle(menu, t('File Cooker -> 选区'));
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Sync selection to flomo ...')
+				.setTitle(t('同步选区到 flomo ...'))
 				.onClick(() => {
 					new CurrentFileReader(this.plugin, ReadType.SELECTION, editor.getSelection())
 						.read(new SyncFlomoAction(this.plugin));
@@ -148,7 +149,7 @@ export class ContextMenuCommand implements Command {
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Add selection in current file to canvas ...')
+				.setTitle(t('将当前文件中的选区添加到画布 ...'))
 				.onClick(() => {
 					new ChooseCanvasModal(
 						this.plugin.app,
@@ -165,11 +166,11 @@ export class ContextMenuCommand implements Command {
 			return false;
 		}
 
-		this.addGroupTitle(menu, 'File Cooker -> Current file links');
+		this.addGroupTitle(menu, t('File Cooker -> 当前文件链接'));
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Rename in current file links ...')
+				.setTitle(t('重命名当前文件链接中的文件 ...'))
 				.onClick(() => {
 					this.runCurrentFileLinkAction(() => new RenameAction(this.plugin.app));
 				});
@@ -177,7 +178,7 @@ export class ContextMenuCommand implements Command {
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Edit Properties in current file links ...')
+				.setTitle(t('编辑当前文件链接中的属性 ...'))
 				.onClick(() => {
 					this.runCurrentFileLinkAction(() => new EditPropertiesAction(this.plugin.app));
 				});
@@ -185,7 +186,7 @@ export class ContextMenuCommand implements Command {
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Delete link-files in current file!')
+				.setTitle(t('删除当前文件中的链接文件!'))
 				.onClick(() => {
 					this.runCurrentFileLinkAction(() => new DeleteAction(this.plugin.app));
 				});
@@ -194,7 +195,7 @@ export class ContextMenuCommand implements Command {
 
 		menu.addItem((item) => {
 			item
-				.setTitle('Add links in current file to target canvas ...')
+				.setTitle(t('将当前文件中的链接添加到目标画布 ...'))
 				.onClick(() => {
 					new ChooseCanvasModal(this.plugin.app, new CurrentFileReader(this.plugin)).open();
 				});
@@ -239,7 +240,7 @@ export class ContextMenuCommand implements Command {
 	 */
 	private runCurrentFileLinkAction(actionFactory: () => { act: (models: ActionModel[]) => void }): void {
 		if (!this.hasActiveFileContext()) {
-			new Notice('No active file!');
+			new Notice(t('当前没有活动文件！'));
 			return;
 		}
 

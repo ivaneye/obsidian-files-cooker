@@ -1,4 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
+import { t } from 'src/i18n/index';
 import { RenamePropertyModal } from "src/modal/rename-property-modal";
 import { Action, ActionModel } from "./action";
 
@@ -15,7 +16,7 @@ export class RenamePropertyAction implements Action {
             let files = actionModels.map(model => model.file);
             new RenamePropertyModal(this.app, files).open();
         } else {
-            new Notice("No Files Found!");
+            new Notice(t('未找到文件。'));
         }
     }
 }

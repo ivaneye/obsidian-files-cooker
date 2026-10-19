@@ -1,11 +1,14 @@
 /**
  * 轻量 i18n 层：
  * - 以中文文案为键（源语言），英文文案统一维护在 en.ts 词典；
- * - 默认跟随 Obsidian 界面语言（localStorage 'language'），可在设置中覆盖（auto / zh / en）；
+ * - 默认跟随 Obsidian 界面语言：优先官方 getLanguage()（Obsidian 1.8.7+），
+ *   再回退历史版本的 localStorage 'language'，都拿不到时按中文（源语言）；
+ *   可在设置中手动覆盖为 auto / zh / en；
  * - t(key, vars) 支持 {name} 占位符插值；
- * - 英文词典缺失或检测不可用时回退为键本身（中文），保证 UI 永远有文案可显示。
+ * - 英文词典缺失时回退为键本身（中文），保证 UI 永远有文案可显示。
  */
 
+import { getLanguage } from 'obsidian';
 import { EN } from './en';
 
 export type Locale = 'zh' | 'en';
@@ -18,21 +21,43 @@ export function initI18n(setting: LanguageSetting | undefined): void {
 	languageSetting = setting === 'zh' || setting === 'en' ? setting : 'auto';
 }
 
-/** 当前生效语言：设置覆盖 > Obsidian 界面语言 > 中文（检测不可用时，如测试环境）。 */
+/** 当前生效语言：设置覆盖 > Obsidian 界面语言 > 中文（插件源语言，完全检测不到时）。 */
 export function getLocale(): Locale {
 	if (languageSetting !== 'auto') return languageSetting;
 	return detectLocale();
 }
 
-/** 从 Obsidian 的 localStorage 读取界面语言（如 'en' / 'zh'）；不可用时回退中文。 */
-function detectLocale(): Locale {
+/**
+ * 读取 Obsidian 界面语言码（如 'en' / 'zh' / 'zh-TW'）；读取不到时返回空串。
+ * 注意：先走官方 API——部分 Obsidian 版本不再把界面语言写进 localStorage，
+ * 只读 localStorage 会让英文环境误判成中文（issue #20）。
+ */
+function readAppLanguage(): string {
+	// 1) 官方 API：Obsidian 1.8.7+ 提供 getLanguage()，未设置语言时返回 'en'
 	try {
-		const lang = window.localStorage.getItem('language');
-		if (!lang) return 'zh';
-		return lang.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+		const official = getLanguage();
+		if (typeof official === 'string' && official.trim() !== '') return official.trim();
 	} catch (e) {
-		return 'zh';
+		// 旧版本 / 测试环境（obsidian mock 未实现该 API）→ 继续用后备方案
 	}
+	// 2) 后备：历史版本把界面语言写在 localStorage 的 'language' 键
+	try {
+		const stored = window.localStorage.getItem('language');
+		if (stored != null && stored.trim() !== '') return stored.trim();
+	} catch (e) {
+		// localStorage 不可用（沙盒 / 隐私模式）→ 交给上层回退
+	}
+	return '';
+}
+
+/**
+ * 语言码以 zh 开头视为中文，其余（含未识别）按英文处理；
+ * 完全检测不到语言信息时回退中文（插件源语言）。
+ */
+function detectLocale(): Locale {
+	const lang = readAppLanguage();
+	if (lang === '') return 'zh';
+	return lang.toLowerCase().startsWith('zh') ? 'zh' : 'en';
 }
 
 /**

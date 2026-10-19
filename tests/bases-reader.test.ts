@@ -5,6 +5,7 @@ vi.mock('obsidian', async () => {
 });
 
 import { __getNotices, __resetNotices } from './mocks/obsidian';
+import { t } from 'src/i18n/index';
 import { BasesReader } from 'src/reader/bases-reader';
 
 function createPlugin(rows: unknown[] | null, existingPaths: string[] = []) {
@@ -69,7 +70,7 @@ describe('BasesReader', () => {
 		new BasesReader(plugin as never).read(action as never);
 
 		expect(action.act).not.toHaveBeenCalled();
-		expect(__getNotices()).toContain('Bases results unavailable! Please open a Bases query view and run a query first!');
+		expect(__getNotices()).toContain(t('Bases 结果不可用！请先打开 Bases 查询视图并执行查询。'));
 	});
 
 	it('2.1 空结果时应提示并不执行动作', () => {
@@ -80,7 +81,7 @@ describe('BasesReader', () => {
 		new BasesReader(plugin as never).read(action as never);
 
 		expect(action.act).not.toHaveBeenCalled();
-		expect(__getNotices()).toContain('Has no bases results! Please run a query first!');
+		expect(__getNotices()).toContain(t('Bases 没有结果！请先执行查询。'));
 	});
 
 	it('2.2 混合结果时仅处理可映射文件并提示忽略数量', () => {
@@ -102,7 +103,7 @@ describe('BasesReader', () => {
 		expect(models).toHaveLength(2);
 		expect(models[0].file.path).toBe('a.md');
 		expect(models[1].file.path).toBe('b.md');
-		expect(__getNotices()).toContain('Ignored 2 non-file bases results.');
+		expect(__getNotices()).toContain(t('已忽略 {n} 条非文件类型的 Bases 结果。', { n: 2 }));
 	});
 
 	it('2.2 全部不可映射时应提示忽略数量并告知无可处理文件', () => {
@@ -114,8 +115,8 @@ describe('BasesReader', () => {
 		new BasesReader(plugin as never).read(action as never);
 
 		expect(action.act).not.toHaveBeenCalled();
-		expect(__getNotices()).toContain('Ignored 2 non-file bases results.');
-		expect(__getNotices()).toContain('No Files Found!');
+		expect(__getNotices()).toContain(t('已忽略 {n} 条非文件类型的 Bases 结果。', { n: 2 }));
+		expect(__getNotices()).toContain(t('未找到文件。'));
 	});
 
 	it('2.2 task 模式下应输出仅基于文件的 checklist 内容', () => {

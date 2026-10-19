@@ -1,4 +1,5 @@
 import FileCookerPlugin from 'main';
+import { t } from 'src/i18n/index';
 import { Command } from './command';
 import { UndoHistoryModal } from 'src/modal/undo-history-modal';
 
@@ -15,7 +16,7 @@ export class UndoCommand implements Command {
 	regist(): void {
 		this.plugin.addCommand({
 			id: 'undo-last-batch-operation',
-			name: 'Undo last batch operation ...',
+			name: t('撤销上一次批量操作 ...'),
 			callback: () => {
 				new UndoHistoryModal(this.plugin.app, { focusLast: true }).open();
 			},
@@ -23,7 +24,7 @@ export class UndoCommand implements Command {
 
 		this.plugin.addCommand({
 			id: 'open-backup-undo-history',
-			name: 'Open backup & undo history ...',
+			name: t('打开备份与撤销历史 ...'),
 			callback: () => {
 				new UndoHistoryModal(this.plugin.app).open();
 			},

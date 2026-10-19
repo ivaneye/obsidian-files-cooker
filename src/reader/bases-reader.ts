@@ -1,13 +1,14 @@
 import FileCookerPlugin from "main";
 import { App, Notice } from "obsidian";
+import { t } from 'src/i18n/index';
 import { Action, ActionModel } from "src/action/action";
 import { getLinebreak } from "src/utils/line-break-util";
 import { ReadInfo } from "./read-info";
 import { Readable } from "./readable";
 
-const BASES_UNAVAILABLE_NOTICE = "Bases results unavailable! Please open a Bases query view and run a query first!";
-const BASES_EMPTY_NOTICE = "Has no bases results! Please run a query first!";
-const BASES_NO_FILES_NOTICE = "No Files Found!";
+const BASES_UNAVAILABLE_NOTICE = 'Bases 结果不可用！请先打开 Bases 查询视图并执行查询。';
+const BASES_EMPTY_NOTICE = 'Bases 没有结果！请先执行查询。';
+const BASES_NO_FILES_NOTICE = '未找到文件。';
 
 export class BasesReader implements Readable {
 
@@ -28,12 +29,12 @@ export class BasesReader implements Readable {
         const rows = resolveBasesRows(this.app);
 
         if (rows == null) {
-            new Notice(BASES_UNAVAILABLE_NOTICE);
+            new Notice(t(BASES_UNAVAILABLE_NOTICE));
             return;
         }
 
         if (rows.length === 0) {
-            new Notice(BASES_EMPTY_NOTICE);
+            new Notice(t(BASES_EMPTY_NOTICE));
             return;
         }
 
@@ -58,7 +59,7 @@ export class BasesReader implements Readable {
         });
 
         if (ignoredCount > 0) {
-            new Notice(`Ignored ${ignoredCount} non-file bases results.`);
+            new Notice(t('已忽略 {n} 条非文件类型的 Bases 结果。', { n: ignoredCount }));
         }
 
         let models = readInfo.getModels();
@@ -85,15 +86,15 @@ export class BasesReader implements Readable {
 
         if (models.length === 0) {
             const firstRow = rows[0] as any;
-            const keys = firstRow && typeof firstRow === "object" ? Object.keys(firstRow).slice(0, 8).join(", ") : "(no object keys)";
+            const keys = firstRow && typeof firstRow === "object" ? Object.keys(firstRow).slice(0, 8).join(", ") : t('（无对象字段）');
             console.log("[File Cooker][BasesReader] No file mapped from bases rows.", {
                 rowsCount: rows.length,
                 firstRow,
                 firstRowType: typeof firstRow,
                 firstRowFunctionKeys: typeof firstRow === "function" ? Object.keys(firstRow) : undefined,
             });
-            new Notice(`Bases rows detected but none mapped. First row keys: ${keys}`);
-            new Notice(BASES_NO_FILES_NOTICE);
+            new Notice(t('检测到 Bases 行，但未能映射到任何文件。首行字段：{keys}', { keys }));
+            new Notice(t(BASES_NO_FILES_NOTICE));
             return;
         }
 

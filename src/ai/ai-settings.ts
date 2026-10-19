@@ -186,7 +186,7 @@ export function renderAiSettings(containerEl: HTMLElement, plugin: AiSettingsHos
 		});
 
 	new Setting(containerEl)
-		.setName('API Key')
+		.setName(t('API 密钥'))
 		.setDesc(t('优先存入 Obsidian SecretStorage；不可用时降级为明文保存在配置文件中（有泄露风险）。'))
 		.addText((text) => {
 			const stored = loadAiApiKey(plugin.app, ai);

@@ -1,4 +1,5 @@
 import FileCookerPlugin from 'main';
+import { t } from 'src/i18n/index';
 import { Action } from 'src/action/action';
 import { AddToCanvasAction } from 'src/action/add-to-canvas-action';
 import { DeleteAction } from 'src/action/delete-action';
@@ -38,7 +39,7 @@ export class ClipboardCommand implements Command {
     private registRenameFile() {
         this.plugin.addCommand({
             id: 'rename-files-in-clipboard',
-            name: 'Rename files in clipboard ...',
+            name: t('重命名剪贴板中的文件 ...'),
             callback: () => {
                 new ClipboardReader(this.plugin).read(new RenameAction(this.plugin.app));
             }
@@ -52,7 +53,7 @@ export class ClipboardCommand implements Command {
     private registEditProp() {
         this.plugin.addCommand({
             id: 'edit-front-matter-in-clipboard-files',
-            name: 'Edit Properties in clipboard files ...',
+            name: t('编辑剪贴板文件的属性 ...'),
             callback: () => {
                 new ClipboardReader(this.plugin).read(new EditPropertiesAction(this.plugin.app));
             }
@@ -65,7 +66,7 @@ export class ClipboardCommand implements Command {
     private registAiCompleteProps() {
         this.plugin.addCommand({
             id: 'ai-complete-properties-in-clipboard',
-            name: 'AI complete properties in clipboard files ...',
+            name: t('AI 补全剪贴板文件的属性 ...'),
             callback: () => {
                 new ClipboardReader(this.plugin).read(new AiPropertiesAction(this.plugin));
             }
@@ -75,7 +76,7 @@ export class ClipboardCommand implements Command {
     private registDeleteFile() {
         this.plugin.addCommand({
             id: 'delete-files-in-clipboard',
-            name: 'Delete files in clipboard!',
+            name: t('删除剪贴板中的文件!'),
             callback: () => {
                 new ClipboardReader(this.plugin).read(new DeleteAction(this.plugin.app));
             }
@@ -85,7 +86,7 @@ export class ClipboardCommand implements Command {
     private registMergeFile() {
         this.plugin.addCommand({
             id: 'merge-files-in-clipboard-to',
-            name: 'Merge files in clipboard to ...',
+            name: t('合并剪贴板中的文件到 ...'),
             callback: () => {
                 new ChooseFileModal(this.plugin.app, new ClipboardReader(this.plugin)).open();
             }
@@ -95,7 +96,7 @@ export class ClipboardCommand implements Command {
     private registSyncFlomo() {
         this.plugin.addCommand({
             id: 'sync-files-in-clipboard-to-flomo',
-            name: 'Sync files in clipboard to flomo ...',
+            name: t('同步剪贴板中的文件到 flomo ...'),
             callback: () => {
                 new ClipboardReader(this.plugin).read(new SyncFlomoAction(this.plugin));
             }
@@ -105,7 +106,7 @@ export class ClipboardCommand implements Command {
     private registMoveFile() {
         this.plugin.addCommand({
             id: 'move-files-in-clipboard-to',
-            name: 'Move files in clipboard to ...',
+            name: t('移动剪贴板中的文件到 ...'),
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
                 new ChooseFolderModal(this.plugin.app, new ClipboardReader(this.plugin), actionFunc).open();
@@ -116,7 +117,7 @@ export class ClipboardCommand implements Command {
     private registAddContToCanvas() {
         this.plugin.addCommand({
             id: "Add-content-to",
-            name: "Add content in clipboard to canvas ...",
+            name: t('将剪贴板中的内容添加到画布 ...'),
             callback: () => {
                 new ChooseCanvasModal(this.plugin.app, new ClipboardContentReader(this.plugin)).open();
             }
@@ -126,7 +127,7 @@ export class ClipboardCommand implements Command {
     private registAddFile2Canvas() {
         this.plugin.addCommand({
             id: "add-files-in-clipboard-to-canvas",
-            name: "Add files in clipboard to target canvas ...",
+            name: t('将剪贴板中的文件添加到目标画布 ...'),
             callback: () => {
                 new ChooseCanvasModal(this.plugin.app, new ClipboardReader(this.plugin,)).open();
             }

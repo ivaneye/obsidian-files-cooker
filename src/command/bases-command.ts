@@ -1,4 +1,5 @@
 import FileCookerPlugin from 'main';
+import { t } from 'src/i18n/index';
 import { Action } from 'src/action/action';
 import { CopyAction } from 'src/action/copy-action';
 import { DeleteAction } from 'src/action/delete-action';
@@ -37,7 +38,7 @@ export class BasesCommand implements Command {
     private registRenameFile() {
         this.plugin.addCommand({
             id: 'rename-in-bases-results',
-            name: 'Rename in bases results ...',
+            name: t('重命名 Bases 查询结果中的文件 ...'),
             callback: () => {
                 new BasesReader(this.plugin).read(new RenameAction(this.plugin.app));
             }
@@ -47,7 +48,7 @@ export class BasesCommand implements Command {
     private registEditProp() {
         this.plugin.addCommand({
             id: 'edit-front-matter-in-bases-results',
-            name: 'Edit Properties in bases results ...',
+            name: t('编辑 Bases 查询结果中的属性 ...'),
             callback: () => {
                 new BasesReader(this.plugin).read(new EditPropertiesAction(this.plugin.app));
             }
@@ -60,7 +61,7 @@ export class BasesCommand implements Command {
     private registAiCompleteProps() {
         this.plugin.addCommand({
             id: 'ai-complete-properties-in-bases-results',
-            name: 'AI complete properties in bases results ...',
+            name: t('AI 补全 Bases 查询结果中的属性 ...'),
             callback: () => {
                 new BasesReader(this.plugin).read(new AiPropertiesAction(this.plugin));
             }
@@ -70,7 +71,7 @@ export class BasesCommand implements Command {
     private registCopyLinks() {
         this.plugin.addCommand({
             id: 'copy-bases-result-links',
-            name: 'Copy bases result links!',
+            name: t('复制 Bases 查询结果链接!'),
             callback: () => {
                 new BasesReader(this.plugin).read(new CopyAction(this.plugin.app));
             }
@@ -80,7 +81,7 @@ export class BasesCommand implements Command {
     private registDeleteFile() {
         this.plugin.addCommand({
             id: 'delete-bases-results',
-            name: 'Delete bases query results!',
+            name: t('删除 Bases 查询结果中的文件!'),
             callback: () => {
                 new BasesReader(this.plugin).read(new DeleteAction(this.plugin.app));
             }
@@ -90,7 +91,7 @@ export class BasesCommand implements Command {
     private registMergeFile() {
         this.plugin.addCommand({
             id: 'merge-bases-results-to',
-            name: 'Merge bases query results to ...',
+            name: t('合并 Bases 查询结果到 ...'),
             callback: () => {
                 new ChooseFileModal(this.plugin.app, new BasesReader(this.plugin)).open();
             }
@@ -100,7 +101,7 @@ export class BasesCommand implements Command {
     private registSyncFlomo() {
         this.plugin.addCommand({
             id: 'sync-bases-results-to',
-            name: 'Sync bases query results to flomo ...',
+            name: t('同步 Bases 查询结果到 flomo ...'),
             callback: () => {
                 new BasesReader(this.plugin).read(new SyncFlomoAction(this.plugin));
             }
@@ -110,7 +111,7 @@ export class BasesCommand implements Command {
     private registMoveFile() {
         this.plugin.addCommand({
             id: 'move-bases-results-to',
-            name: 'Move bases query results to ...',
+            name: t('移动 Bases 查询结果到 ...'),
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
                 new ChooseFolderModal(this.plugin.app, new BasesReader(this.plugin), actionFunc).open();
@@ -121,7 +122,7 @@ export class BasesCommand implements Command {
     private registAddFile2Canvas() {
         this.plugin.addCommand({
             id: 'add-bases-results-to-canvas',
-            name: 'Add bases query results to canvas...',
+            name: t('将 Bases 查询结果添加到画布 ...'),
             callback: () => {
                 new ChooseCanvasModal(this.plugin.app, new BasesReader(this.plugin)).open();
             }
@@ -131,7 +132,7 @@ export class BasesCommand implements Command {
     private registAddTask2Canvas() {
         this.plugin.addCommand({
             id: 'add-bases-task-to-canvas',
-            name: 'Add bases task to canvas...',
+            name: t('将 Bases 任务添加到画布 ...'),
             callback: () => {
                 new ChooseCanvasModal(this.plugin.app, new BasesReader(this.plugin, true)).open();
             }

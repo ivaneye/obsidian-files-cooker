@@ -1,5 +1,6 @@
 import FileCookerPlugin from 'main';
 import { Editor, MarkdownView } from 'obsidian';
+import { t } from 'src/i18n/index';
 import { Action } from 'src/action/action';
 import { CreateAction } from 'src/action/create-action';
 import { DeleteAction } from 'src/action/delete-action';
@@ -42,7 +43,7 @@ export class CurrentFileCommand implements Command {
     private registRenameFile() {
         this.plugin.addCommand({
             id: "rename-in-current-file-links",
-            name: "Rename in current file links ...",
+            name: t('重命名当前文件链接中的文件 ...'),
             callback: () => {
                 new CurrentFileReader(this.plugin).read(new RenameAction(this.plugin.app));
             }
@@ -56,7 +57,7 @@ export class CurrentFileCommand implements Command {
     private registEditProp() {
         this.plugin.addCommand({
             id: "edit-front-matter-in-current-file-links",
-            name: "Edit Properties in current file links ...",
+            name: t('编辑当前文件链接中的属性 ...'),
             callback: () => {
                 new CurrentFileReader(this.plugin).read(new EditPropertiesAction(this.plugin.app));
             }
@@ -69,7 +70,7 @@ export class CurrentFileCommand implements Command {
     private registAiCompleteProps() {
         this.plugin.addCommand({
             id: "ai-complete-properties-in-current-file-links",
-            name: "AI complete properties in current file links ...",
+            name: t('AI 补全当前文件链接中的属性 ...'),
             callback: () => {
                 new CurrentFileReader(this.plugin).read(new AiPropertiesAction(this.plugin));
             }
@@ -79,7 +80,7 @@ export class CurrentFileCommand implements Command {
     private registDeleteFile() {
         this.plugin.addCommand({
             id: "delete-links-in-current-file",
-            name: "Delete link-files in current file!",
+            name: t('删除当前文件中的链接文件!'),
             callback: () => {
                 new CurrentFileReader(this.plugin).read(new DeleteAction(this.plugin.app));
             }
@@ -89,7 +90,7 @@ export class CurrentFileCommand implements Command {
     private registMergeFile() {
         this.plugin.addCommand({
             id: "merge-links-to",
-            name: "Merge links in current file to ...",
+            name: t('合并当前文件中的链接到 ...'),
             callback: () => {
                 new ChooseFileModal(this.plugin.app, new CurrentFileReader(this.plugin)).open();
             }
@@ -99,7 +100,7 @@ export class CurrentFileCommand implements Command {
     private registCreateFile() {
         this.plugin.addCommand({
             id: "create-links",
-            name: "Create links in current file ...",
+            name: t('创建当前文件中的链接 ...'),
             callback: () => {
                 let actionFunc = (path: string): Action => { return new CreateAction(this.plugin.app, path); };
                 new ChooseFolderModal(this.plugin.app, new CurrentFileReader(this.plugin, ReadType.UN_RESOLVED_LINKS), actionFunc).open();
@@ -110,7 +111,7 @@ export class CurrentFileCommand implements Command {
     private registSyncFileToFlomo() {
         this.plugin.addCommand({
             id: "sync-links-to",
-            name: "Sync links in current file to flomo ...",
+            name: t('同步当前文件中的链接到 flomo ...'),
             callback: () => {
                 new CurrentFileReader(this.plugin).read(new SyncFlomoAction(this.plugin));
             }
@@ -120,7 +121,7 @@ export class CurrentFileCommand implements Command {
     private registSyncContentToFlomo() {
         this.plugin.addCommand({
             id: "sync-content-to",
-            name: "Sync content in current file to flomo ...",
+            name: t('同步当前文件中的内容到 flomo ...'),
             callback: () => {
                 new CurrentFileReader(this.plugin, ReadType.CONTENT).read(new SyncFlomoAction(this.plugin));
             }
@@ -130,7 +131,7 @@ export class CurrentFileCommand implements Command {
     private registSyncSelectionToFlomo() {
         this.plugin.addCommand({
             id: "sync-selection-to",
-            name: "Sync selection in current file to flomo ...",
+            name: t('同步当前文件中的选区到 flomo ...'),
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
                     new CurrentFileReader(this.plugin, ReadType.SELECTION, editor.getSelection()).read(new SyncFlomoAction(this.plugin));
@@ -143,7 +144,7 @@ export class CurrentFileCommand implements Command {
     private registAddSelectionToCanvas() {
         this.plugin.addCommand({
             id: "Add-selection-to",
-            name: "Add selection in current file to canvas ...",
+            name: t('将当前文件中的选区添加到画布 ...'),
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 if (!checking) {
                     new ChooseCanvasModal(this.plugin.app, new CurrentFileReader(this.plugin, ReadType.SELECTION, editor.getSelection())).open();
@@ -156,7 +157,7 @@ export class CurrentFileCommand implements Command {
     private registMoveFile() {
         this.plugin.addCommand({
             id: "move-links-to",
-            name: "Move links in current file to ...",
+            name: t('移动当前文件中的链接到 ...'),
             callback: () => {
                 let actionFunc = (path: string): Action => { return new MoveAction(this.plugin.app, path); };
                 new ChooseFolderModal(this.plugin.app, new CurrentFileReader(this.plugin), actionFunc).open();
@@ -167,7 +168,7 @@ export class CurrentFileCommand implements Command {
     private registAddFile2Canvas() {
         this.plugin.addCommand({
             id: "add-links-to-canvas",
-            name: "Add links in current file to target canvas ...",
+            name: t('将当前文件中的链接添加到目标画布 ...'),
             callback: () => {
                 new ChooseCanvasModal(this.plugin.app, new CurrentFileReader(this.plugin)).open();
             }

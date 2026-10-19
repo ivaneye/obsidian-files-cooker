@@ -309,3 +309,18 @@ export class ItemView {
 export function requireApiVersion(): boolean {
 	return true;
 }
+
+/**
+ * Obsidian 界面语言（官方 getLanguage()）。默认空串 = 视为该 API 不可用，
+ * 让 i18n 的检测走 localStorage 后备，与既有用例的预期保持一致。
+ */
+let currentLanguage = '';
+
+export function getLanguage(): string {
+	return currentLanguage;
+}
+
+/** 测试辅助：指定 getLanguage() 的返回值（null / '' 表示 API 不可用）。 */
+export function __setLanguage(lang: string | null | undefined): void {
+	currentLanguage = lang ?? '';
+}

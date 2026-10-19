@@ -25,7 +25,7 @@ export class WorkbenchCommand implements Command {
 	regist(): void {
 		this.plugin.addCommand({
 			id: 'open-file-cooker-workbench',
-			name: 'Open File Cooker workbench ...',
+			name: t('打开 File Cooker 工作台 ...'),
 			callback: () => this.openWorkbench(),
 		});
 

@@ -1,5 +1,6 @@
 import FileCookerPlugin from "main";
 import { App, Notice, TAbstractFile, TFile, TFolder, Vault } from "obsidian";
+import { t } from 'src/i18n/index';
 import { Action } from "src/action/action";
 import hasMarkdownSuffix from "src/utils/file-type-util";
 import { ReadInfo } from "./read-info";
@@ -29,7 +30,7 @@ export class CurrentFileReader implements Readable {
         let currentFile = this.app.workspace.getActiveFile();
 
         if (currentFile == null) {
-            new Notice("No active file!");
+            new Notice(t('当前没有活动文件！'));
             return;
         }
 

@@ -1,4 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
+import { t } from 'src/i18n/index';
 import { EditPropertiesModal } from "src/modal/edit-properties-modal";
 import { Action, ActionModel } from "./action";
 
@@ -15,7 +16,7 @@ export class EditPropertiesAction implements Action {
             let files = actionModels.map(model => model.file);
             new EditPropertiesModal(this.app, files).open();
         } else {
-            new Notice("No Files Found!");
+            new Notice(t('未找到文件。'));
         }
     }
 }

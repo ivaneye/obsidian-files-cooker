@@ -1,4 +1,5 @@
 import { App, Notice, TAbstractFile } from "obsidian";
+import { t } from 'src/i18n/index';
 import { CreateConfirmModal } from "src/modal/create-confirm-modal";
 import { MoveInfo } from "../modal/move-info";
 import { Action, ActionModel } from "./action";
@@ -27,7 +28,7 @@ export class CreateAction implements Action {
             })
             new CreateConfirmModal(this.app, moveInfos).open();
         } else {
-            new Notice("No Files Found!");
+            new Notice(t('未找到文件。'));
         }
     }
 
